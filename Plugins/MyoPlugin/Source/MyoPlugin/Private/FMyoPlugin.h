@@ -1,5 +1,4 @@
 #pragma once
-#include <myo/myo.hpp>
 
 class DataCollector;
 class MyoDelegate;
@@ -13,6 +12,7 @@ public:
 
 	/** Delegate Method To subscribe to event calls, only supports one listener for now */
 	void SetDelegate(MyoDelegate* newDelegate);
+	void RemoveDelegate();
 
 	/** Manual looping, currently called in main thread */
 	void MyoTick(float DeltaTime);
@@ -24,8 +24,11 @@ public:
 	void LeftMyoId(bool& available, int& deviceId);
 	void RightMyoId(bool& available, int& deviceId);
 	bool IsHubEnabled();
+	void CalibrateOrientation(int deviceId);	//adjusts all input to arm orientation after this is called.
+	
+	//Internal Utility
+	bool isValidDeviceId(int deviceId);
 
 private:
-	myo::Hub *hub;
 	DataCollector *collector;
 };

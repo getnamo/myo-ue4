@@ -57,7 +57,7 @@ Myo* Hub::waitForMyo(unsigned int timeout_ms)
 
     do {
         libmyo_run(_hub, timeout_ms ? timeout_ms : 1000, &local::handler, this, ThrowOnError());
-    } while (!timeout_ms && _myos.empty());
+    } while (!timeout_ms && _myos.size() <= prevSize);
 
     if (_myos.size() <= prevSize) {
         return 0;
@@ -120,6 +120,9 @@ void Hub::onDeviceEvent(libmyo_event_t event)
             listener->onPair(myo, time, version);
             break;
         }
+        case libmyo_event_unpaired:
+            listener->onUnpair(myo, time);
+            break;
         case libmyo_event_connected: {
             FirmwareVersion version = {libmyo_event_get_firmware_version(event, libmyo_version_major),
                                        libmyo_event_get_firmware_version(event, libmyo_version_minor),

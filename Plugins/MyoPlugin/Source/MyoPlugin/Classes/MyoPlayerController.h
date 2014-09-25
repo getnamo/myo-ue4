@@ -13,8 +13,7 @@ class AMyoPlayerController : public APlayerController, public MyoDelegateBluepri
 	GENERATED_UCLASS_BODY()
 
 	/* 
-	* (BUG) NB: blueprint functions and events do not support u/int64!
-	* Timestamp behaviour currently undefined
+	* NB: Timestamps are not forwarded due to lack of 64bit support in blueprints. Use game time to determine timings.
 	*/
 
 	/**
@@ -24,7 +23,7 @@ class AMyoPlayerController : public APlayerController, public MyoDelegateBluepri
 	* @param pose (out): 0 = rest, 1 = fist, 2 = waveIn, 3 = waveOut, 4 = fingersSpread, 5 = reserved1, 6 = thumbToPinky, 7 = unknown
 	*/
 	UFUNCTION(BlueprintImplementableEvent, Category = MyoEvents)
-	void OnPose(int32 myoId, int32 timestamp, int32 pose);
+	void OnPose(int32 myoId, int32 pose);
 
 	/**
 	* On arm detection, typically after a wave out gesture
@@ -34,7 +33,7 @@ class AMyoPlayerController : public APlayerController, public MyoDelegateBluepri
 	* @param direction (out) 0 = toward wrist, 1 = toward elbow, 2 = unknown
 	*/
 	UFUNCTION(BlueprintImplementableEvent, Category = MyoEvents)
-		void OnArmRecognized(int32 myoId, int32 timestamp, int32 arm, int32 direction);
+		void OnArmRecognized(int32 myoId, int32 arm, int32 direction);
 
 	/**
 	* Called when a myo has been removed from arm.
@@ -42,7 +41,7 @@ class AMyoPlayerController : public APlayerController, public MyoDelegateBluepri
 	* @param timestamp (out) truncated from 64bit
 	*/
 	UFUNCTION(BlueprintImplementableEvent, Category = MyoEvents)
-		void OnArmLost(int32 myoId, int32 timestamp);
+		void OnArmLost(int32 myoId);
 
 	/**
 	* Event on a Myo connecting
@@ -50,7 +49,7 @@ class AMyoPlayerController : public APlayerController, public MyoDelegateBluepri
 	* @param timestamp (out) truncated from 64bit
 	*/
 	UFUNCTION(BlueprintImplementableEvent, Category = MyoEvents)
-		void OnConnect(int32 myoId, int32 timestamp);
+		void OnConnect(int32 myoId);
 
 	/**
 	* Event on a Myo disconnecting
@@ -58,7 +57,7 @@ class AMyoPlayerController : public APlayerController, public MyoDelegateBluepri
 	* @param timestamp (out) truncated from 64bit
 	*/
 	UFUNCTION(BlueprintImplementableEvent, Category = MyoEvents)
-		void OnDisconnect(int32 myoId, int32 timestamp);
+		void OnDisconnect(int32 myoId);
 
 	/**
 	* Event on a Myo pairing
@@ -66,7 +65,15 @@ class AMyoPlayerController : public APlayerController, public MyoDelegateBluepri
 	* @param timestamp (out) truncated from 64bit
 	*/
 	UFUNCTION(BlueprintImplementableEvent, Category = MyoEvents)
-		void OnPair(int32 myoId, int32 timestamp);
+		void OnPair(int32 myoId);
+
+	/**
+	* Event on a Myo unpairing
+	* @param myoId (out) starting from 1, based on pairing priority. Call Which Arm (myoId) to figure out which arm it belongs to.
+	* @param timestamp (out) truncated from 64bit
+	*/
+	//UFUNCTION(BlueprintImplementableEvent, Category = MyoEvents)
+	//	void OnUnpair(int32 myoId);
 
 	/**
 	* Event on a Myo receiving orientation data, typically each frame.
@@ -75,7 +82,7 @@ class AMyoPlayerController : public APlayerController, public MyoDelegateBluepri
 	* @param orientation (out) orientation in rotator format.
 	*/
 	UFUNCTION(BlueprintImplementableEvent, Category = MyoEvents)
-		void OnOrientationData(int32 myoId, int32 timestamp, FRotator orientation);
+		void OnOrientationData(int32 myoId, FRotator orientation);
 
 	/**
 	* Event on a Myo receiving acceleration data, typically each frame.
@@ -84,7 +91,7 @@ class AMyoPlayerController : public APlayerController, public MyoDelegateBluepri
 	* @param acceleration (out) acceleration in units of g.
 	*/
 	UFUNCTION(BlueprintImplementableEvent, Category = MyoEvents)
-		void OnAccelerometerData(int32 myoId, int32 timestamp, FVector acceleration);
+		void OnAccelerometerData(int32 myoId, FVector acceleration);
 
 	/**
 	* Event on a Myo receiving gyroscope data, typically each frame.
@@ -93,7 +100,7 @@ class AMyoPlayerController : public APlayerController, public MyoDelegateBluepri
 	* @param gyro (out) gyroscope vector in deg/s.
 	*/
 	UFUNCTION(BlueprintImplementableEvent, Category = MyoEvents)
-		void OnGyroscopeData(int32 myoId, int32 timestamp, FVector gyro);
+		void OnGyroscopeData(int32 myoId, FVector gyro);
 
 	/**
 	* Called when a problem occurs such as bluetooth usb device not being detected (unplugged).
@@ -118,16 +125,21 @@ class AMyoPlayerController : public APlayerController, public MyoDelegateBluepri
 
 	/**
 	* Returns the latest Myo data available for polling
-	* @param myoId (in) starting from 1, based on pairing priority. Call Which Arm (myoId) to figure out which arm it belongs to.
+	* @param myoId (in) starting from 1, based on pairing priority. Call Which Arm (myoId) to figure out which arm it belongs to
 	* @param pose (out): 0 = rest, 1 = fist, 2 = waveIn, 3 = waveOut, 4 = fingersSpread, 5 = reserved1, 6 = thumbToPinky, 7 = unknown
-	* @param acceleration (out) acceleration in units of g.
-	* @param orientation (out) orientation in rotator format.
-	* @param gyro (out) gyroscope vector in deg/s.
+	* @param acceleration (out) acceleration in units of g
+	* @param orientation (out) orientation in rotator format
+	* @param gyro (out) gyroscope vector in deg/s
 	* @param arm (out) 0 = right, 1 = left, 2 = unknown
+	* @param xDirection (out) 0 = toward wrist, 1 = toward elbow, 2 = unknown
+	* @param ArmAcceleration (out) acceleration in arm space given in units of g
+	* @param ArmOrientation (out) orientation in arm space
+	* @param ArmGyro (out) gyro in arm space
+	* @param ArmCorrection (out) the correction rotation to transform raw into arm space
+	* @param BodySpaceAcceleration (out) acceleration in calibrated body space, with gravity removed. (This value is used for velocity and position integration)
 	*/
 	UFUNCTION(BlueprintCallable, Category = MyoFunctions)
-		void LatestData(int32 myoId, int32& pose, FVector& Acceleration, FRotator& Rotation, FVector& Gyro, int32& Arm);
-
+		void LatestData(int32 myoId, int32& Pose, FVector& Acceleration, FRotator& Orientation, FVector& Gyro, int32& Arm, int32& xDirection, FVector& ArmAcceleration, FRotator& ArmOrientation, FVector& ArmGyro, FRotator& ArmCorrection, FVector& BodySpaceAcceleration);
 	/**
 	* Determine Which Arm the Myo is on.
 	* @param myoId (in) starting from 1, based on pairing priority. Call Which Arm (myoId) to figure out which arm it belongs to.
@@ -157,10 +169,18 @@ class AMyoPlayerController : public APlayerController, public MyoDelegateBluepri
 	* @param converted (out) out orientation, raw myo format.
 	*/
 	UFUNCTION(BlueprintCallable, Category = MyoFunctions)
-		virtual void ConvertToRawOrientation(FRotator orientation, FRotator& converted);
+		virtual void ConvertToMyoOrientationSpace(FRotator orientation, FRotator& converted);
 
+	/**
+	* Calibrate the Orientation for Arm Space. Ask the user to point their arm to the screen, then call this function and all orientation will be
+	* in arm orientation space.
+	* @param myoId (in) device you wish to calibrate, use 0 to calibrate all.
+	*/
+	UFUNCTION(BlueprintCallable, Category = MyoFunctions)
+		virtual void CalibrateArmOrientation(int32 myoId);
 
 	//Required for setting delegate (startup) and forwarding Tick to the Myo Delegate.
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaTime) override;
 };

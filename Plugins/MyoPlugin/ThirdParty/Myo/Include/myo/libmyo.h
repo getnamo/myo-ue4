@@ -133,6 +133,7 @@ static const unsigned int libmyo_num_trained_poses = sizeof(libmyo_trained_poses
 /// Types of events.
 typedef enum {
     libmyo_event_paired, ///< Successfully paired with a Myo.
+    libmyo_event_unpaired, ///< Successfully unpaired from a Myo.
     libmyo_event_connected, ///< A Myo has successfully connected.
     libmyo_event_disconnected, ///< A Myo has been disconnected.
     libmyo_event_arm_recognized, ///< A Myo has recognized that it is now on an arm.

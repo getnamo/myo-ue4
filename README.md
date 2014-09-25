@@ -1,7 +1,7 @@
 myo-ue4
 =======
 
-A Myo Plugin for Unreal Engine 4.
+A Myo Plugin for Unreal Engine 4. Supports all features up to Beta-4 SDK, including multiple Myos.
 
 ## Quick Setup ##
 1. Create new or open a project. 
@@ -100,7 +100,7 @@ void ConvertToRawOrientation(FRotator orientation, FRotator& converted);
 ####*Simple Version*####
 1. Extend or Subclass MyoPluginActor and Override functions you wish to subscribe to e.g. 
 
-```virtual void onPose(int32 myoId, uint64 timestamp, int32 pose) OVERRIDE;```
+```virtual void onPose(int32 myoId, uint64 timestamp, int32 pose) override;```
 
 
 ####*Extend your own Class to Receive Events*####
@@ -122,19 +122,35 @@ struct MyoDeviceData{
 	FRotator orientation;	//orientation
 	FVector gyro;			//angular speed in deg/s
 	int arm;			//which arm it is bound to, 0=right, 1=left, 2=unknown
+	int xDirection;			//0 = toward wrist, 1= toward elbow, 2=unknown
+
+	//Values in arm space after calibration, otherwise same as raw
+	FVector armAcceleration;	//units of g
+	FRotator armOrientation;	//orientation
+	FVector armGyro;			//angular speed in deg/s
+	FRotator armSpaceCorrection;	//used to calibrate the orientation, not exposed to blueprints
+
+	//Body space, useful for easy component space integration
+	FVector bodySpaceNullAcceleration;	//units of g, in calibrated space, without gravity component
 };
 ``` 
 
 defined in MyoDelegate.h
 
+###Calibrated Values###
+
+Not fully supported for now, but you can use calibrated Orientation and acceleration after calling ```void MyoCalibrateArmOrientation(int32 myoId);``` while pointing arm in the forward (toward screen) direction, without calibration, these emit raw values.
+
+Full support coming in next update, use with caution.
+
 ##Bugs and Todo##
 * Hub runs on the main thread, adds 1ms to render loop. Should be separated into its own thread or reduced to near 0ms.
 * Only the first paired is Myo supported for Input Mapping, will need some thought into how to cleanly emit a second Myo.
-* Myo does not stop running when stopping PIE, may encounter large number of events when resuming.
 * Platforms apart from Windows are untested
+* Calibrated Values need to be fully supported, Orientation still lacking multi-myo support, Acceleration and Gyro calibrated values are not currently correctly implemented.
 * While Plugin does support hot plugging Myos (turning them on/off, running out of range), it does not support hot plugging of the bluetooth hub. This is a limitation of the Myo SDK. If you run your game with the hub disabled (e.g. bluetooth usb unplugged), you will receive the event *MyoDisabled()* and no further notifications. Plugging in the bluetooth hub and restarting the game will re-enable it.
 
 
 ##Credits and Misc##
-* Bound to Thalmic Beta-1 SDK
+* Bound to Thalmic Beta-4 SDK
 * Plugin by Getnamo, Myo SDK provided by Thalmic Labs

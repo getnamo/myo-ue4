@@ -41,12 +41,15 @@ public:
 	 * Optional way of getting data is to subscribe to the MyoDelegate class through inheritance
 	 */
 	virtual void SetDelegate(MyoDelegate* newDelegate) {};
+	virtual void RemoveDelegate(){};
 	virtual void MyoTick(float DeltaTime) {};
+
 	virtual void VibrateDevice(int deviceId, int vibrationType) {};
 	virtual void LatestData(int deviceId, MyoDeviceData& data) {};
 	virtual void WhichArm(int deviceId, int& arm){};
 	virtual void LeftMyoId(bool& available, int& deviceId){};
 	virtual void RightMyoId(bool& available, int& deviceId){};
 	virtual bool IsHubEnabled() = 0;
+	virtual void CalibrateOrientation(int deviceId){};
 };
 

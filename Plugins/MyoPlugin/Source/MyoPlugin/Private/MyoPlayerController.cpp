@@ -10,14 +10,22 @@ AMyoPlayerController::AMyoPlayerController(const class FPostConstructInitializeP
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-//Test, can we get the plugin data?
+//Three mandatory overrides
 void AMyoPlayerController::BeginPlay()
 {
+	Super::BeginPlay();
 	MyoStartup();
+}
+
+void AMyoPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	MyoShutdown();
 }
 
 void AMyoPlayerController::Tick(float DeltaTime)
 {
+	Super::Tick(DeltaTime);
 	MyoTick(DeltaTime);
 }
 
@@ -31,9 +39,12 @@ bool AMyoPlayerController::IsHubEnabled()
 {
 	return MyoDelegateBlueprint::IsHubEnabled();
 }
-void AMyoPlayerController::LatestData(int32 myoId, int32& pose, FVector& Acceleration, FRotator& Rotation, FVector& Gyro, int32& Arm)
+void AMyoPlayerController::LatestData(int32 myoId, int32& Pose, FVector& Acceleration, FRotator& Orientation, FVector& Gyro,
+	int32& Arm, int32& xDirection,
+	FVector& ArmAcceleration, FRotator& ArmOrientation, FVector& ArmGyro, FRotator& ArmCorrection,
+	FVector& BodySpaceAcceleration)
 {
-	MyoDelegateBlueprint::LatestData(myoId, pose, Acceleration, Rotation, Gyro, Arm);
+	MyoDelegateBlueprint::LatestData(myoId, Pose, Acceleration, Orientation, Gyro, Arm, xDirection, ArmAcceleration, ArmOrientation, ArmGyro, ArmCorrection, BodySpaceAcceleration);
 }
 void AMyoPlayerController::WhichArm(int32 myoId, int32& Arm)
 {
@@ -47,7 +58,11 @@ void AMyoPlayerController::RightMyoId(bool& available, int32& myoId)
 {
 	MyoDelegateBlueprint::RightMyoId(available, myoId);
 }
-void AMyoPlayerController::ConvertToRawOrientation(FRotator orientation, FRotator& converted)
+void AMyoPlayerController::ConvertToMyoOrientationSpace(FRotator orientation, FRotator& converted)
 {
-	MyoDelegateBlueprint::ConvertToRawOrientation(orientation, converted);
+	MyoDelegateBlueprint::ConvertToMyoOrientationSpace(orientation, converted);
+}
+void AMyoPlayerController::CalibrateArmOrientation(int32 myoId)
+{
+	MyoDelegateBlueprint::CalibrateArmOrientation(myoId);
 }

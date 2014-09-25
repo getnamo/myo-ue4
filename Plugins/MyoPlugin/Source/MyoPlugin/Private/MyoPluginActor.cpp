@@ -2,7 +2,6 @@
 
 #include "Engine.h"
 #include "GameFramework/Actor.h"
-#include "IMyoPlugin.h"
 #include "MyoPluginActor.h"
 
 //Constructor/Initializer
@@ -12,16 +11,21 @@ AMyoPluginActor::AMyoPluginActor(const FPostConstructInitializeProperties& PCIP)
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-//Test, can we get the plugin data?
+//Three mandatory overrides
 void AMyoPluginActor::BeginPlay()
 {
 	Super::BeginPlay();
-
 	MyoStartup();
 
 	//Actors by default aren't attached to the input chain, so we enable input for this actor to forward Key and Gamepad Events
 	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
 	EnableInput(PC);
+}
+
+void AMyoPluginActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	MyoShutdown();
 }
 
 void AMyoPluginActor::Tick(float DeltaTime)
@@ -39,10 +43,14 @@ bool AMyoPluginActor::IsHubEnabled()
 {
 	return MyoDelegateBlueprint::IsHubEnabled();
 }
-void AMyoPluginActor::LatestData(int32 myoId, int32& pose, FVector& Acceleration, FRotator& Rotation, FVector& Gyro, int32& Arm)
+void AMyoPluginActor::LatestData(int32 myoId, int32& Pose, FVector& Acceleration, FRotator& Orientation, FVector& Gyro,
+	int32& Arm, int32& xDirection,
+	FVector& ArmAcceleration, FRotator& ArmOrientation, FVector& ArmGyro, FRotator& ArmCorrection,
+	FVector& BodySpaceAcceleration)
 {
-	MyoDelegateBlueprint::LatestData(myoId, pose, Acceleration, Rotation, Gyro, Arm);
+	MyoDelegateBlueprint::LatestData(myoId, Pose, Acceleration, Orientation, Gyro, Arm, xDirection, ArmAcceleration, ArmOrientation, ArmGyro, ArmCorrection, BodySpaceAcceleration);
 }
+
 void AMyoPluginActor::WhichArm(int32 myoId, int32& Arm)
 {
 	MyoDelegateBlueprint::WhichArm(myoId, Arm);
@@ -55,7 +63,11 @@ void AMyoPluginActor::RightMyoId(bool& available, int32& myoId)
 {
 	MyoDelegateBlueprint::RightMyoId(available, myoId);
 }
-void AMyoPluginActor::ConvertToRawOrientation(FRotator orientation, FRotator& converted)
+void AMyoPluginActor::ConvertToMyoOrientationSpace(FRotator orientation, FRotator& converted)
 {
-	MyoDelegateBlueprint::ConvertToRawOrientation(orientation, converted);
+	MyoDelegateBlueprint::ConvertToMyoOrientationSpace(orientation, converted);
+}
+void AMyoPluginActor::CalibrateArmOrientation(int32 myoId)
+{
+	MyoDelegateBlueprint::CalibrateArmOrientation(myoId);
 }

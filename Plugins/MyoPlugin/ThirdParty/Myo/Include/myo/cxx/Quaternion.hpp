@@ -115,6 +115,47 @@ Vector3<T> rotate(const Quaternion<T>& quat, const Vector3<T>& vec)
     return Vector3<T>(result.x(), result.y(), result.z());
 }
 
+/// Return a quaternion that represents a rotation from vector \a from to \a to.
+/// \relates myo::Quaternion
+/// See http://stackoverflow.com/questions/1171849/finding-quaternion-representing-the-rotation-from-one-vector-to-another
+/// for some explanation.
+template<typename T>
+Quaternion<T> rotate(const Vector3<T>& from, const Vector3<T>& to)
+{
+    Vector3<T> cross = from.cross(to);
+
+    // The product of the square of magnitudes and the cosine of the angle between from and to.
+    T cosTheta = from.dot(to);
+
+    // Return identity if the vectors are the same direction.
+    if (cosTheta >= 1) {
+        return Quaternion<T>();
+    }
+
+    // The product of the square of the magnitudes
+    T k = std::sqrt(from.dot(from) * to.dot(to));
+
+    // Return identity in the degenerate case.
+    if (k <= 0) {
+        return Quaternion<T>();
+    }
+
+    // Special handling for vectors facing opposite directions.
+    if (cosTheta / k <= -1) {
+        Vector3<T> xAxis(1, 0, 0);
+        Vector3<T> yAxis(0, 1, 0);
+
+        cross = from.cross(std::abs(from.dot(xAxis)) < 1 ? xAxis : yAxis);
+        k = cosTheta = 0;
+    }
+
+    return Quaternion<T>(
+        cross.x(),
+        cross.y(),
+        cross.z(),
+        k + cosTheta);
+}
+
 } // namespace myo
 
 #endif // MYO_CXX_QUATERNION_HPP

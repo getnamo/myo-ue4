@@ -46,6 +46,9 @@ public:
     /// Called when a Myo has been paired.
     virtual void onPair(Myo* myo, uint64_t timestamp, FirmwareVersion firmwareVersion) {}
 
+    /// Called when a Myo has been unpaired.
+    virtual void onUnpair(Myo* myo, uint64_t timestamp) {}
+
     /// Called when a paired Myo has been connected.
     virtual void onConnect(Myo* myo, uint64_t timestamp, FirmwareVersion firmwareVersion) {}
 
