@@ -3,8 +3,8 @@
 
 //Latest Data structure
 struct MyoDeviceData{
-	//Raw data
-	int pose;				//0 = rest, 1 = fist, 2 = waveIn, 3 = waveOut, 4 = fingersSpread, 5 = reserved1, 6 = thumbToPinky, 7 = unknown (as of beta1)
+	//Raw data (as of beta4)
+	int pose;				//0 = rest, 1 = fist, 2 = waveIn, 3 = waveOut, 4 = fingersSpread, 5 = reserved1, 6 = thumbToPinky, 65535 = unknown
 	FVector acceleration;	//units of g
 	FQuat quaternion;		//orientation in quaternion format
 	FRotator orientation;	//orientation
@@ -12,7 +12,7 @@ struct MyoDeviceData{
 	int arm;				//which arm it is bound to, 0=right, 1=left, 2=unknown
 	int xDirection;			//0 = toward wrist, 1= toward elbow, 2=unknown
 
-	//Values in arm space after calibration, otherwise same as raw
+	//Plugin Derived - Values given arm space after arm calibration, otherwise same as raw
 	FVector armAcceleration;	//units of g
 	FRotator armOrientation;	//orientation
 	FVector armGyro;			//angular speed in deg/s
@@ -20,16 +20,12 @@ struct MyoDeviceData{
 
 	//Body space, useful for easy component space integration
 	FVector bodySpaceNullAcceleration;	//units of g, in calibrated space, without gravity component
-
-	//Integrated Data - Unused for now, integration left up to the user
-	//FVector deltaVelocity;	//obtains the difference in velocity obtained from last acceleration
-	//FVector deltaPosition;	//obtains the difference in position obtained from last acceleration
 };
 
 //Input Mapping Key Structure
 struct EKeysMyo
 {
-	//Poses
+	//Posess
 	static const FKey MyoPoseRest;
 	static const FKey MyoPoseFist;
 	static const FKey MyoPoseWaveIn;
@@ -84,7 +80,7 @@ public:
 	virtual void MyoLeftMyoId(bool& available, int32& myoId);		//convenience function, gets the myoId of the currently myo bound to the left arm
 	virtual void MyoRightMyoId(bool& available, int32& myoId);	//convenience function, gets the myoId of the currently myo bound to the right arm
 	virtual void MyoConvertToMyoOrientationSpace(FRotator orientation, FRotator& converted);	//if you want to use the raw myo orientation not the UE4 formatted one, run your rotator through this
-	virtual void MyoCalibrateArmOrientation(int32 myoId);					//Uses current orientation as arm zero point (ask user to point arm to screen and call this)
+	virtual void MyoCalibrateArmOrientation(int32 myoId, FRotator direction);					//Uses current orientation as arm zero point (ask user to point arm to screen and call this)
 
 	//Required Functions
 	virtual void MyoStartup();

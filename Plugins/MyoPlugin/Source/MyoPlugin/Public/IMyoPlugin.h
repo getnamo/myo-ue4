@@ -50,6 +50,6 @@ public:
 	virtual void LeftMyoId(bool& available, int& deviceId){};
 	virtual void RightMyoId(bool& available, int& deviceId){};
 	virtual bool IsHubEnabled() = 0;
-	virtual void CalibrateOrientation(int deviceId){};
+	virtual void CalibrateOrientation(int deviceId, FRotator direction){};
 };
 

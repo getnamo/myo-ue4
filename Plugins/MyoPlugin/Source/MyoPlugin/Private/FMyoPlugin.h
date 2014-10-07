@@ -24,7 +24,7 @@ public:
 	void LeftMyoId(bool& available, int& deviceId);
 	void RightMyoId(bool& available, int& deviceId);
 	bool IsHubEnabled();
-	void CalibrateOrientation(int deviceId);	//adjusts all input to arm orientation after this is called.
+	void CalibrateOrientation(int deviceId, FRotator direction);	//adjusts arm and body input relative to screen forward after this is called.
 	
 	//Internal Utility
 	bool isValidDeviceId(int deviceId);

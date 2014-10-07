@@ -30,6 +30,7 @@ void AMyoPluginActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void AMyoPluginActor::Tick(float DeltaTime)
 {
+	Super::Tick(DeltaTime);
 	MyoTick(DeltaTime);
 }
 
@@ -67,7 +68,7 @@ void AMyoPluginActor::ConvertToMyoOrientationSpace(FRotator orientation, FRotato
 {
 	MyoDelegateBlueprint::ConvertToMyoOrientationSpace(orientation, converted);
 }
-void AMyoPluginActor::CalibrateArmOrientation(int32 myoId)
+void AMyoPluginActor::CalibrateArmOrientation(int32 myoId, FRotator direction)
 {
-	MyoDelegateBlueprint::CalibrateArmOrientation(myoId);
+	MyoDelegateBlueprint::CalibrateArmOrientation(myoId, direction);
 }

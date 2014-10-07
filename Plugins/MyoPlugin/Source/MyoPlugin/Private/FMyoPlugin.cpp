@@ -53,47 +53,40 @@ FVector convertVectorToUE(FVector rawAcceleration)
 	return FVector(rawAcceleration.X, -rawAcceleration.Y, -rawAcceleration.Z);
 }
 
-//CONTINUE HERE convert acceleration to arm space by using the arm direction obtained from the myo, it isnt being handled properly
-//the other thing that doesn't work is calibration for the reverse direction (plug facing away), might be linked. Investigate deeper
-
 FVector convertAccelerationToBodySpace(FVector armAcceleration, FRotator orientation, FRotator armCorrection, myo::XDirection direction)
 {
+	float directionModifier = 1.f;
 	//something wrong here, also make sure this is applie to the arm space correction as well
 	if (direction == myo::xDirectionTowardWrist){
-		orientation = FRotator(orientation.Pitch*-1.f, orientation.Yaw, orientation.Roll*-1.f);
+		directionModifier = -1.f;
 	}
 
 	//Compensate for arm roll
-	FRotator armRollCompensationRotator = FRotator(0, 0, -armCorrection.Roll);
+	FRotator armYawCorrection = FRotator(0, armCorrection.Yaw, 0);
 
-	FRotator fullCompensationOrientation = combineRotators(armRollCompensationRotator, orientation);
+	FRotator fullCompensationOrientation = combineRotators(orientation, armYawCorrection);
 
-	FVector reactionAcceleration = fullCompensationOrientation.RotateVector(armAcceleration)*-1.f;
-	reactionAcceleration = reactionAcceleration - FVector(0, 0, 1);
-	return reactionAcceleration;
+	FVector reactionAcceleration = fullCompensationOrientation.RotateVector(armAcceleration);
+
+	//Subtract gravity
+	return ((reactionAcceleration * FVector(directionModifier, directionModifier, 1.f)) + FVector(0, 0, 1)) * -1.f;
 }
 
 FRotator convertOrientationToArmSpace(FRotator convertedOrientation, FRotator armCorrection, myo::XDirection direction)
 {
+	float directionModifier = 1.f;
 	//Check for arm direction, compensate if needed by reversing pitch and roll
 	if (direction == myo::xDirectionTowardWrist){
-		convertedOrientation = FRotator(convertedOrientation.Pitch*-1.f, convertedOrientation.Yaw, convertedOrientation.Roll*-1.f);
+		directionModifier = -1.f;
+		convertedOrientation = FRotator(convertedOrientation.Pitch*directionModifier, convertedOrientation.Yaw, convertedOrientation.Roll*directionModifier);
 	}
 
 	//Compensate Roll (pre)
-	FRotator tempRot = combineRotators(FRotator(0, 0, armCorrection.Roll), convertedOrientation);
+	FRotator tempRot = combineRotators(FRotator(0, 0, armCorrection.Roll*directionModifier), convertedOrientation);
 
 	//Compensate for Yaw (post) and return the result
 	return combineRotators(tempRot, FRotator(0, armCorrection.Yaw, 0));
 }
-
-/*
-CONTINUE HERE: 
--add calibration compensation to acceleration and gyro, and test that they are correct
--forward the calibrated versions to input mapping.
-*/
-
-
 
 class DataCollector : public myo::DeviceListener {
 public:
@@ -185,6 +178,12 @@ public:
 		{
 			myoDelegate->MyoOnDisconnect(identifyMyo(myo), timestamp);
 		}
+
+		//Ensure we have a valid input mapping pointer
+		if (myo == lastPairedMyo)
+		{
+			lastPairedMyo = lastValidMyo();
+		}
 	}
 
 	void onArmRecognized(myo::Myo *myo, uint64_t timestamp, myo::Arm arm, myo::XDirection xDirection){
@@ -250,13 +249,12 @@ public:
 		{
 			myoDelegate->MyoOnPair(identifyMyo(myo), timestamp);
 		}
+
+		lastPairedMyo = myo;
 	}
 
-	//Uncomment when beta3 works properly
 	/*void onUnpair(myo::Myo *myo, uint64_t timestamp){
 		int myoIndex = myoIndexForMyo(myo);
-
-		//m_data.erase(m_data.begin() + myoIndex);
 
 		if (myoDelegate != NULL)
 		{
@@ -267,7 +265,7 @@ public:
 	// Called when a paired Myo has provided new orientation data, which is represented
 	// as a unit quaternion.
 	void onOrientationData(myo::Myo* myo, uint64_t timestamp, const myo::Quaternion<float>& quat){
-		int myoIndex = identifyMyo(myo)-1;
+		int myoIndex = myoIndexForMyo(myo);
 
 		m_data[myoIndex].quaternion.X = quat.x();
 		m_data[myoIndex].quaternion.Y = quat.y();
@@ -283,7 +281,7 @@ public:
 			myoDelegate->MyoOnOrientationData(myoIndex + 1, timestamp, m_data[myoIndex].armOrientation);	//overloaded rotator - in UE format, arm converted
 
 			//InputMapping - only supports controller 1 for now
-			if (myoIndex == 0)
+			if (myoIsValidForInputMapping(myo))
 			{
 				//Scale input mapping to -1.0-> 1.0 range
 				FSlateApplication::Get().OnControllerAnalog(EKeysMyo::MyoOrientationPitch, 0, m_data[myoIndex].armOrientation.Pitch * ORIENTATION_SCALE_PITCH);
@@ -307,14 +305,14 @@ public:
 		m_data[myoIndex].armAcceleration = m_data[myoIndex].acceleration;
 
 		//convert to body space with nullified acceleration
-		m_data[myoIndex].bodySpaceNullAcceleration = convertAccelerationToBodySpace(m_data[myoIndex].armAcceleration, m_data[myoIndex].armOrientation, m_data[myoIndex].armSpaceCorrection, (myo::XDirection)m_data[myoIndex].xDirection);
+		m_data[myoIndex].bodySpaceNullAcceleration = convertAccelerationToBodySpace(m_data[myoIndex].armAcceleration, m_data[myoIndex].orientation, m_data[myoIndex].armSpaceCorrection, (myo::XDirection)m_data[myoIndex].xDirection);
 
 		if (myoDelegate)
 		{
 			myoDelegate->MyoOnAccelerometerData(myoIndex + 1, timestamp, m_data[myoIndex].acceleration);
 
 			//InputMapping - only supports controller 1 for now
-			if (myoIndex == 0)
+			if (myoIsValidForInputMapping(myo))
 			{
 				//No scaling needed, 1.0 = 1g.
 				FSlateApplication::Get().OnControllerAnalog(EKeysMyo::MyoAccelerationX, 0, m_data[myoIndex].armAcceleration.X);
@@ -338,7 +336,7 @@ public:
 			myoDelegate->MyoOnGyroscopeData(myoIndex + 1, timestamp, m_data[myoIndex].gyro);
 
 			//InputMapping - only supports controller 1 for now
-			if (myoIndex == 0)
+			if (myoIsValidForInputMapping(myo))
 			{
 				//scaled down by 1/45. Fast flicks should be close to 1.0, slower gyro motions may need scaling up if used in input mapping
 				FSlateApplication::Get().OnControllerAnalog(EKeysMyo::MyoGyroX, 0, m_data[myoIndex].armGyro.X * GYRO_SCALE);
@@ -363,8 +361,8 @@ public:
 		{
 			myoDelegate->MyoOnPose(myoIndex + 1, timestamp, (int32)pose.type());
 
-			//InputMapping - only supports controller 1 for now
-			if (myoIndex == 0)
+			//InputMapping - only supports controller 1 for now, last bound myo = input mapper
+			if (myoIsValidForInputMapping(myo))
 			{
 				//release the old pose, press new pose
 				ReleasePose(lastPose);
@@ -391,6 +389,21 @@ public:
 		return 0;
 	}
 
+	myo::Myo* lastValidMyo(){
+		for (size_t i = 0; i < knownMyos.size(); ++i) {
+			// If two Myo pointers compare equal, they refer to the same Myo device.
+			myo::Myo* myo = knownMyos[i];
+			if (myo) {
+				return knownMyos[i];
+			}
+		}
+		return NULL;
+	}
+	
+	bool myoIsValidForInputMapping(myo::Myo* myo){
+		return (myo == lastPairedMyo);
+	}
+
 	size_t myoIndexForMyo(myo::Myo* myo){
 		return identifyMyo(myo) - 1;
 	}
@@ -414,14 +427,17 @@ public:
 		{
 			try{
 				hub = new myo::Hub("com.plugin.unrealengine4");
+				UE_LOG(LogClass, Log, TEXT("Myo Hub Initialized."));
 			}
 			catch (const std::exception& e) {
+				UE_LOG(LogClass, Error, TEXT("Myo did not initialize correctly, check if Myo Connect is running!"));
 				UE_LOG(LogClass, Error, TEXT("Error: %s"), e.what());
 				hub = NULL;
 			}
 		}
 		if (hub){
 			StartListening();
+			Enabled = true;
 			return true;
 		}
 		else{
@@ -446,6 +462,7 @@ public:
 	std::vector<myo::Myo*> knownMyos;
 	int leftMyo;
 	int rightMyo;
+	myo::Myo* lastPairedMyo;
 	std::vector<MyoDeviceData>  m_data;	//up to n devices supported
 	MyoDelegate* myoDelegate;
 	bool Enabled;
@@ -460,37 +477,26 @@ void FMyoPlugin::StartupModule()
 	// Instantiate the PrintMyoEvents class we defined above, and attach it as a listener to our Hub.
 	collector = new DataCollector;
 
-	//This will throw an exception if the bluetooth dongle is missing! You cannot do any hub actions after.
-	if(collector->Startup())
-	{
-		UE_LOG(LogClass, Log, TEXT("Myo Hub Initialized."));
+	//Register all input mapping keys and axes
+	EKeys::AddKey(FKeyDetails(EKeysMyo::MyoPoseRest, LOCTEXT("MyoPoseRest", "Myo Pose Rest"), FKeyDetails::GamepadKey));
+	EKeys::AddKey(FKeyDetails(EKeysMyo::MyoPoseFist, LOCTEXT("MyoPoseFist", "Myo Pose Fist"), FKeyDetails::GamepadKey));
+	EKeys::AddKey(FKeyDetails(EKeysMyo::MyoPoseWaveIn, LOCTEXT("MyoPoseWaveIn", "Myo Pose Wave In"), FKeyDetails::GamepadKey));
+	EKeys::AddKey(FKeyDetails(EKeysMyo::MyoPoseWaveOut, LOCTEXT("MyoPoseWaveOut", "Myo Pose Wave Out"), FKeyDetails::GamepadKey));
+	EKeys::AddKey(FKeyDetails(EKeysMyo::MyoPoseFingersSpread, LOCTEXT("MyoPoseFingersSpread", "Myo Pose FingersSpread"), FKeyDetails::GamepadKey));
+	EKeys::AddKey(FKeyDetails(EKeysMyo::MyoPoseThumbToPinky, LOCTEXT("MyoPoseThumbToPinky", "Myo Pose Thumb To Pinky"), FKeyDetails::GamepadKey));
+	EKeys::AddKey(FKeyDetails(EKeysMyo::MyoPoseUnknown, LOCTEXT("MyoPoseUnknown", "Myo Pose Unknown"), FKeyDetails::GamepadKey));
 
-		collector->Enabled = true;
+	EKeys::AddKey(FKeyDetails(EKeysMyo::MyoAccelerationX, LOCTEXT("MyoAccelerationX", "Myo Acceleration X"), FKeyDetails::FloatAxis));
+	EKeys::AddKey(FKeyDetails(EKeysMyo::MyoAccelerationY, LOCTEXT("MyoAccelerationY", "Myo Acceleration Y"), FKeyDetails::FloatAxis));
+	EKeys::AddKey(FKeyDetails(EKeysMyo::MyoAccelerationZ, LOCTEXT("MyoAccelerationZ", "Myo Acceleration Z"), FKeyDetails::FloatAxis));
 
-		//Register all input mapping keys and axes
-		EKeys::AddKey(FKeyDetails(EKeysMyo::MyoPoseRest, LOCTEXT("MyoPoseRest", "Myo Pose Rest"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(EKeysMyo::MyoPoseFist, LOCTEXT("MyoPoseFist", "Myo Pose Fist"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(EKeysMyo::MyoPoseWaveIn, LOCTEXT("MyoPoseWaveIn", "Myo Pose Wave In"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(EKeysMyo::MyoPoseWaveOut, LOCTEXT("MyoPoseWaveOut", "Myo Pose Wave Out"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(EKeysMyo::MyoPoseFingersSpread, LOCTEXT("MyoPoseFingersSpread", "Myo Pose FingersSpread"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(EKeysMyo::MyoPoseThumbToPinky, LOCTEXT("MyoPoseThumbToPinky", "Myo Pose Thumb To Pinky"), FKeyDetails::GamepadKey));
-		EKeys::AddKey(FKeyDetails(EKeysMyo::MyoPoseUnknown, LOCTEXT("MyoPoseUnknown", "Myo Pose Unknown"), FKeyDetails::GamepadKey));
+	EKeys::AddKey(FKeyDetails(EKeysMyo::MyoOrientationPitch, LOCTEXT("MyoOrientationPitch", "Myo Orientation Pitch"), FKeyDetails::FloatAxis));
+	EKeys::AddKey(FKeyDetails(EKeysMyo::MyoOrientationYaw, LOCTEXT("MyoOrientationYaw", "Myo Orientation Yaw"), FKeyDetails::FloatAxis));
+	EKeys::AddKey(FKeyDetails(EKeysMyo::MyoOrientationRoll, LOCTEXT("MyoOrientationRoll", "Myo Orientation Roll"), FKeyDetails::FloatAxis));
 
-		EKeys::AddKey(FKeyDetails(EKeysMyo::MyoAccelerationX, LOCTEXT("MyoAccelerationX", "Myo Acceleration X"), FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(EKeysMyo::MyoAccelerationY, LOCTEXT("MyoAccelerationY", "Myo Acceleration Y"), FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(EKeysMyo::MyoAccelerationZ, LOCTEXT("MyoAccelerationZ", "Myo Acceleration Z"), FKeyDetails::FloatAxis));
-
-		EKeys::AddKey(FKeyDetails(EKeysMyo::MyoOrientationPitch, LOCTEXT("MyoOrientationPitch", "Myo Orientation Pitch"), FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(EKeysMyo::MyoOrientationYaw, LOCTEXT("MyoOrientationYaw", "Myo Orientation Yaw"), FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(EKeysMyo::MyoOrientationRoll, LOCTEXT("MyoOrientationRoll", "Myo Orientation Roll"), FKeyDetails::FloatAxis));
-
-		EKeys::AddKey(FKeyDetails(EKeysMyo::MyoGyroX, LOCTEXT("MyoGyroX", "Myo Gyro X"), FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(EKeysMyo::MyoGyroY, LOCTEXT("MyoGyroY", "Myo Gyro Y"), FKeyDetails::FloatAxis));
-		EKeys::AddKey(FKeyDetails(EKeysMyo::MyoGyroZ, LOCTEXT("MyoGyroZ", "Myo Gyro Z"), FKeyDetails::FloatAxis));
-	}
-	else {
-		UE_LOG(LogClass, Error, TEXT("Myo Did not initialize, check if Myo Connect is running!"));
-	}
+	EKeys::AddKey(FKeyDetails(EKeysMyo::MyoGyroX, LOCTEXT("MyoGyroX", "Myo Gyro X"), FKeyDetails::FloatAxis));
+	EKeys::AddKey(FKeyDetails(EKeysMyo::MyoGyroY, LOCTEXT("MyoGyroY", "Myo Gyro Y"), FKeyDetails::FloatAxis));
+	EKeys::AddKey(FKeyDetails(EKeysMyo::MyoGyroZ, LOCTEXT("MyoGyroZ", "Myo Gyro Z"), FKeyDetails::FloatAxis));
 }
 
 void FMyoPlugin::ShutdownModule()
@@ -558,7 +564,7 @@ bool FMyoPlugin::IsHubEnabled()
 }
 
 //sets the calibration orientation
-void FMyoPlugin::CalibrateOrientation(int deviceId)
+void FMyoPlugin::CalibrateOrientation(int deviceId, FRotator direction)
 {
 	//special case, means calibrate all
 	if (deviceId == 0)
@@ -566,7 +572,7 @@ void FMyoPlugin::CalibrateOrientation(int deviceId)
 		for (size_t i = 0; i < collector->m_data.size(); ++i) 
 		{
 			//Grab current orientation set it to the space correction orientation
-			collector->m_data[i].armSpaceCorrection = collector->m_data[i].orientation*-1.f;
+			collector->m_data[i].armSpaceCorrection = combineRotators(collector->m_data[i].orientation*-1.f, direction);
 		}
 	}
 	//Otherwise check device id validity and calibrate specific myo
@@ -575,7 +581,7 @@ void FMyoPlugin::CalibrateOrientation(int deviceId)
 		if (!this->isValidDeviceId(deviceId)) return;
 
 		//Grab current orientation set it to the space correction orientation
-		collector->m_data[deviceId - 1].armSpaceCorrection = collector->m_data[deviceId - 1].orientation*-1.f;
+		collector->m_data[deviceId - 1].armSpaceCorrection = combineRotators(collector->m_data[deviceId - 1].orientation*-1.f, direction);
 	}
 }
 

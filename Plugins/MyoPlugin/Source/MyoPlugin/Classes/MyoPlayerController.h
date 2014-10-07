@@ -175,9 +175,10 @@ class AMyoPlayerController : public APlayerController, public MyoDelegateBluepri
 	* Calibrate the Orientation for Arm Space. Ask the user to point their arm to the screen, then call this function and all orientation will be
 	* in arm orientation space.
 	* @param myoId (in) device you wish to calibrate, use 0 to calibrate all.
+	* @param direction (in) orientation of the calibrated myo with respect to the user forward vector (R0,P0,Y0) specifies into the screen, (R0,P0,Y90) specifies pointing right, etc.
 	*/
 	UFUNCTION(BlueprintCallable, Category = MyoFunctions)
-		virtual void CalibrateArmOrientation(int32 myoId);
+		virtual void CalibrateArmOrientation(int32 myoId, FRotator direction);
 
 	//Required for setting delegate (startup) and forwarding Tick to the Myo Delegate.
 	virtual void BeginPlay() override;

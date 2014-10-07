@@ -44,7 +44,7 @@ public:
 	virtual void LeftMyoId(bool& available, int32& myoId);
 	virtual void RightMyoId(bool& available, int32& myoId);
 	virtual void ConvertToMyoOrientationSpace(FRotator orientation, FRotator& converted);
-	virtual void CalibrateArmOrientation(int32 myoId);					//Uses current orientation as arm zero point (ask user to point arm to screen and call this)
+	virtual void CalibrateArmOrientation(int32 myoId, FRotator direction);
 
 	//Required functions to make plugin work
 	virtual void MyoStartup() override;

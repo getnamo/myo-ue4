@@ -82,9 +82,9 @@ void MyoDelegateBlueprint::ConvertToMyoOrientationSpace(FRotator orientation, FR
 	MyoConvertToMyoOrientationSpace(orientation, converted);
 }
 
-void MyoDelegateBlueprint::CalibrateArmOrientation(int32 myoId)
+void MyoDelegateBlueprint::CalibrateArmOrientation(int32 myoId, FRotator direction)
 {
-	MyoCalibrateArmOrientation(myoId);
+	MyoCalibrateArmOrientation(myoId, direction);
 }
 
 void MyoDelegateBlueprint::MyoTick(float DeltaTime)

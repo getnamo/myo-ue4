@@ -62,7 +62,7 @@ void AMyoPlayerController::ConvertToMyoOrientationSpace(FRotator orientation, FR
 {
 	MyoDelegateBlueprint::ConvertToMyoOrientationSpace(orientation, converted);
 }
-void AMyoPlayerController::CalibrateArmOrientation(int32 myoId)
+void AMyoPlayerController::CalibrateArmOrientation(int32 myoId, FRotator direction)
 {
-	MyoDelegateBlueprint::CalibrateArmOrientation(myoId);
+	MyoDelegateBlueprint::CalibrateArmOrientation(myoId, direction);
 }

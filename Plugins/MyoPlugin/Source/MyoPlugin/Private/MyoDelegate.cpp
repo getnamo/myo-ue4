@@ -119,11 +119,11 @@ void MyoDelegate::MyoConvertToMyoOrientationSpace(FRotator orientation, FRotator
 	converted.Roll = orientation.Roll;
 }
 
-void MyoDelegate::MyoCalibrateArmOrientation(int32 myoId)
+void MyoDelegate::MyoCalibrateArmOrientation(int32 myoId, FRotator direction)
 {
 	if (IMyoPlugin::IsAvailable())
 	{
-		IMyoPlugin::Get().CalibrateOrientation(myoId);
+		IMyoPlugin::Get().CalibrateOrientation(myoId, direction);
 	}
 }
 
