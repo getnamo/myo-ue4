@@ -1,7 +1,9 @@
 myo-ue4
 =======
 
-A Myo Plugin for Unreal Engine 4. Latest plugin is bound to beta-5, requires Myos to have firmware 0.8.17 or later.
+A Myo Plugin for Unreal Engine 4. Latest plugin is bound to beta-5, requires Myos to have [firmware 0.8.17](https://developer.thalmic.com/downloads) or later.
+
+[Main discussion thread](https://forums.unrealengine.com/showthread.php?37876-Plugin-Myo)
 
 ## Quick Setup ##
 1. Create new or open a project. 
