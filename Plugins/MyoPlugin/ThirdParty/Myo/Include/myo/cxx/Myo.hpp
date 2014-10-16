@@ -1,7 +1,6 @@
 // Copyright (C) 2013-2014 Thalmic Labs Inc.
 // Distributed under the Myo SDK license agreement. See LICENSE.txt for details.
-#ifndef MYO_CXX_MYO_HPP
-#define MYO_CXX_MYO_HPP
+#pragma once
 
 #include <myo/libmyo.h>
 
@@ -50,5 +49,3 @@ private:
 } // namespace myo
 
 #include "impl/Myo_impl.hpp"
-
-#endif // MYO_CXX_MYO_HPP

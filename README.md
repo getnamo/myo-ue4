@@ -1,7 +1,7 @@
 myo-ue4
 =======
 
-A Myo Plugin for Unreal Engine 4. Supports all features up to Beta-4 SDK, including multiple Myos.
+A Myo Plugin for Unreal Engine 4. Latest plugin is bound to beta-5, requires Myos to have firmware 0.8.17 or later.
 
 ## Quick Setup ##
 1. Create new or open a project. 

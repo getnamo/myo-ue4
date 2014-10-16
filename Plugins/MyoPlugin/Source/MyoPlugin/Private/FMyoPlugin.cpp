@@ -253,14 +253,14 @@ public:
 		lastPairedMyo = myo;
 	}
 
-	/*void onUnpair(myo::Myo *myo, uint64_t timestamp){
+	void onUnpair(myo::Myo *myo, uint64_t timestamp){
 		int myoIndex = myoIndexForMyo(myo);
 
 		if (myoDelegate != NULL)
 		{
 			myoDelegate->MyoOnUnpair(identifyMyo(myo), timestamp);
 		}
-	}*/
+	}
 
 	// Called when a paired Myo has provided new orientation data, which is represented
 	// as a unit quaternion.

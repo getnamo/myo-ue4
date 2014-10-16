@@ -167,6 +167,12 @@ typedef enum {
     libmyo_version_hardware_rev, ///< Hardware revision.
 } libmyo_version_component_t;
 
+/// Hardware revisions.
+typedef enum {
+    libmyo_hardware_rev_c = 1, ///< Alpha units
+    libmyo_hardware_rev_d = 2, ///< Consumer units
+} libmyo_hardware_rev_t;
+
 /// Retrieve the Myo armband's firmware version from this event.
 /// Valid for libmyo_event_paired and libmyo_event_connected events.
 LIBMYO_EXPORT

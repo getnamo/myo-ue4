@@ -23,8 +23,8 @@ void MyoDelegateBlueprint::MyoOnPair(int32 myoId, uint64 timestamp)
 }
 void MyoDelegateBlueprint::MyoOnUnpair(int32 myoId, uint64 timestamp)
 {
-	//To be supported later
-	//OnUnpair(myoId);
+	if (MyoIsValidId(myoId))
+		IMyoInterface::Execute_OnUnpair(_interfaceDelegate, InternalControllerForId(myoId));
 }
 void MyoDelegateBlueprint::MyoOnArmMoved(int32 myoId, FVector armAcceleration, FRotator armOrientation, FVector armGyro, MyoPose pose)
 {

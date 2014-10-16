@@ -40,8 +40,8 @@ public:
 	* Event on a Myo unpairing
 	* @param myo (out) pointer to emitted myo controller class, branch to read other data.
 	*/
-	//UFUNCTION(BlueprintImplementableEvent, Category = MyoEvents)
-	//void OnUnpair(MyoController* myo);
+	UFUNCTION(BlueprintImplementableEvent, Category = MyoEvents)
+	void OnUnpair(UMyoController* myo);
 
 
 	/**
