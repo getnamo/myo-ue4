@@ -174,6 +174,20 @@ Fully supported. Call ```Calibrate Myo Orientation``` on your Myo Controller whe
 
 <img src="http://i.imgur.com/pWXZhmW.png">
 
+###Shipping/Packaged Builds###
+<ol>
+<li> Projects require code, if you are using blueprint only add an empty class and compile your project module.</li>
+<li> Add the following line to your DefaultEngine.ini </li>
+
+<i>EnabledPlugins=MyoPlugin</i>
+
+under <i>[Plugins]</i>, create this category if missing.
+
+<li> Package your content</li>
+<li> In your packaged directory drag the <i>Binaries</i> folder from this plugin into your packaged project folder. E.g. if I have a packaged folder called <i>MyoPluginTest</i>
+find <i>WindowsNoEditor/MyoPluginTest</i>, this is your packaged project root. Add the binaries folder there.</li>
+</ol>
+
 ##Bugs and Todo##
 * Hub runs on the main thread, adds 1ms to render loop. Should be separated into its own thread or reduced to near 0ms.
 * Platforms apart from Windows are untested
