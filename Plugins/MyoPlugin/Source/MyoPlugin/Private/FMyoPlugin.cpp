@@ -310,6 +310,7 @@ public:
 		if (myoDelegate)
 		{
 			myoDelegate->MyoOnAccelerometerData(myoIndex + 1, timestamp, m_data[myoIndex].acceleration);
+			myoDelegate->MyoOnArmMoved(myoIndex + 1, m_data[myoIndex].armAcceleration, m_data[myoIndex].armOrientation, m_data[myoIndex].armGyro, (MyoPose)m_data[myoIndex].pose);	//non-thalmic api
 
 			//InputMapping - only supports controller 1 for now
 			if (myoIsValidForInputMapping(myo))
@@ -454,6 +455,9 @@ public:
 			//clear all lists
 			knownMyos.clear();
 			m_data.clear();
+
+			//Shutdown message
+			UE_LOG(LogClass, Log, TEXT("Myo Hub Shutdown."));
 		}
 	}
 
@@ -510,7 +514,7 @@ void FMyoPlugin::ShutdownModule()
 
 //Public API Implementation
 
-bool FMyoPlugin::isValidDeviceId(int deviceId)
+bool FMyoPlugin::IsValidDeviceId(int deviceId)
 {
 	return !(deviceId < 1 || deviceId > collector->m_data.size());
 }
@@ -518,23 +522,23 @@ bool FMyoPlugin::isValidDeviceId(int deviceId)
 /** Public API **/
 void FMyoPlugin::VibrateDevice(int deviceId, int vibrationType)
 {
-	if (!this->isValidDeviceId(deviceId)) return;
+	if (!this->IsValidDeviceId(deviceId)) return;
 
 	myo::Myo* myo = collector->knownMyos[deviceId - 1];
 	myo->vibrate(static_cast<myo::Myo::VibrationType>(vibrationType));
 }
  
 //Freshest Data
-void FMyoPlugin::LatestData(int deviceId, MyoDeviceData& data)
+MyoDeviceData* FMyoPlugin::LatestData(int deviceId)
 {
-	if (!this->isValidDeviceId(deviceId)) return;
+	if (!this->IsValidDeviceId(deviceId)) return NULL;
 
-	data = collector->m_data[deviceId - 1];
+	return &(collector->m_data[deviceId - 1]);
 }
 
 void FMyoPlugin::WhichArm(int deviceId, int& arm)
 {
-	if (!this->isValidDeviceId(deviceId)) return;
+	if (!this->IsValidDeviceId(deviceId)) return;
 
 	arm = collector->m_data[deviceId - 1].arm;
 }
@@ -558,6 +562,19 @@ void FMyoPlugin::RightMyoId(bool& available, int& deviceId)
 	}
 }
 
+//Returns last valid myo, this is a catch-all identifier 
+//so a user can just call this and get their one paired myo pointer easily
+void FMyoPlugin::PrimaryMyoId(bool& available, int& deviceId)
+{
+	deviceId = collector->identifyMyo(collector->lastValidMyo());
+	available = (deviceId != -1);
+}
+
+void FMyoPlugin::MaxMyoId(int& maxId)
+{
+	maxId = collector->m_data.size();
+}
+
 bool FMyoPlugin::IsHubEnabled()
 {
 	return collector->Enabled;
@@ -578,7 +595,7 @@ void FMyoPlugin::CalibrateOrientation(int deviceId, FRotator direction)
 	//Otherwise check device id validity and calibrate specific myo
 	else
 	{
-		if (!this->isValidDeviceId(deviceId)) return;
+		if (!this->IsValidDeviceId(deviceId)) return;
 
 		//Grab current orientation set it to the space correction orientation
 		collector->m_data[deviceId - 1].armSpaceCorrection = combineRotators(collector->m_data[deviceId - 1].orientation*-1.f, direction);

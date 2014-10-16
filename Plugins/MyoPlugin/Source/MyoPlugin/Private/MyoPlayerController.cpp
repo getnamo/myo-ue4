@@ -14,6 +14,7 @@ AMyoPlayerController::AMyoPlayerController(const class FPostConstructInitializeP
 void AMyoPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+	ValidSelfPointer = this;	//required from v0.7
 	MyoStartup();
 }
 
@@ -29,40 +30,28 @@ void AMyoPlayerController::Tick(float DeltaTime)
 	MyoTick(DeltaTime);
 }
 
-/*Blueprint callable functions implementation passthrough, required*/
-
-void AMyoPlayerController::VibrateDevice(int32 myoId, int32 type)
-{
-	MyoDelegateBlueprint::VibrateDevice(myoId, type);
-}
+//Functions forwards, required implementations
 bool AMyoPlayerController::IsHubEnabled()
 {
-	return MyoDelegateBlueprint::IsHubEnabled();
+	return MyoIsHubEnabled();
 }
-void AMyoPlayerController::LatestData(int32 myoId, int32& Pose, FVector& Acceleration, FRotator& Orientation, FVector& Gyro,
-	int32& Arm, int32& xDirection,
-	FVector& ArmAcceleration, FRotator& ArmOrientation, FVector& ArmGyro, FRotator& ArmCorrection,
-	FVector& BodySpaceAcceleration)
+
+UMyoController* AMyoPlayerController::LeftMyo()
 {
-	MyoDelegateBlueprint::LatestData(myoId, Pose, Acceleration, Orientation, Gyro, Arm, xDirection, ArmAcceleration, ArmOrientation, ArmGyro, ArmCorrection, BodySpaceAcceleration);
+	return MyoLeftMyo();
 }
-void AMyoPlayerController::WhichArm(int32 myoId, int32& Arm)
+
+UMyoController* AMyoPlayerController::RightMyo()
 {
-	MyoDelegateBlueprint::WhichArm(myoId, Arm);
+	return MyoRightMyo();
 }
-void AMyoPlayerController::LeftMyoId(bool& available, int32& myoId)
+
+UMyoController* AMyoPlayerController::PrimaryMyo()
 {
-	MyoDelegateBlueprint::LeftMyoId(available, myoId);
+	return MyoPrimaryMyo();
 }
-void AMyoPlayerController::RightMyoId(bool& available, int32& myoId)
-{
-	MyoDelegateBlueprint::RightMyoId(available, myoId);
-}
+
 void AMyoPlayerController::ConvertToMyoOrientationSpace(FRotator orientation, FRotator& converted)
 {
-	MyoDelegateBlueprint::ConvertToMyoOrientationSpace(orientation, converted);
-}
-void AMyoPlayerController::CalibrateArmOrientation(int32 myoId, FRotator direction)
-{
-	MyoDelegateBlueprint::CalibrateArmOrientation(myoId, direction);
+	return MyoConvertToMyoOrientationSpace(orientation, converted);
 }

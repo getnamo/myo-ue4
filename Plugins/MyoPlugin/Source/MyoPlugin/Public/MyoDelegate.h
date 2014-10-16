@@ -1,5 +1,44 @@
 #pragma once
+#include "MyoDelegate.generated.h"
+
 /** Inherit override and set delegate to subscribe to callbacks*/
+
+UENUM(BlueprintType)
+enum MyoArm
+{
+	MYO_ARM_RIGHT = 0,
+	MYO_ARM_LEFT,
+	MYO_ARM_UNKNOWN
+};
+
+UENUM(BlueprintType)
+enum MyoArmDirection
+{
+	MYO_TOWARD_WRIST = 0,
+	MYO_TOWARD_ELBOW,
+	MYO_DIRECTION_UNKNOWN
+};
+
+UENUM(BlueprintType)
+enum MyoPose
+{
+	MYO_POSE_REST = 0,
+	MYO_POSE_FIST,
+	MYO_POSE_WAVEIN,
+	MYO_POSE_WAVEOUT,
+	MYO_POSE_FINGERSPREAD,
+	MYO_POSE_RESERVED1,
+	MYO_POSE_THUMBTOPINKY,
+	MYO_POSE_UNKNOWN = 255	//this needs to be properly switched...
+};
+
+UENUM(BlueprintType)
+enum MyoVibrationType
+{
+	MYO_VIBRATION_SHORT = 0,
+	MYO_VIBRATION_MEDIUM,
+	MYO_VIBRATION_LONG
+};
 
 //Latest Data structure
 struct MyoDeviceData{
@@ -56,6 +95,7 @@ public:
 	virtual void MyoOnDisconnect(int32 myoId, uint64 timestamp);
 	virtual void MyoOnPair(int32 myoId, uint64 timestamp);
 	virtual void MyoOnUnpair(int32 myoId, uint64 timestamp);
+	virtual void MyoOnArmMoved(int32 myoId, FVector armAcceleration, FRotator armOrientation, FVector armGyro, MyoPose pose);
 	virtual void MyoOnOrientationData(int32 myoId, uint64 timestamp, FQuat quat);
 	virtual void MyoOnOrientationData(int32 myoId, uint64 timestamp, FRotator rot);	//forward rotator version for blueprint events
 	virtual void MyoOnAccelerometerData(int32 myoId, uint64 timestamp, FVector accel);
@@ -71,7 +111,7 @@ public:
 	/** Callable Functions */
 	virtual void MyoVibrateDevice(int32 myoId, int32 type);
 	virtual bool MyoIsHubEnabled();
-	virtual void MyoLatestData(int32 myoId, MyoDeviceData& myoData);
+	virtual MyoDeviceData* MyoLatestData(int32 myoId);
 	virtual void MyoLatestData(	int32 myoId, int32& Pose, FVector& Acceleration, FRotator& Orientation, FVector& Gyro, 
 								int32& Arm, int32& xDirection, 
 								FVector& ArmAcceleration, FRotator& ArmOrientation, FVector& ArmGyro, FRotator& ArmCorrection,
@@ -79,6 +119,9 @@ public:
 	virtual void MyoWhichArm(int32 myoId, int32& Arm);
 	virtual void MyoLeftMyoId(bool& available, int32& myoId);		//convenience function, gets the myoId of the currently myo bound to the left arm
 	virtual void MyoRightMyoId(bool& available, int32& myoId);	//convenience function, gets the myoId of the currently myo bound to the right arm
+	virtual void MyoPrimaryMyoId(bool& available, int32& myoId);
+	virtual int32 MyoMaxId();
+	virtual bool MyoIsValidId(int32 myoId);
 	virtual void MyoConvertToMyoOrientationSpace(FRotator orientation, FRotator& converted);	//if you want to use the raw myo orientation not the UE4 formatted one, run your rotator through this
 	virtual void MyoCalibrateArmOrientation(int32 myoId, FRotator direction);					//Uses current orientation as arm zero point (ask user to point arm to screen and call this)
 

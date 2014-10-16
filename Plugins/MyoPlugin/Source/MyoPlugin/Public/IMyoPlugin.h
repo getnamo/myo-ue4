@@ -45,11 +45,14 @@ public:
 	virtual void MyoTick(float DeltaTime) {};
 
 	virtual void VibrateDevice(int deviceId, int vibrationType) {};
-	virtual void LatestData(int deviceId, MyoDeviceData& data) {};
+	virtual MyoDeviceData* LatestData(int deviceId) { return NULL; };
 	virtual void WhichArm(int deviceId, int& arm){};
 	virtual void LeftMyoId(bool& available, int& deviceId){};
 	virtual void RightMyoId(bool& available, int& deviceId){};
+	virtual void PrimaryMyoId(bool& available, int& deviceId){};
+	virtual void MaxMyoId(int& size){};
 	virtual bool IsHubEnabled() = 0;
+	virtual bool IsValidDeviceId(int myoId) = 0;
 	virtual void CalibrateOrientation(int deviceId, FRotator direction){};
 };
 

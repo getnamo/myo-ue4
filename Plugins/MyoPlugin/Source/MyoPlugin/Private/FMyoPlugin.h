@@ -19,15 +19,17 @@ public:
 
 	/** Optional Public API For direct module bind */
 	void VibrateDevice(int deviceId, int vibrationType);
-	void LatestData(int deviceId, MyoDeviceData& data);
+	MyoDeviceData* LatestData(int deviceId);
 	void WhichArm(int deviceId, int& arm);
 	void LeftMyoId(bool& available, int& deviceId);
 	void RightMyoId(bool& available, int& deviceId);
+	void PrimaryMyoId(bool& available, int& deviceId);
 	bool IsHubEnabled();
 	void CalibrateOrientation(int deviceId, FRotator direction);	//adjusts arm and body input relative to screen forward after this is called.
 	
-	//Internal Utility
-	bool isValidDeviceId(int deviceId);
+	//Utility
+	void MaxMyoId(int& maxId);
+	bool IsValidDeviceId(int myoId);
 
 private:
 	DataCollector *collector;

@@ -1,15 +1,38 @@
 #pragma once
 #include "MyoDelegate.h"
+#include "MyoInterface.h"
 
 //Declares Blueprint event calls, only 
+#include "MyoInterface.h"
 
 class MyoDelegateBlueprint : public MyoDelegate
 {
+public:
+
+	//Component Functions - override these in your classes to expose to blueprint, need different naming however (e.g. drop Myo prefix)
+	virtual UMyoController* MyoPrimaryMyo();
+	virtual UMyoController* MyoLeftMyo();
+	virtual UMyoController* MyoRightMyo();
+	virtual bool MyoIsHubEnabled() override;
+	virtual void MyoConvertToMyoOrientationSpace(FRotator orientation, FRotator& converted) override;
+
+	//Required functions to make plugin work
+	virtual void MyoStartup() override;
+	virtual void MyoShutdown() override;
+	virtual void MyoTick(float DeltaTime) override;
+
+	//If you want an alternate delegate, set it here
+	void SetInterfaceDelegate(UObject* newDelegate);
+protected:
+	UObject* ValidSelfPointer;	//REQUIRED: has to be set before MyoStartup by a UObject subclass.
+
+private:
 	//Delegate function override to passthrough and convert parameters to blueprint
 	virtual void MyoOnConnect(int32 myoId, uint64 timestamp) override;
 	virtual void MyoOnDisconnect(int32 myoId, uint64 timestamp) override;
 	virtual void MyoOnPair(int32 myoId, uint64 timestamp) override;
 	virtual void MyoOnUnpair(int32 myoId, uint64 timestamp) override;
+	virtual void MyoOnArmMoved(int32 myoId, FVector armAcceleration, FRotator armOrientation, FVector armGyro, MyoPose pose);
 	virtual void MyoOnOrientationData(int32 myoId, uint64 timestamp, FRotator rot) override;
 	virtual void MyoOnAccelerometerData(int32 myoId, uint64 timestamp, FVector accel) override;
 	virtual void MyoOnGyroscopeData(int32 myoId, uint64 timestamp, FVector gyro) override;
@@ -18,35 +41,8 @@ class MyoDelegateBlueprint : public MyoDelegate
 	virtual void MyoOnArmLost(int32 myoId, uint64 timestamp) override;
 	virtual void MyoDisabled() override;
 
-public:
-
-	//Blueprint Events, name them the same way with UFunction declaration. These contain no timestamps (unsupported in blueprints due to 64bit value)
-	virtual void OnPose(int32 myoId, int32 pose) = 0;
-	virtual void OnArmRecognized(int32 myoId, int32 arm, int32 direction) = 0;
-	virtual void OnArmLost(int32 myoId) = 0;
-	virtual void OnConnect(int32 myoId) = 0;
-	virtual void OnDisconnect(int32 myoId) = 0;
-	virtual void OnPair(int32 myoId) = 0;
-	//virtual void OnUnpair(int32 myoId) = 0;
-	virtual void OnOrientationData(int32 myoId, FRotator rotation) = 0;
-	virtual void OnAccelerometerData(int32 myoId, FVector acceleration) = 0;
-	virtual void OnGyroscopeData(int32 myoId, FVector gyro) = 0;
-	virtual void DeviceDisabled() = 0;
-
-	//Callable Blueprint Functions
-	virtual void VibrateDevice(int32 myoId, int32 type);
-	virtual bool IsHubEnabled();
-	virtual void LatestData(	int32 myoId, int32& Pose, FVector& Acceleration, FRotator& Orientation, FVector& Gyro,
-								int32& Arm, int32& xDirection,
-								FVector& ArmAcceleration, FRotator& ArmOrientation, FVector& ArmGyro, FRotator& ArmCorrection,
-								FVector& BodySpaceAcceleration);
-	virtual void WhichArm(int32 myoId, int32& Arm);
-	virtual void LeftMyoId(bool& available, int32& myoId);
-	virtual void RightMyoId(bool& available, int32& myoId);
-	virtual void ConvertToMyoOrientationSpace(FRotator orientation, FRotator& converted);
-	virtual void CalibrateArmOrientation(int32 myoId, FRotator direction);
-
-	//Required functions to make plugin work
-	virtual void MyoStartup() override;
-	virtual void MyoTick(float DeltaTime) override;
+	UMyoController* InternalAddController(int newId);
+	UMyoController* InternalControllerForId(int32 myoId);
+	UObject* _interfaceDelegate;
+	TArray<class UMyoController*> _latestFrame;
 };

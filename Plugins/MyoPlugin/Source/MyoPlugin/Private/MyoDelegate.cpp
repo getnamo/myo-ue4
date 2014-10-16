@@ -26,6 +26,7 @@ void MyoDelegate::MyoOnConnect(int32 myoId, uint64 timestamp){}
 void MyoDelegate::MyoOnDisconnect(int32 myoId, uint64 timestamp){}
 void MyoDelegate::MyoOnPair(int32 myoId, uint64 timestamp){}
 void MyoDelegate::MyoOnUnpair(int32 myoId, uint64 timestamp){}
+void MyoDelegate::MyoOnArmMoved(int32 myoId, FVector armAcceleration, FRotator armOrientation, FVector armGyro, MyoPose pose){}
 void MyoDelegate::MyoOnOrientationData(int32 myoId, uint64 timestamp, FQuat quat){}
 void MyoDelegate::MyoOnOrientationData(int32 myoId, uint64 timestamp, FRotator rot){}
 void MyoDelegate::MyoOnAccelerometerData(int32 myoId, uint64 timestamp, FVector accel){}
@@ -56,12 +57,13 @@ bool MyoDelegate::MyoIsHubEnabled()
 	}
 }
 
-void MyoDelegate::MyoLatestData(int32 myoId, MyoDeviceData& myoData)
+MyoDeviceData* MyoDelegate::MyoLatestData(int32 myoId)
 {
 	if (IMyoPlugin::IsAvailable())
 	{
-		IMyoPlugin::Get().LatestData(myoId, myoData);
+		return IMyoPlugin::Get().LatestData(myoId);
 	}
+	return NULL;
 }
 
 void MyoDelegate::MyoLatestData(int32 myoId, int32& Pose, FVector& Acceleration, FRotator& Orientation, FVector& Gyro,
@@ -69,8 +71,7 @@ void MyoDelegate::MyoLatestData(int32 myoId, int32& Pose, FVector& Acceleration,
 					FVector& ArmAcceleration, FRotator& ArmOrientation, FVector& ArmGyro, FRotator& ArmCorrection,
 					FVector& BodySpaceAcceleration){
 
-	MyoDeviceData data;
-	MyoLatestData(myoId, data);
+	MyoDeviceData data = *MyoLatestData(myoId);
 
 	Pose = data.pose;
 	Acceleration = data.acceleration;
@@ -108,6 +109,32 @@ void MyoDelegate::MyoRightMyoId(bool& available, int32& myoId)
 	{
 		IMyoPlugin::Get().RightMyoId(available, myoId);
 	}
+}
+void MyoDelegate::MyoPrimaryMyoId(bool& available, int32& myoId)
+{
+	if (IMyoPlugin::IsAvailable())
+	{
+		IMyoPlugin::Get().PrimaryMyoId(available, myoId);
+	}
+}
+
+int32 MyoDelegate::MyoMaxId()
+{
+	int size = 0;
+	if (IMyoPlugin::IsAvailable())
+	{
+		IMyoPlugin::Get().MaxMyoId(size);
+	}
+	return size;
+}
+
+bool MyoDelegate::MyoIsValidId(int32 myoId)
+{
+	if (IMyoPlugin::IsAvailable())
+	{
+		return IMyoPlugin::Get().IsValidDeviceId(myoId);
+	}
+	return false;
 }
 
 void MyoDelegate::MyoConvertToMyoOrientationSpace(FRotator orientation, FRotator& converted)

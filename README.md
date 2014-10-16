@@ -15,7 +15,7 @@ A Myo Plugin for Unreal Engine 4. Supports all features up to Beta-4 SDK, includ
 (Optional) You can confirm it has successfully loaded by opening the Class Viewer, searching "myo" should show you one actor class added by the plugin called *MyoPluginActor*.
 
 ## Usage ##
-The plugin is designed with an event driven architecture through a delegate interface. You can access device events through the UE4 Input Mapping system, the convenience Blueprint classes provided or through C++. C++ supports both subclassing of provided example class or by inheriting the MyoDelegate, you can extend your own class to support Myo events. Additionally callable functions support polling for latest data.
+The plugin is designed with an event driven architecture through a delegate interface. You can access device events through the UE4 Input Mapping system, adding myo support to any blueprint through the Myo Component and Myo Interface, the convenience Blueprint classes provided, or through C++. C++ supports both subclassing of provided example class or by inheriting the MyoDelegate, you can extend your own class to support Myo events. Additionally callable functions support polling for latest data.
 
 ### Input Mapping ###
 
@@ -28,6 +28,8 @@ The plugin is designed with an event driven architecture through a delegate inte
  7.	Play and test your scaling adjust as needed.
 
 (Optional) Use key and axis events in any input derived class blueprint (such as controller). Note note that any events you override will cause Engine->Input mapping to stop working for that bind.
+
+Note that only the last paired myo emits input mapping events.
 
 ####*Input Axis Events and Buttons Available*####
 
@@ -55,7 +57,59 @@ FKey MyoGyroY;
 FKey MyoGyroZ;
 ```
 
-###Events through Blueprint###
+###Events through Blueprint - Component Based Support for Any Blueprint###
+
+Available since v0.7, this method works by adding a Myo Component and then subscribing to the events through a MyoInterface.
+
+<ol>
+<li> Open the blueprint you wish to receive myo events.</li>
+<li> Add the Myo Component to your blueprint through method 3 or 4.</li>
+<li> (Option 1) Add component directly</li>
+
+<img src="http://i.imgur.com/H3INs0v.png">
+
+<li> (Option 2) Add component through event graph</li>
+
+<img src="http://i.imgur.com/vSXFb7O.png">
+
+<li> To receive events we now have to add an interface. Click on Blueprint Props and under Details find 'Add' under interfaces. Add the MyoInterface.</li>
+
+<img src="http://i.imgur.com/tdPViq8.png">
+
+</ol>
+
+### How to Use
+
+####*Blueprint Events Available*####
+
+<img src="http://i.imgur.com/h49rgju.png">
+
+####*Blueprint Callable Functions Available*####
+
+#####*Myo Component/Convenience Class*#####
+
+<img src="http://i.imgur.com/1kncm52.png">
+
+#####*Myo Controller*#####
+
+<img src="http://i.imgur.com/WU3Dumv.png">
+
+####Example####
+For example you can show a debug myo orientation like this
+
+<img src="http://i.imgur.com/zrd95U2.png">
+
+with a Draw Orientation function like this
+
+<img src="http://i.imgur.com/aNBewsH.png">
+
+which gives the following result in the Rolling template
+
+<img src="http://i.imgur.com/lVdgzWA.png">
+
+Note in this example two myos were paired and the orientation was obtained from calibrated values thus needed a calibration call to each myo when the user was pointing them toward the screen (e.g. point to screen and bind calibration to make fist).
+
+###Events through Blueprint - Convenience Classes###
 1. Select Window->Class Viewer.
 2. Search for "MyoPluginActor"
 3. Right click the actor and Create a new Blueprint e.g. "MyoPluginActorBP"
@@ -68,32 +122,7 @@ e.g. If you want to get the acceleration data from your Myo/s add the Event "On 
 
 Compile and Play to see the accelerometer data stream as printed output after the myo/s automatically connect and pair.
 
-####*Blueprint Events Available*####
 
-```
-void OnPose(int32 myoId, int32 timestamp, int32 pose);
-void OnArmRecognized(int32 myoId, int32 timestamp, int32 arm, int32 direction);
-void OnArmLost(int32 myoId, int32 timestamp);
-void OnConnect(int32 myoId, int32 timestamp);
-void OnDisconnect(int32 myoId, int32 timestamp);
-void OnPair(int32 myoId, int32 timestamp);
-void OnOrientationData(int32 myoId, int32 timestamp, FRotator orientation);
-void OnAccelerometerData(int32 myoId, int32 timestamp, FVector acceleration);
-void OnGyroscopeData(int32 myoId, int32 timestamp, FVector gyro);
-void DeviceDisabled();
-```
-
-####*Blueprint Callable Functions Available*####
-
-```
-void VibrateDevice(int32 myoId, int32 type);
-bool IsHubEnabled();
-void LatestData(int32 myoId, int32& pose, FVector& Acceleration, FRotator& Rotation, FVector& Gyro, int32& Arm);
-void WhichArm(int32 myoId, int32& Arm);
-void LeftMyoId(bool& available, int32& myoId);
-void RightMyoId(bool& available, int32& myoId);
-void ConvertToRawOrientation(FRotator orientation, FRotator& converted);
-```
 
 ###Events through C++###
 
@@ -139,15 +168,13 @@ defined in MyoDelegate.h
 
 ###Calibrated Values###
 
-Not fully supported for now, but you can use calibrated Orientation and acceleration after calling ```void MyoCalibrateArmOrientation(int32 myoId);``` while pointing arm in the forward (toward screen) direction, without calibration, these emit raw values.
+Fully supported. Call ```Calibrate Myo Orientation``` on your Myo Controller when facing toward screen. All Arm Moved events from then on will emit Arm space orientation and acceleration.
 
-Full support coming in next update, use with caution.
+<img src="http://i.imgur.com/pWXZhmW.png">
 
 ##Bugs and Todo##
 * Hub runs on the main thread, adds 1ms to render loop. Should be separated into its own thread or reduced to near 0ms.
-* Only the first paired is Myo supported for Input Mapping, will need some thought into how to cleanly emit a second Myo.
 * Platforms apart from Windows are untested
-* Calibrated Values need to be fully supported, Orientation still lacking multi-myo support, Acceleration and Gyro calibrated values are not currently correctly implemented.
 * While Plugin does support hot plugging Myos (turning them on/off, running out of range), it does not support hot plugging of the bluetooth hub. This is a limitation of the Myo SDK. If you run your game with the hub disabled (e.g. bluetooth usb unplugged), you will receive the event *MyoDisabled()* and no further notifications. Plugging in the bluetooth hub and restarting the game will re-enable it.
 
 

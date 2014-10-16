@@ -1,19 +1,15 @@
 #pragma once
 
-#include "GameFramework/Actor.h"
+#include "MyoPluginPrivatePCH.h"
 #include "MyoDelegateBlueprint.h"
-#include "MyoPluginActor.generated.h"
+#include "MyoComponent.generated.h"
 
-
-/**
- * Placeable Actor that receives Myo input and pose updates. 
- * Use or Extend to receive event notifications.
- */
-UCLASS()
-class AMyoPluginActor : public AActor, public MyoDelegateBlueprint, public IMyoInterface
+UCLASS(ClassGroup="Input Controller", meta=(BlueprintSpawnableComponent))
+class UMyoComponent : public UActorComponent, public MyoDelegateBlueprint
 {
 	GENERATED_UCLASS_BODY()
 
+public:
 
 	//Callable Blueprint functions - Need to be defined for direct access
 	/**
@@ -36,7 +32,7 @@ class AMyoPluginActor : public AActor, public MyoDelegateBlueprint, public IMyoI
 	*/
 	UFUNCTION(BlueprintCallable, Category = MyoFunctions)
 	UMyoController* RightMyo();
-
+	
 	/**
 	*	Obtain controller pointer to any last paired myo, if you only have one myo and just want the primary myo, use this.
 	*/
@@ -49,11 +45,7 @@ class AMyoPluginActor : public AActor, public MyoDelegateBlueprint, public IMyoI
 	UFUNCTION(BlueprintCallable, Category = MyoUtilityFunctions)
 	void ConvertToMyoOrientationSpace(FRotator orientation, FRotator& converted);
 
-
-	//Required for plugin startup, end, and forwarding Tick to the Myo Delegate.
-	virtual void BeginPlay() override;
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-	virtual void Tick(float DeltaTime) override;
+	virtual void OnRegister() override;
+	virtual void OnUnregister() override;
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
 };
-
-
