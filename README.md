@@ -22,7 +22,7 @@ The plugin is designed with an event driven architecture through a delegate inte
 ### Input Mapping ###
 
  1.	For a good example start with a template project.
- 2.	Use the MyoPluginController or the MyoPluginActor (NB the convenience actor needs to be placed)
+ 2.	Use the MyoPluginController or the MyoPluginActor (NB the convenience actor needs to be placed), or any blueprint with the Myo Component attached.
  3.	Select Edit->Project Settings.
  4.	Select Engine->Input
  5.	Under Action Mappings and Axis Mappings expand the category you wish to add controller movement to. For example if you want to add Forward motion in the standard 3rd person template, click the + sign in MoveForward.
