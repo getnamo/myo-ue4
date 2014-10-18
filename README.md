@@ -194,6 +194,16 @@ find <i>WindowsNoEditor/MyoPluginTest</i>, this is your packaged project root. A
 * While Plugin does support hot plugging Myos (turning them on/off, running out of range), it does not support hot plugging of the bluetooth hub. This is a limitation of the Myo SDK. If you run your game with the hub disabled (e.g. bluetooth usb unplugged), you will receive the event *MyoDisabled()* and no further notifications. Plugging in the bluetooth hub and restarting the game will re-enable it.
 
 
-##Credits and Misc##
-* Bound to Thalmic Beta-4 SDK
+##Credits and License##
 * Plugin by Getnamo, Myo SDK provided by Thalmic Labs
+* Bound to Thalmic Myo SDK Beta-5
+* Point any questions and queries to the [plugin unreal engine thread](https://forums.unrealengine.com/showthread.php?37876-Plugin-Myo)
+
+
+<a rel="license" href="http://creativecommons.org/publicdomain/mark/1.0/">
+<img src="http://i.creativecommons.org/p/mark/1.0/88x31.png"
+     style="border-style: none;" alt="Public Domain Mark" />
+</a>
+<br />
+
+Anything not covered by [Myo SDK](https://developer.thalmic.com/docs/api_reference/platform/legal-notices.html) and [Unreal Engine EULA](https://www.unrealengine.com/eula) in <span property="dct:title">Myo UE4 Plugin</span> is free of known copyright restrictions.
