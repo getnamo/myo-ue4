@@ -82,6 +82,16 @@ Available since v0.7, this method works by adding a Myo Component and then subsc
 
 ### How to Use
 
+####Calibration
+If you're using only delta values, you may wish to use the raw values instead. If you would like to use absolute orientations (e.g. copying an arm orientation, or getting acceleration in component space) however you may wish to use the calibrated arm space values.
+
+Myo reports values in myo space, which may be rotated around your wrist and has no fixed reference to which direction your screen is. In order to use arm space data emitted from On Arm Moved correctly, your myo should be calibrated. This is done by pointing your myo forward toward your screen or another known reference direction (adjustable in the function) and calling Calibrate Arm Orientation on the myo you wish to calibrate. After this is done all your arm space orientation, gyro, and acceleration data will be automatically rotated to compensate for any wrist roll offset (myo can be arbitrarily rotated around your wrist), yaw offset (difference between screen and magnetic north) and you can safely use these outputs to drive your 3d data in component space.
+
+example of how to calibrate:
+<img src="http://i.imgur.com/yQcd5NH.png">
+
+Note that you should perform a 'Sync Gesture' first in order to establish which arm the myo is on and which direction it is facing (toward wrist/arm), calibration picks this up and automatically adjusts for it as well, but if your arm isn't detected (synced), your movements may be inverse if you have the device on the opposite direction compared to default.
+
 ####*Blueprint Events Available*####
 
 <img src="http://i.imgur.com/h49rgju.png">
