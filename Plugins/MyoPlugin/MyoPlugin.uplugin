@@ -3,7 +3,7 @@
 	
 	"FriendlyName" : "Myo Plugin",
 	"Version" : 1,
-	"VersionName" : "0.7.1",
+	"VersionName" : "0.7.2",
 	"CreatedBy" : "Getnamo",
 	"CreatedByURL" : "http://syntheticinsights.com",
 	"EngineVersion" : 1579795,
@@ -14,7 +14,8 @@
 	[
 		{
 			"Name" : "MyoPlugin",
-			"Type" : "Runtime"
+			"Type" : "Runtime",
+			"WhitelistPlatforms" : [ "Win64", "Win32" ]
 		}
 	]
 }
