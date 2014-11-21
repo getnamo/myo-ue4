@@ -52,15 +52,15 @@ void MyoDelegateBlueprint::MyoOnPose(int32 myoId, uint64 timestamp, int32 pose)
 	if(MyoIsValidId(myoId))
 		IMyoInterface::Execute_OnPose(_interfaceDelegate, InternalControllerForId(myoId), (MyoPose)pose);
 }
-void MyoDelegateBlueprint::MyoOnArmRecognized(int32 myoId, uint64 timestamp, int32 arm, int32 direction)
+void MyoDelegateBlueprint::MyoOnArmSync(int32 myoId, uint64 timestamp, int32 arm, int32 direction)
 {
 	if(MyoIsValidId(myoId))
-		IMyoInterface::Execute_OnArmRecognized(_interfaceDelegate, InternalControllerForId(myoId), (MyoArm) arm, (MyoArmDirection) direction);
+		IMyoInterface::Execute_OnArmSync(_interfaceDelegate, InternalControllerForId(myoId), (MyoArm)arm, (MyoArmDirection)direction);
 }
-void MyoDelegateBlueprint::MyoOnArmLost(int32 myoId, uint64 timestamp)
+void MyoDelegateBlueprint::MyoOnArmUnsync(int32 myoId, uint64 timestamp)
 {
 	if(MyoIsValidId(myoId))
-		IMyoInterface::Execute_OnArmLost(_interfaceDelegate, InternalControllerForId(myoId));
+		IMyoInterface::Execute_OnArmUnsync(_interfaceDelegate, InternalControllerForId(myoId));
 }
 void MyoDelegateBlueprint::MyoDisabled()
 {

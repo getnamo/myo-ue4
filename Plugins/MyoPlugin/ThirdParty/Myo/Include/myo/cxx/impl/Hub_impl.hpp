@@ -134,13 +134,13 @@ void Hub::onDeviceEvent(libmyo_event_t event)
         case libmyo_event_disconnected:
             listener->onDisconnect(myo, time);
             break;
-        case libmyo_event_arm_recognized:
-            listener->onArmRecognized(myo, time,
-                                      static_cast<Arm>(libmyo_event_get_arm(event)),
-                                      static_cast<XDirection>(libmyo_event_get_x_direction(event)));
+        case libmyo_event_arm_synced:
+            listener->onArmSync(myo, time,
+                                static_cast<Arm>(libmyo_event_get_arm(event)),
+                                static_cast<XDirection>(libmyo_event_get_x_direction(event)));
             break;
-        case libmyo_event_arm_lost:
-            listener->onArmLost(myo, time);
+        case libmyo_event_arm_unsynced:
+            listener->onArmUnsync(myo, time);
             break;
         case libmyo_event_orientation:
             listener->onOrientationData(myo, time,

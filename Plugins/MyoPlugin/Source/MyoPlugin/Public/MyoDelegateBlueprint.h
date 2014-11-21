@@ -37,8 +37,8 @@ private:
 	virtual void MyoOnAccelerometerData(int32 myoId, uint64 timestamp, FVector accel) override;
 	virtual void MyoOnGyroscopeData(int32 myoId, uint64 timestamp, FVector gyro) override;
 	virtual void MyoOnPose(int32 myoId, uint64 timestamp, int32 pose) override;
-	virtual void MyoOnArmRecognized(int32 myoId, uint64 timestamp, int32 arm, int32 direction) override;
-	virtual void MyoOnArmLost(int32 myoId, uint64 timestamp) override;
+	virtual void MyoOnArmSync(int32 myoId, uint64 timestamp, int32 arm, int32 direction) override;
+	virtual void MyoOnArmUnsync(int32 myoId, uint64 timestamp) override;
 	virtual void MyoDisabled() override;
 
 	UMyoController* InternalAddController(int newId);

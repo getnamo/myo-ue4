@@ -3,10 +3,10 @@
 	
 	"FriendlyName" : "Myo Plugin",
 	"Version" : 1,
-	"VersionName" : "0.7.2",
+	"VersionName" : "0.7.3",
 	"CreatedBy" : "Getnamo",
 	"CreatedByURL" : "http://syntheticinsights.com",
-	"EngineVersion" : 1579795,
+	"EngineVersion" : "4.5.0",
 	"Description" : "Unofficial Plugin for Thalmic Myo.",
 	"Category" : "Input.Controller",
 	

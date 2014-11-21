@@ -89,14 +89,14 @@ public:
 	* @param direction (out) 0 = toward wrist, 1 = toward elbow, 2 = unknown
 	*/
 	UFUNCTION(BlueprintImplementableEvent, Category = MyoEvents)
-	void OnArmRecognized(UMyoController* myo, MyoArm arm, MyoArmDirection direction);
+	void OnArmSync(UMyoController* myo, MyoArm arm, MyoArmDirection direction);
 
 	/**
 	* Called when a myo has been removed from arm.
 	* @param myo (out) pointer to emitted myo controller class, branch to read other data.
 	*/
 	UFUNCTION(BlueprintImplementableEvent, Category = MyoEvents)
-	void OnArmLost(UMyoController* myo);
+	void OnArmUnsync(UMyoController* myo);
 
 	/**
 	* Called when a problem occurs such as bluetooth usb device not being detected (unplugged).

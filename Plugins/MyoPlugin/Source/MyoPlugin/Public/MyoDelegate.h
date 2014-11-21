@@ -101,8 +101,8 @@ public:
 	virtual void MyoOnAccelerometerData(int32 myoId, uint64 timestamp, FVector accel);
 	virtual void MyoOnGyroscopeData(int32 myoId, uint64 timestamp, FVector gyro);
 	virtual void MyoOnPose(int32 myoId, uint64 timestamp, int32 pose);
-	virtual void MyoOnArmRecognized(int32 myoId, uint64 timestamp, int32 arm, int32 direction);
-	virtual void MyoOnArmLost(int32 myoId, uint64 timestamp);
+	virtual void MyoOnArmSync(int32 myoId, uint64 timestamp, int32 arm, int32 direction);
+	virtual void MyoOnArmUnsync(int32 myoId, uint64 timestamp);
 
 	/*Myo being disabled can occur if we do not have our bluetooth device in before launching app, 
 	 in that case MyoDisabled() will emit.*/

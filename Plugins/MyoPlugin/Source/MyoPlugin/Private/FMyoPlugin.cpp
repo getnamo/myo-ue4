@@ -186,7 +186,7 @@ public:
 		}
 	}
 
-	void onArmRecognized(myo::Myo *myo, uint64_t timestamp, myo::Arm arm, myo::XDirection xDirection){
+	void onArmSync(myo::Myo *myo, uint64_t timestamp, myo::Arm arm, myo::XDirection xDirection){
 		int myoIndex = myoIndexForMyo(myo);
 		m_data[myoIndex].arm = arm;
 		m_data[myoIndex].xDirection = xDirection;
@@ -199,10 +199,10 @@ public:
 
 		if (myoDelegate)
 		{
-			myoDelegate->MyoOnArmRecognized(identifyMyo(myo), timestamp, arm, xDirection);
+			myoDelegate->MyoOnArmSync(identifyMyo(myo), timestamp, arm, xDirection);
 		}
 	}
-	void onArmLost(myo::Myo *myo, uint64_t timestamp){
+	void onArmUnsync(myo::Myo *myo, uint64_t timestamp){
 		int myoIndex = myoIndexForMyo(myo);
 		//bool armJustLost = false;
 		//int old = m_data[myoIndex].arm;
@@ -221,7 +221,7 @@ public:
 
 		if (myoDelegate)// && armJustLost)
 		{
-			myoDelegate->MyoOnArmLost(identifyMyo(myo), timestamp);
+			myoDelegate->MyoOnArmUnsync(identifyMyo(myo), timestamp);
 		}
 	}
 

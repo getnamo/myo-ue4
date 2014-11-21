@@ -32,8 +32,8 @@ void MyoDelegate::MyoOnOrientationData(int32 myoId, uint64 timestamp, FRotator r
 void MyoDelegate::MyoOnAccelerometerData(int32 myoId, uint64 timestamp, FVector accel){}
 void MyoDelegate::MyoOnGyroscopeData(int32 myoId, uint64 timestamp, FVector gyro){}
 void MyoDelegate::MyoOnPose(int32 myoId, uint64 timestamp, int32 pose){}
-void MyoDelegate::MyoOnArmRecognized(int32 myoId, uint64 timestamp, int32 arm, int32 direction){}
-void MyoDelegate::MyoOnArmLost(int32 myoId, uint64 timestamp){}
+void MyoDelegate::MyoOnArmSync(int32 myoId, uint64 timestamp, int32 arm, int32 direction){}
+void MyoDelegate::MyoOnArmUnsync(int32 myoId, uint64 timestamp){}
 
 void MyoDelegate::MyoDisabled(){}
 
