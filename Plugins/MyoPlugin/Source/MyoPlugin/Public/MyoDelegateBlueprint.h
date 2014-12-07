@@ -2,7 +2,8 @@
 #include "MyoDelegate.h"
 #include "MyoInterface.h"
 
-//Declares Blueprint event calls, only 
+//Declares Blueprint event calls, used for the Myo main component, other functions may be called from the MyoController
+
 #include "MyoInterface.h"
 
 class MyoDelegateBlueprint : public MyoDelegate
@@ -13,6 +14,7 @@ public:
 	virtual UMyoController* MyoPrimaryMyo();
 	virtual UMyoController* MyoLeftMyo();
 	virtual UMyoController* MyoRightMyo();
+	virtual void MyoSetLockingPolicy(MyoLockingPolicy policy);
 	virtual bool MyoIsHubEnabled() override;
 	virtual void MyoConvertToMyoOrientationSpace(FRotator orientation, FRotator& converted) override;
 
@@ -27,7 +29,7 @@ protected:
 	UObject* ValidSelfPointer;	//REQUIRED: has to be set before MyoStartup by a UObject subclass.
 
 private:
-	//Delegate function override to passthrough and convert parameters to blueprint
+	//Delegate function override to pass-through and convert parameters to blueprint
 	virtual void MyoOnConnect(int32 myoId, uint64 timestamp) override;
 	virtual void MyoOnDisconnect(int32 myoId, uint64 timestamp) override;
 	virtual void MyoOnPair(int32 myoId, uint64 timestamp) override;

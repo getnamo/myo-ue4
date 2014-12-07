@@ -2,8 +2,8 @@
     "FileVersion" : 3,
 	
 	"FriendlyName" : "Myo Plugin",
-	"Version" : 1,
-	"VersionName" : "0.7.3",
+	"Version" : 2,
+	"VersionName" : "0.7.4",
 	"CreatedBy" : "Getnamo",
 	"CreatedByURL" : "http://syntheticinsights.com",
 	"EngineVersion" : "4.5.0",

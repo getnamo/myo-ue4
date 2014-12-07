@@ -19,8 +19,7 @@ public:
         waveIn        = libmyo_pose_wave_in,
         waveOut       = libmyo_pose_wave_out,
         fingersSpread = libmyo_pose_fingers_spread,
-        reserved1     = libmyo_pose_reserved1,
-        thumbToPinky  = libmyo_pose_thumb_to_pinky,
+        doubleTap     = libmyo_pose_double_tap,
         unknown       = libmyo_pose_unknown
     };
 

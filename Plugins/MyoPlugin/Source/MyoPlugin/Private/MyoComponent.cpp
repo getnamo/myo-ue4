@@ -4,7 +4,7 @@
 #include "Engine.h"
 #include "CoreUObject.h"
 
-UMyoComponent::UMyoComponent(const FPostConstructInitializeProperties &init) : UActorComponent(init)
+UMyoComponent::UMyoComponent(const FObjectInitializer &init) : UActorComponent(init)
 {
 	bWantsInitializeComponent = true;
 	bAutoActivate = true;
@@ -40,6 +40,11 @@ void UMyoComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,
 bool UMyoComponent::IsHubEnabled()
 {
 	return MyoIsHubEnabled();
+}
+
+void UMyoComponent::SetLockingPolicy(MyoLockingPolicy policy)
+{
+	MyoSetLockingPolicy(policy);
 }
 
 UMyoController* UMyoComponent::LeftMyo()

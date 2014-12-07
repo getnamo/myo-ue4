@@ -30,7 +30,9 @@ public:
 	//Utility
 	void MaxMyoId(int& maxId);
 	bool IsValidDeviceId(int myoId);
-
+	void SetLockingPolicy(MyoLockingPolicy policy);
+	void UnlockMyo(int deviceId, MyoUnlockType type);
+	void LockMyo(int deviceId);
 private:
 	DataCollector *collector;
 };

@@ -4,7 +4,8 @@
 #include "FMyoPlugin.h"
 #include "MyoDelegate.h"
 #include "MyoDelegateBlueprint.h"
-#include "Slate.h"
+#include "MyoHubWorker.h"
+#include "SlateBasics.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -13,12 +14,48 @@
 
 IMPLEMENT_MODULE(FMyoPlugin, MyoPlugin)
 
+#pragma warning( disable:4273 )
+
 #define LOCTEXT_NAMESPACE "MyoPlugin"
 #define ORIENTATION_SCALE_PITCH 0.01111111111	//1/90
 #define ORIENTATION_SCALE_YAWROLL 0.00555555555 //1/180
 #define GYRO_SCALE 0.02222222222				//1/45
 
+#define PLUGIN_VERSION "0.7.4"
+
 //Private API - This is where the magic happens
+
+//UE v4.6 IM event wrappers
+bool EmitKeyUpEventForKey(FKey key, int32 user, bool repeat)
+{
+	FKeyEvent KeyEvent(key, FSlateApplication::Get().GetModifierKeys(), user, repeat, 0, 0);
+	return FSlateApplication::Get().ProcessKeyUpEvent(KeyEvent);
+}
+
+bool EmitKeyDownEventForKey(FKey key, int32 user, bool repeat)
+{
+	FKeyEvent KeyEvent(key, FSlateApplication::Get().GetModifierKeys(), user, repeat, 0, 0);
+	return FSlateApplication::Get().ProcessKeyDownEvent(KeyEvent);
+}
+
+bool EmitAnalogInputEventForKey(FKey key, float value, int32 user)
+{
+	FAnalogInputEvent AnalogInputEvent(key, FSlateApplication::Get().GetModifierKeys(), user, false, 0, 0, value);
+	return FSlateApplication::Get().ProcessAnalogInputEvent(AnalogInputEvent);
+}
+
+FText FAnalogInputEvent::ToText() const
+{
+	return NSLOCTEXT("Joystick Plugin Events", "Analog", "Text");
+}
+FText FInputEvent::ToText() const
+{
+	return NSLOCTEXT("Joystick Plugin Events", "Input", "Text");
+}
+FText FKeyEvent::ToText() const
+{
+	return NSLOCTEXT("Joystick Plugin Events", "Key", "Text");
+}
 
 //String Conversion to UE4
 TCHAR* tcharFromStdString(std::string str){
@@ -56,7 +93,7 @@ FVector convertVectorToUE(FVector rawAcceleration)
 FVector convertAccelerationToBodySpace(FVector armAcceleration, FRotator orientation, FRotator armCorrection, myo::XDirection direction)
 {
 	float directionModifier = 1.f;
-	//something wrong here, also make sure this is applie to the arm space correction as well
+	//something wrong here, also make sure this is applied to the arm space correction as well
 	if (direction == myo::xDirectionTowardWrist){
 		directionModifier = -1.f;
 	}
@@ -101,71 +138,72 @@ public:
 		ShutDown();
 	}
 
-	//Inputmapping
+	//Input Mapping
 	void PressPose(myo::Pose pose){
+
 		if (pose == myo::Pose::rest)
 		{
-			FSlateApplication::Get().OnControllerButtonPressed(EKeysMyo::MyoPoseRest, 0, 0);
+			EmitKeyDownEventForKey(EKeysMyo::MyoPoseRest, 0, 0);
 		}
 		else if (pose == myo::Pose::fist)
 		{
-			FSlateApplication::Get().OnControllerButtonPressed(EKeysMyo::MyoPoseFist, 0, 0);
+			EmitKeyDownEventForKey(EKeysMyo::MyoPoseFist, 0, 0);
 		}
 		else if (pose == myo::Pose::waveIn)
 		{
-			FSlateApplication::Get().OnControllerButtonPressed(EKeysMyo::MyoPoseWaveIn, 0, 0);
+			EmitKeyDownEventForKey(EKeysMyo::MyoPoseWaveIn, 0, 0);
 		}
 		else if (pose == myo::Pose::waveOut)
 		{
-			FSlateApplication::Get().OnControllerButtonPressed(EKeysMyo::MyoPoseWaveOut, 0, 0);
+			EmitKeyDownEventForKey(EKeysMyo::MyoPoseWaveOut, 0, 0);
 		}
 		else if (pose == myo::Pose::fingersSpread)
 		{
-			FSlateApplication::Get().OnControllerButtonPressed(EKeysMyo::MyoPoseFingersSpread, 0, 0);
+			EmitKeyDownEventForKey(EKeysMyo::MyoPoseFingersSpread, 0, 0);
 		}
-		else if (pose == myo::Pose::thumbToPinky)
+		else if (pose == myo::Pose::doubleTap)
 		{
-			FSlateApplication::Get().OnControllerButtonPressed(EKeysMyo::MyoPoseThumbToPinky, 0, 0);
+			EmitKeyDownEventForKey(EKeysMyo::MyoPoseDoubleTap, 0, 0);
 		}
 		else
 		{//unknown
-			FSlateApplication::Get().OnControllerButtonPressed(EKeysMyo::MyoPoseUnknown, 0, 0);
+			EmitKeyDownEventForKey(EKeysMyo::MyoPoseUnknown, 0, 0);
 		}
 	}
 	void ReleasePose(myo::Pose pose){
 		if (pose == myo::Pose::rest)
 		{
-			FSlateApplication::Get().OnControllerButtonReleased(EKeysMyo::MyoPoseRest, 0, 0);
+			EmitKeyUpEventForKey(EKeysMyo::MyoPoseRest, 0, 0);
 		}
 		else if (pose == myo::Pose::fist)
 		{
-			FSlateApplication::Get().OnControllerButtonReleased(EKeysMyo::MyoPoseFist, 0, 0);
+			EmitKeyUpEventForKey(EKeysMyo::MyoPoseFist, 0, 0);
 		}
 		else if (pose == myo::Pose::waveIn)
 		{
-			FSlateApplication::Get().OnControllerButtonReleased(EKeysMyo::MyoPoseWaveIn, 0, 0);
+			EmitKeyUpEventForKey(EKeysMyo::MyoPoseWaveIn, 0, 0);
 		}
 		else if (pose == myo::Pose::waveOut)
 		{
-			FSlateApplication::Get().OnControllerButtonReleased(EKeysMyo::MyoPoseWaveOut, 0, 0);
+			EmitKeyUpEventForKey(EKeysMyo::MyoPoseWaveOut, 0, 0);
 		}
 		else if (pose == myo::Pose::fingersSpread)
 		{
-			FSlateApplication::Get().OnControllerButtonReleased(EKeysMyo::MyoPoseFingersSpread, 0, 0);
+			EmitKeyUpEventForKey(EKeysMyo::MyoPoseFingersSpread, 0, 0);
 		}
-		else if (pose == myo::Pose::thumbToPinky)
+		else if (pose == myo::Pose::doubleTap)
 		{
-			FSlateApplication::Get().OnControllerButtonReleased(EKeysMyo::MyoPoseThumbToPinky, 0, 0);
+			EmitKeyUpEventForKey(EKeysMyo::MyoPoseDoubleTap, 0, 0);
 		}
 		else
 		{//unknown
-			FSlateApplication::Get().OnControllerButtonReleased(EKeysMyo::MyoPoseUnknown, 0, 0);
+			EmitKeyUpEventForKey(EKeysMyo::MyoPoseUnknown, 0, 0);
 		}
 	}
 
 	void onConnect(myo::Myo *myo, uint64_t timestamp,
 		myo::FirmwareVersion firmwareVersion){
-		UE_LOG(LogClass, Log, TEXT("Myo %d  has connected."), identifyMyo(myo));
+		UE_LOG(MyoPluginLog, Log, TEXT("Myo %d  has connected."), identifyMyo(myo));
 		if (myoDelegate)
 		{
 			myoDelegate->MyoOnConnect(identifyMyo(myo), timestamp);
@@ -173,7 +211,7 @@ public:
 	}
 
 	void onDisconnect(myo::Myo *myo, uint64_t timestamp){
-		UE_LOG(LogClass, Log, TEXT("Myo %d  has disconnected."), identifyMyo(myo));
+		UE_LOG(MyoPluginLog, Log, TEXT("Myo %d  has disconnected."), identifyMyo(myo));
 		if (myoDelegate)
 		{
 			myoDelegate->MyoOnDisconnect(identifyMyo(myo), timestamp);
@@ -241,6 +279,9 @@ public:
 			data.xDirection = myo::xDirectionUnknown;
 			data.arm = myo::armUnknown;
 
+			if (correctionAvailable)
+				data.armSpaceCorrection = armSpaceCorrection;
+
 			m_data.push_back(data);
 		}
 
@@ -284,9 +325,9 @@ public:
 			if (myoIsValidForInputMapping(myo))
 			{
 				//Scale input mapping to -1.0-> 1.0 range
-				FSlateApplication::Get().OnControllerAnalog(EKeysMyo::MyoOrientationPitch, 0, m_data[myoIndex].armOrientation.Pitch * ORIENTATION_SCALE_PITCH);
-				FSlateApplication::Get().OnControllerAnalog(EKeysMyo::MyoOrientationYaw, 0, m_data[myoIndex].armOrientation.Yaw * ORIENTATION_SCALE_YAWROLL);
-				FSlateApplication::Get().OnControllerAnalog(EKeysMyo::MyoOrientationRoll, 0, m_data[myoIndex].armOrientation.Roll * ORIENTATION_SCALE_YAWROLL);
+				EmitAnalogInputEventForKey(EKeysMyo::MyoOrientationPitch, m_data[myoIndex].armOrientation.Pitch * ORIENTATION_SCALE_PITCH, 0);
+				EmitAnalogInputEventForKey(EKeysMyo::MyoOrientationYaw, m_data[myoIndex].armOrientation.Yaw * ORIENTATION_SCALE_YAWROLL, 0);
+				EmitAnalogInputEventForKey(EKeysMyo::MyoOrientationRoll, m_data[myoIndex].armOrientation.Roll * ORIENTATION_SCALE_YAWROLL, 0);
 			}
 		}
 	}
@@ -316,9 +357,9 @@ public:
 			if (myoIsValidForInputMapping(myo))
 			{
 				//No scaling needed, 1.0 = 1g.
-				FSlateApplication::Get().OnControllerAnalog(EKeysMyo::MyoAccelerationX, 0, m_data[myoIndex].armAcceleration.X);
-				FSlateApplication::Get().OnControllerAnalog(EKeysMyo::MyoAccelerationY, 0, m_data[myoIndex].armAcceleration.Y);
-				FSlateApplication::Get().OnControllerAnalog(EKeysMyo::MyoAccelerationZ, 0, m_data[myoIndex].armAcceleration.Z);
+				EmitAnalogInputEventForKey(EKeysMyo::MyoAccelerationX, m_data[myoIndex].armAcceleration.X, 0);
+				EmitAnalogInputEventForKey(EKeysMyo::MyoAccelerationY, m_data[myoIndex].armAcceleration.Y, 0);
+				EmitAnalogInputEventForKey(EKeysMyo::MyoAccelerationZ, m_data[myoIndex].armAcceleration.Z, 0);
 			}
 		}
 	}
@@ -340,11 +381,24 @@ public:
 			if (myoIsValidForInputMapping(myo))
 			{
 				//scaled down by 1/45. Fast flicks should be close to 1.0, slower gyro motions may need scaling up if used in input mapping
-				FSlateApplication::Get().OnControllerAnalog(EKeysMyo::MyoGyroX, 0, m_data[myoIndex].armGyro.X * GYRO_SCALE);
-				FSlateApplication::Get().OnControllerAnalog(EKeysMyo::MyoGyroY, 0, m_data[myoIndex].armGyro.Y * GYRO_SCALE);
-				FSlateApplication::Get().OnControllerAnalog(EKeysMyo::MyoGyroZ, 0, m_data[myoIndex].armGyro.Z * GYRO_SCALE);
+				EmitAnalogInputEventForKey(EKeysMyo::MyoGyroX, m_data[myoIndex].armGyro.X * GYRO_SCALE, 0);
+				EmitAnalogInputEventForKey(EKeysMyo::MyoGyroY, m_data[myoIndex].armGyro.Y * GYRO_SCALE, 0);
+				EmitAnalogInputEventForKey(EKeysMyo::MyoGyroZ, m_data[myoIndex].armGyro.Z * GYRO_SCALE, 0);
 			}
 		}
+	}
+
+	// onUnlock() is called whenever Myo has become unlocked, and will start delivering pose events.
+	void onUnlock(myo::Myo* myo, uint64_t timestamp)
+	{
+		int myoIndex = myoIndexForMyo(myo);
+		m_data[myoIndex].isLocked = false;
+	}
+	// onLock() is called whenever Myo has become locked. No pose events will be sent until the Myo is unlocked again.
+	void onLock(myo::Myo* myo, uint64_t timestamp)
+	{
+		int myoIndex = myoIndexForMyo(myo);
+		m_data[myoIndex].isLocked = true;
 	}
 
 	// Called whenever the Myo detects that the person wearing it has changed their pose, for example,
@@ -352,9 +406,10 @@ public:
 	void onPose(myo::Myo* myo, uint64_t timestamp, myo::Pose pose){
 		int myoIndex = myoIndexForMyo(myo);
 		m_data[myoIndex].pose = (int)pose.type();
+		
 
 		//debug
-		UE_LOG(LogClass, Log, TEXT("Myo %d switched to pose %s."), identifyMyo(myo), tcharFromStdString(pose.toString()));
+		UE_LOG(MyoPluginLog, Log, TEXT("Myo %d switched to pose %s."), identifyMyo(myo), tcharFromStdString(pose.toString()));
 		//FString debugmsg = FString::Printf(TEXT("Myo %d switched to pose %s."), identifyMyo(myo), tcharFromStdString(pose.toString()));
 		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, debugmsg);
 
@@ -411,14 +466,35 @@ public:
 
 	void StartListening(){
 		if (!Listening){
-			hub->addListener(this);
+			hub->addListener(this);	//for single threaded listener needs to be added locally
 			Listening = true;
 		}
 	}
 	void StopListening(){
 		if (Listening){
-			hub->removeListener(this);
+			hub->removeListener(this);	//for single threaded listener needs to be removed locally
 			Listening = false;
+		}
+	}
+
+	void UnlockHoldEachMyo()
+	{
+		for (size_t i = 0; i < knownMyos.size(); ++i) {
+			// If two Myo pointers compare equal, they refer to the same Myo device.
+			myo::Myo* myo = knownMyos[i];
+			if (myo) {
+				myo->unlock(myo::Myo::unlockHold);
+			}
+		}
+	}
+	void LockEachMyo()
+	{
+		for (size_t i = 0; i < knownMyos.size(); ++i) {
+			// If two Myo pointers compare equal, they refer to the same Myo device.
+			myo::Myo* myo = knownMyos[i];
+			if (myo) {
+				myo->lock();
+			}
 		}
 	}
 	//The plugin may live longer than the playing session, run() causes a backlog of events to stream, to fix this we will close it in between sessions
@@ -428,15 +504,18 @@ public:
 		{
 			try{
 				hub = new myo::Hub("com.plugin.unrealengine4");
-				UE_LOG(LogClass, Log, TEXT("Myo Hub Initialized."));
+				UE_LOG(MyoPluginLog, Log, TEXT("Myo Hub Initialized."));
 			}
 			catch (const std::exception& e) {
-				UE_LOG(LogClass, Error, TEXT("Myo did not initialize correctly, check if Myo Connect is running!"));
-				UE_LOG(LogClass, Error, TEXT("Error: %s"), e.what());
+				UE_LOG(MyoPluginLog, Error, TEXT("Myo did not initialize correctly, check if Myo Connect is running!"));
+				UE_LOG(MyoPluginLog, Error, TEXT("Error: %s"), e.what());
 				hub = NULL;
 			}
 		}
 		if (hub){
+			//Start a hub thread
+			//FMyoHubWorker::HubInit(hub);	//disabled until easy way to callOnGameThread is added for every event
+
 			StartListening();
 			Enabled = true;
 			return true;
@@ -445,9 +524,14 @@ public:
 			return false;
 		}
 	}
+
 	void ShutDown()
 	{
 		StopListening();
+
+		//Stop our hub thread
+		//FMyoHubWorker::Shutdown();	//disabled until easy way to callOnGameThread is added for every event
+
 		if (hub != NULL){
 			delete hub;
 			hub = NULL;
@@ -457,8 +541,20 @@ public:
 			m_data.clear();
 
 			//Shutdown message
-			UE_LOG(LogClass, Log, TEXT("Myo Hub Shutdown."));
+			UE_LOG(MyoPluginLog, Log, TEXT("Myo Hub Shutdown."));
 		}
+	}
+
+	void ResetHub()
+	{
+		ShutDown();
+		Startup();
+	}
+
+	void SetLockingPolicy(myo::Hub::LockingPolicy policy)
+	{
+		lockingPolicy = policy;
+		hub->setLockingPolicy(policy);
 	}
 
 	// We store each Myo pointer that we pair with in this list, so that we can keep track of the order we've seen
@@ -471,13 +567,19 @@ public:
 	MyoDelegate* myoDelegate;
 	bool Enabled;
 	bool Listening;
+	myo::Hub::LockingPolicy lockingPolicy;
 	myo::Pose lastPose;
+	FRotator armSpaceCorrection;	//used to hold on to the correction throughout hub destroying
+	bool correctionAvailable = false;
+
 	myo::Hub *hub;
 };
 
 //Init and Runtime
 void FMyoPlugin::StartupModule()
 {
+	UE_LOG(MyoPluginLog, Log, TEXT("Using Myo Plugin version %s"), TEXT(PLUGIN_VERSION));
+
 	// Instantiate the PrintMyoEvents class we defined above, and attach it as a listener to our Hub.
 	collector = new DataCollector;
 
@@ -487,7 +589,7 @@ void FMyoPlugin::StartupModule()
 	EKeys::AddKey(FKeyDetails(EKeysMyo::MyoPoseWaveIn, LOCTEXT("MyoPoseWaveIn", "Myo Pose Wave In"), FKeyDetails::GamepadKey));
 	EKeys::AddKey(FKeyDetails(EKeysMyo::MyoPoseWaveOut, LOCTEXT("MyoPoseWaveOut", "Myo Pose Wave Out"), FKeyDetails::GamepadKey));
 	EKeys::AddKey(FKeyDetails(EKeysMyo::MyoPoseFingersSpread, LOCTEXT("MyoPoseFingersSpread", "Myo Pose FingersSpread"), FKeyDetails::GamepadKey));
-	EKeys::AddKey(FKeyDetails(EKeysMyo::MyoPoseThumbToPinky, LOCTEXT("MyoPoseThumbToPinky", "Myo Pose Thumb To Pinky"), FKeyDetails::GamepadKey));
+	EKeys::AddKey(FKeyDetails(EKeysMyo::MyoPoseDoubleTap, LOCTEXT("MyoPoseDoubleTap", "Myo Pose Double Tap"), FKeyDetails::GamepadKey));
 	EKeys::AddKey(FKeyDetails(EKeysMyo::MyoPoseUnknown, LOCTEXT("MyoPoseUnknown", "Myo Pose Unknown"), FKeyDetails::GamepadKey));
 
 	EKeys::AddKey(FKeyDetails(EKeysMyo::MyoAccelerationX, LOCTEXT("MyoAccelerationX", "Myo Acceleration X"), FKeyDetails::FloatAxis));
@@ -526,6 +628,66 @@ void FMyoPlugin::VibrateDevice(int deviceId, int vibrationType)
 
 	myo::Myo* myo = collector->knownMyos[deviceId - 1];
 	myo->vibrate(static_cast<myo::Myo::VibrationType>(vibrationType));
+}
+
+void FMyoPlugin::LockMyo(int deviceId)
+{
+	if (!this->IsValidDeviceId(deviceId)) return;
+
+	myo::Myo* myo = collector->knownMyos[deviceId - 1];
+	myo->lock();
+}
+void FMyoPlugin::UnlockMyo(int deviceId, MyoUnlockType type)
+{
+	if (!this->IsValidDeviceId(deviceId)) return;
+
+	myo::Myo* myo = collector->knownMyos[deviceId - 1];
+
+	myo::Myo::UnlockType myoUnlockType;
+	switch (type)
+	{
+	case MYO_UNLOCK_TIMED:
+		myoUnlockType = myo::Myo::unlockTimed;
+		break;
+	case MYO_UNLOCK_HOLD:
+		myoUnlockType = myo::Myo::unlockHold;
+		break;
+	default:
+		myoUnlockType = myo::Myo::unlockTimed;
+		break;
+	}
+	myo->unlock(myoUnlockType);
+}
+
+void FMyoPlugin::SetLockingPolicy(MyoLockingPolicy policy)
+{
+	if (collector->hub == NULL){
+		UE_LOG(MyoPluginLog, Log, TEXT("(FMyoPlugin)Hub hasn't been initialized, locking policy setting failed."))
+		return;
+	}
+
+	//Reset our hub for this to work
+	collector->ResetHub();
+
+	//Set the locking policy
+	myo::Hub::LockingPolicy hubLockingPolicy;
+	switch (policy)
+	{
+	case MYO_LOCKING_POLICY_NONE:
+		hubLockingPolicy = myo::Hub::lockingPolicyNone;
+		break;
+	case MYO_LOCKING_POLICY_STANDARD:
+		hubLockingPolicy = myo::Hub::lockingPolicyStandard;
+		break;
+	default:
+		hubLockingPolicy = myo::Hub::lockingPolicyNone;
+		break;
+	}
+
+	UE_LOG(MyoPluginLog, Log, TEXT("Set Policy to %d"), (int)hubLockingPolicy);
+
+	//Reflect the locking policy in our data
+	collector->SetLockingPolicy(hubLockingPolicy);
 }
  
 //Freshest Data
@@ -583,6 +745,7 @@ bool FMyoPlugin::IsHubEnabled()
 //sets the calibration orientation
 void FMyoPlugin::CalibrateOrientation(int deviceId, FRotator direction)
 {
+
 	//special case, means calibrate all
 	if (deviceId == 0)
 	{
@@ -590,6 +753,8 @@ void FMyoPlugin::CalibrateOrientation(int deviceId, FRotator direction)
 		{
 			//Grab current orientation set it to the space correction orientation
 			collector->m_data[i].armSpaceCorrection = combineRotators(collector->m_data[i].orientation*-1.f, direction);
+			collector->armSpaceCorrection = collector->m_data[i].armSpaceCorrection;
+			collector->correctionAvailable = true;
 		}
 	}
 	//Otherwise check device id validity and calibrate specific myo
@@ -599,6 +764,8 @@ void FMyoPlugin::CalibrateOrientation(int deviceId, FRotator direction)
 
 		//Grab current orientation set it to the space correction orientation
 		collector->m_data[deviceId - 1].armSpaceCorrection = combineRotators(collector->m_data[deviceId - 1].orientation*-1.f, direction);
+		collector->armSpaceCorrection = collector->m_data[deviceId - 1].armSpaceCorrection;
+		collector->correctionAvailable = true;
 	}
 }
 
@@ -606,19 +773,23 @@ void FMyoPlugin::SetDelegate(MyoDelegate* newDelegate){
 	collector->myoDelegate = newDelegate;
 	collector->Startup();
 
-	//Emit disabled event if we didnt manage to create the hub
+	//Emit disabled event if we didn't manage to create the hub
 	if (!collector->Enabled){
 		collector->myoDelegate->MyoDisabled();
-		UE_LOG(LogClass, Warning, TEXT("Myo is Disabled."));
+		UE_LOG(MyoPluginLog, Warning, TEXT("Myo is Disabled."));
+	}
+	else{
+		//Default to None
+		collector->SetLockingPolicy(myo::Hub::lockingPolicyNone);
 	}
 
-	UE_LOG(LogClass, Log, TEXT("Myo Delegate Set (should only be called once per begin play or you have duplicates)."));
+	UE_LOG(MyoPluginLog, Log, TEXT("Myo Delegate Set (should only be called once per begin play or you have duplicates)."));
 }
 
 void FMyoPlugin::RemoveDelegate()
 {
 	collector->myoDelegate = NULL;
-	collector->ShutDown();	//we only allow one delegate to be active so remove listening to stop overloard of streaming
+	collector->ShutDown();	//we only allow one delegate to be active so remove listening to stop overload of streaming
 }
 
 void FMyoPlugin::MyoTick(float DeltaTime)
@@ -634,8 +805,8 @@ void FMyoPlugin::MyoTick(float DeltaTime)
 	*/
 	if (collector->Listening){
 		if (collector->Enabled){
-			collector->hub->run(1);
-			//UE_LOG(LogClass, Log, TEXT("Myo Tick. %1.4f"), DeltaTime);
+			collector->hub->run(1);	//Removed when multi-threaded version is added
+			//UE_LOG(MyoPluginLog, Log, TEXT("Myo Tick. %1.4f"), DeltaTime);
 		}
 	}
 }

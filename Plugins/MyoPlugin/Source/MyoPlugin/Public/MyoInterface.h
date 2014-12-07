@@ -77,7 +77,7 @@ public:
 	/**
 	* Event on a Myo detecting a pose.
 	* @param myo (out) pointer to emitted myo controller class, branch to read other data.
-	* @param pose (out): EMG pose, refer to Thalmic API rest, fist, waveIn, waveOut, fingersSpread, reserved1, thumbToPinky, unknown
+	* @param pose (out): EMG pose, refer to Thalmic API rest, fist, waveIn, waveOut, fingersSpread, reserved1, DoubleTap, unknown
 	*/
 	UFUNCTION(BlueprintImplementableEvent, Category = MyoEvents)
 	void OnPose(UMyoController* myo, MyoPose pose);

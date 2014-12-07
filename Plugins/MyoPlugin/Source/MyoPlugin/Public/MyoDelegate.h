@@ -3,6 +3,8 @@
 
 /** Inherit override and set delegate to subscribe to callbacks*/
 
+DECLARE_LOG_CATEGORY_EXTERN(MyoPluginLog, Log, All);
+
 UENUM(BlueprintType)
 enum MyoArm
 {
@@ -27,8 +29,7 @@ enum MyoPose
 	MYO_POSE_WAVEIN,
 	MYO_POSE_WAVEOUT,
 	MYO_POSE_FINGERSPREAD,
-	MYO_POSE_RESERVED1,
-	MYO_POSE_THUMBTOPINKY,
+	MYO_POSE_DOUBLETAP,
 	MYO_POSE_UNKNOWN = 255	//this needs to be properly switched...
 };
 
@@ -40,10 +41,24 @@ enum MyoVibrationType
 	MYO_VIBRATION_LONG
 };
 
+UENUM(BlueprintType)
+enum MyoLockingPolicy
+{
+	MYO_LOCKING_POLICY_NONE,
+	MYO_LOCKING_POLICY_STANDARD
+};
+
+UENUM(BlueprintType)
+enum MyoUnlockType
+{
+	MYO_UNLOCK_TIMED,
+	MYO_UNLOCK_HOLD
+};
+
 //Latest Data structure
 struct MyoDeviceData{
 	//Raw data (as of beta4)
-	int pose;				//0 = rest, 1 = fist, 2 = waveIn, 3 = waveOut, 4 = fingersSpread, 5 = reserved1, 6 = thumbToPinky, 65535 = unknown
+	int pose;				//0 = rest, 1 = fist, 2 = waveIn, 3 = waveOut, 4 = fingersSpread, 5 = reserved1, 6 = DoubleTap, 65535 = unknown
 	FVector acceleration;	//units of g
 	FQuat quaternion;		//orientation in quaternion format
 	FRotator orientation;	//orientation
@@ -59,18 +74,20 @@ struct MyoDeviceData{
 
 	//Body space, useful for easy component space integration
 	FVector bodySpaceNullAcceleration;	//units of g, in calibrated space, without gravity component
+
+	bool isLocked;
 };
 
 //Input Mapping Key Structure
 struct EKeysMyo
 {
-	//Posess
+	//Possess
 	static const FKey MyoPoseRest;
 	static const FKey MyoPoseFist;
 	static const FKey MyoPoseWaveIn;
 	static const FKey MyoPoseWaveOut;
 	static const FKey MyoPoseFingersSpread;
-	static const FKey MyoPoseThumbToPinky;
+	static const FKey MyoPoseDoubleTap;
 	static const FKey MyoPoseUnknown;
 
 	//Axis, given in arm orientation by default (use calibration or use raw functions to specify)
@@ -110,6 +127,9 @@ public:
 
 	/** Callable Functions */
 	virtual void MyoVibrateDevice(int32 myoId, int32 type);
+	virtual void MyoSetLockingPolicy(MyoLockingPolicy policy);
+	virtual void MyoUnlockMyo(int deviceId, MyoUnlockType type);
+	virtual void MyoLockMyo(int deviceId);
 	virtual bool MyoIsHubEnabled();
 	virtual MyoDeviceData* MyoLatestData(int32 myoId);
 	virtual void MyoLatestData(	int32 myoId, int32& Pose, FVector& Acceleration, FRotator& Orientation, FVector& Gyro, 

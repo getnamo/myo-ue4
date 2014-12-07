@@ -5,7 +5,7 @@
 #include "MyoPluginActor.h"
 
 //Constructor/Initializer
-AMyoPluginActor::AMyoPluginActor(const FPostConstructInitializeProperties& PCIP)
+AMyoPluginActor::AMyoPluginActor(const FObjectInitializer& PCIP)
 : Super(PCIP)
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -47,6 +47,12 @@ bool AMyoPluginActor::IsHubEnabled()
 {
 	return MyoIsHubEnabled();
 }
+
+void AMyoPluginActor::SetLockingPolicy(MyoLockingPolicy policy)
+{
+	MyoSetLockingPolicy(policy);
+}
+
 
 UMyoController* AMyoPluginActor::LeftMyo()
 {

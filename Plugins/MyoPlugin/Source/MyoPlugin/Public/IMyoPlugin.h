@@ -54,5 +54,8 @@ public:
 	virtual bool IsHubEnabled() = 0;
 	virtual bool IsValidDeviceId(int myoId) = 0;
 	virtual void CalibrateOrientation(int deviceId, FRotator direction){};
+	virtual void SetLockingPolicy(enum MyoLockingPolicy policy){};
+	virtual void UnlockMyo(int deviceId, enum MyoUnlockType type){};
+	virtual void LockMyo(int deviceId){};
 };
 

@@ -10,7 +10,7 @@ friend class MyoDelegateBlueprint;
 	GENERATED_UCLASS_BODY()
 public:
 
-	//Can be rest, fist, waveIn, waveOut, fingersSpread, reserved1, thumbToPinky, unknown
+	//Can be rest, fist, waveIn, waveOut, fingersSpread, reserved1, DoubleTap, unknown
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Myo Frame")
 	TEnumAsByte<MyoPose> pose;
 
@@ -82,6 +82,19 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = MyoFunctions)
 	void CalibrateArmOrientation(FRotator direction);
+
+	/**
+	* Unlocks the Myo if locked to detect gestures
+	* @param type (in) type of unlock (short period or indefinite hold)
+	*/
+	UFUNCTION(BlueprintCallable, Category = MyoFunctions)
+	void Unlock(MyoUnlockType type);
+
+	/**
+	* Tell the Myo to stay unlocked until told otherwise.
+	*/
+	UFUNCTION(BlueprintCallable, Category = MyoFunctions)
+	void Lock();
 
 	//Conversion
 	void setFromMyoDeviceData(MyoDeviceData* data);

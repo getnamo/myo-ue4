@@ -2,7 +2,7 @@
 #include "MyoDelegate.h"
 #include "MyoController.h"
 
-UMyoController::UMyoController(const FPostConstructInitializeProperties &init) : UObject(init)
+UMyoController::UMyoController(const FObjectInitializer &init) : UObject(init)
 {
 }
 
@@ -24,6 +24,15 @@ void UMyoController::CalibrateArmOrientation(FRotator direction)
 void UMyoController::VibrateDevice(MyoVibrationType type)
 {
 	_myoDelegate->MyoVibrateDevice(this->myoId, type);
+}
+
+void UMyoController::Unlock(MyoUnlockType type)
+{
+	_myoDelegate->MyoUnlockMyo(this->myoId, type);
+}
+void UMyoController::Lock()
+{
+	_myoDelegate->MyoLockMyo(this->myoId);
 }
 
 void UMyoController::setFromMyoDeviceData(MyoDeviceData* data)

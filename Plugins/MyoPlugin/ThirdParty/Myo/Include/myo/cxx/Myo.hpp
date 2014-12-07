@@ -26,6 +26,25 @@ public:
     /// @see DeviceListener::onRssi()
     void requestRssi() const;
 
+    /// Unlock types supported by Myo.
+    enum UnlockType {
+        unlockTimed = libmyo_unlock_timed,
+        unlockHold  = libmyo_unlock_hold
+    };
+
+    /// Unlock the Myo.
+    /// Myo will remain unlocked for a short amount of time, after which it will automatically lock again.
+    /// If Myo was locked, an onUnlock event will be generated.
+    void unlock(UnlockType type);
+
+    /// Force the Myo to lock immediately.
+    /// If Myo was unlocked, an onLock event will be generated.
+    void lock();
+
+    /// Notify the Myo that a user action was recognized.
+    /// Will cause Myo to vibrate.
+    void notifyUserAction();
+
     /// @cond MYO_INTERNALS
 
     /// Return the internal libmyo object corresponding to this device.

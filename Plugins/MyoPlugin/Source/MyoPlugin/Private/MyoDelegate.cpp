@@ -3,13 +3,15 @@
 #include "IMyoPlugin.h"
 #include "MyoDelegate.h"
 
+DEFINE_LOG_CATEGORY(MyoPluginLog);
+
 //Input Mapping EKey definitions
 const FKey EKeysMyo::MyoPoseRest("MyoPoseRest");
 const FKey EKeysMyo::MyoPoseFist("MyoPoseFist");
 const FKey EKeysMyo::MyoPoseWaveIn("MyoPoseWaveIn");
 const FKey EKeysMyo::MyoPoseWaveOut("MyoPoseWaveOut");
 const FKey EKeysMyo::MyoPoseFingersSpread("MyoPoseFingersSpread");
-const FKey EKeysMyo::MyoPoseThumbToPinky("MyoPoseThumbToPinky");
+const FKey EKeysMyo::MyoPoseDoubleTap("MyoPoseDoubleTap");
 const FKey EKeysMyo::MyoPoseUnknown("MyoPoseUnknown");
 const FKey EKeysMyo::MyoAccelerationX("MyoAccelerationX");
 const FKey EKeysMyo::MyoAccelerationY("MyoAccelerationY");
@@ -43,6 +45,30 @@ void MyoDelegate::MyoVibrateDevice(int32 myoId, int32 type)
 	if (IMyoPlugin::IsAvailable())
 	{
 		IMyoPlugin::Get().VibrateDevice(myoId, type);
+	}
+}
+
+void MyoDelegate::MyoSetLockingPolicy(MyoLockingPolicy policy)
+{
+	if (IMyoPlugin::IsAvailable())
+	{
+		IMyoPlugin::Get().SetLockingPolicy(policy);
+	}
+}
+
+void MyoDelegate::MyoUnlockMyo(int deviceId, MyoUnlockType type)
+{
+	if (IMyoPlugin::IsAvailable())
+	{
+		IMyoPlugin::Get().UnlockMyo(deviceId, type);
+	}
+}
+
+void MyoDelegate::MyoLockMyo(int deviceId)
+{
+	if (IMyoPlugin::IsAvailable())
+	{
+		IMyoPlugin::Get().LockMyo(deviceId);
 	}
 }
 

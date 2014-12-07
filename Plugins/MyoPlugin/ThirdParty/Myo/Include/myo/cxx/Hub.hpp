@@ -43,6 +43,15 @@ public:
     /// Remove a previously registered listener.
     void removeListener(DeviceListener* listener);
 
+    /// Locking policies supported by Myo.
+    enum LockingPolicy {
+        lockingPolicyNone     = libmyo_locking_policy_none,
+        lockingPolicyStandard = libmyo_locking_policy_standard
+    };
+
+    /// Set the locking policy for Myos connected to the Hub.
+    void setLockingPolicy(LockingPolicy lockingPolicy);
+
     /// Run the event loop for the specified duration (in milliseconds).
     void run(unsigned int duration_ms);
 
@@ -74,6 +83,7 @@ private:
 };
 
 /// @example hello-myo.cpp
+/// @example multiple-myos.cpp
 
 } // namespace myo
 

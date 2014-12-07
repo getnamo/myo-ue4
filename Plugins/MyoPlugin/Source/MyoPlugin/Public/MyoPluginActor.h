@@ -22,6 +22,12 @@ class AMyoPluginActor : public AActor, public MyoDelegateBlueprint, public IMyoI
 	UFUNCTION(BlueprintCallable, Category = MyoFunctions)
 	bool IsHubEnabled();
 
+	/**
+	* Set the Locking Policy of the Myo Hub see myo documentation for details.
+	*/
+	UFUNCTION(BlueprintCallable, Category = MyoFunctions)
+	void SetLockingPolicy(enum MyoLockingPolicy policy);
+
 	//Todo: add historical support later and latest if in demand
 
 	//Convenience Methods - Get

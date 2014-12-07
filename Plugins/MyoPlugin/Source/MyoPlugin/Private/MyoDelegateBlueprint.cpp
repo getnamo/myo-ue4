@@ -68,7 +68,7 @@ void MyoDelegateBlueprint::MyoDisabled()
 }
 
 //Functions
-//Todo: consider use case for below: Keep convenience or ask users to use class?
+//TODO: consider use case for below: Keep convenience or ask users to use class?
 /*void MyoDelegateBlueprint::LatestData(	int32 myoId, int32& Pose, FVector& Acceleration, FRotator& Orientation, FVector& Gyro,
 										int32& Arm, int32& xDirection,
 										FVector& ArmAcceleration, FRotator& ArmOrientation, FVector& ArmGyro, FRotator& ArmCorrection,
@@ -81,8 +81,13 @@ void MyoDelegateBlueprint::MyoDisabled()
 //Blueprint functions forward
 bool MyoDelegateBlueprint::MyoIsHubEnabled()
 {
-	return MyoIsHubEnabled();
+	return MyoDelegate::MyoIsHubEnabled();
 }
+void MyoDelegateBlueprint::MyoSetLockingPolicy(MyoLockingPolicy policy)
+{
+	MyoDelegate::MyoSetLockingPolicy(policy);
+}
+
 void MyoDelegateBlueprint::MyoConvertToMyoOrientationSpace(FRotator orientation, FRotator& converted)
 {
 	MyoConvertToMyoOrientationSpace(orientation, converted);

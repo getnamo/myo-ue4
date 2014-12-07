@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MyoPluginPrivatePCH.h"
+#include "MyoDelegate.h"
 #include "MyoDelegateBlueprint.h"
 #include "MyoComponent.generated.h"
 
@@ -18,7 +19,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = MyoFunctions)
 	bool IsHubEnabled();
 
-	//Todo: add historical support later and latest if in demand
+	/**
+	* Set the Locking Policy of the Myo Hub see myo documentation for details.
+	*/
+	UFUNCTION(BlueprintCallable, Category = MyoFunctions)
+	void SetLockingPolicy(enum MyoLockingPolicy policy);
+
+	//TODO: add historical support later and latest if in demand
 
 	//Convenience Methods - Get
 	/**
