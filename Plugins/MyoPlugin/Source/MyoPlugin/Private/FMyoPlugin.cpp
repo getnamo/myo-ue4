@@ -14,14 +14,12 @@
 
 IMPLEMENT_MODULE(FMyoPlugin, MyoPlugin)
 
-#pragma warning( disable:4273 )
-
 #define LOCTEXT_NAMESPACE "MyoPlugin"
 #define ORIENTATION_SCALE_PITCH 0.01111111111	//1/90
 #define ORIENTATION_SCALE_YAWROLL 0.00555555555 //1/180
 #define GYRO_SCALE 0.02222222222				//1/45
 
-#define PLUGIN_VERSION "0.7.4"
+#define PLUGIN_VERSION "0.7.5"
 
 //Private API - This is where the magic happens
 
@@ -42,19 +40,6 @@ bool EmitAnalogInputEventForKey(FKey key, float value, int32 user)
 {
 	FAnalogInputEvent AnalogInputEvent(key, FSlateApplication::Get().GetModifierKeys(), user, false, 0, 0, value);
 	return FSlateApplication::Get().ProcessAnalogInputEvent(AnalogInputEvent);
-}
-
-FText FAnalogInputEvent::ToText() const
-{
-	return NSLOCTEXT("Joystick Plugin Events", "Analog", "Text");
-}
-FText FInputEvent::ToText() const
-{
-	return NSLOCTEXT("Joystick Plugin Events", "Input", "Text");
-}
-FText FKeyEvent::ToText() const
-{
-	return NSLOCTEXT("Joystick Plugin Events", "Key", "Text");
 }
 
 //String Conversion to UE4
