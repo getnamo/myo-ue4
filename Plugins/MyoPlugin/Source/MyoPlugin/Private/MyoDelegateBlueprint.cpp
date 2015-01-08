@@ -62,21 +62,16 @@ void MyoDelegateBlueprint::MyoOnArmUnsync(int32 myoId, uint64 timestamp)
 	if(MyoIsValidId(myoId))
 		IMyoInterface::Execute_OnArmUnsync(_interfaceDelegate, InternalControllerForId(myoId));
 }
+void MyoDelegateBlueprint::MyoOnEmgData(int32 myoId, FMyoEmgData data)
+{
+	if (MyoIsValidId(myoId))
+		IMyoInterface::Execute_OnEmgData(_interfaceDelegate, InternalControllerForId(myoId), data);
+}
+
 void MyoDelegateBlueprint::MyoDisabled()
 {
 	IMyoInterface::Execute_DeviceDisabled(_interfaceDelegate);
 }
-
-//Functions
-//TODO: consider use case for below: Keep convenience or ask users to use class?
-/*void MyoDelegateBlueprint::LatestData(	int32 myoId, int32& Pose, FVector& Acceleration, FRotator& Orientation, FVector& Gyro,
-										int32& Arm, int32& xDirection,
-										FVector& ArmAcceleration, FRotator& ArmOrientation, FVector& ArmGyro, FRotator& ArmCorrection,
-										FVector& BodySpaceAcceleration) {
-	MyoLatestData(myoId, Pose, Acceleration, Orientation, Gyro, Arm, xDirection, ArmAcceleration, ArmOrientation, ArmGyro, ArmCorrection, BodySpaceAcceleration);
-}*/
-
-
 
 //Blueprint functions forward
 bool MyoDelegateBlueprint::MyoIsHubEnabled()

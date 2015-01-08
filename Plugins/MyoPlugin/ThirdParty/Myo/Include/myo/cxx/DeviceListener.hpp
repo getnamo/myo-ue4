@@ -82,6 +82,10 @@ public:
     /// @see Myo::requestRssi() to request an RSSI value from the Myo.
     virtual void onRssi(Myo* myo, uint64_t timestamp, int8_t rssi) {}
 
+    /// Called when a paired Myo has provided new EMG data.
+    /// \a emg is an array of 8 elements, each corresponding to one sensor.
+    virtual void onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* emg) {}
+
     /// @cond LIBMYO_INTERNALS
 
     virtual void onOpaqueEvent(libmyo_event_t) {}

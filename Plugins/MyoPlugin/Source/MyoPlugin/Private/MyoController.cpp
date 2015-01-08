@@ -35,6 +35,11 @@ void UMyoController::Lock()
 	_myoDelegate->MyoLockMyo(this->myoId);
 }
 
+void UMyoController::SetStreamEmg(MyoStreamEmgType streamType)
+{
+	_myoDelegate->MyoSetStreamEmg(this->myoId, streamType);
+}
+
 void UMyoController::setFromMyoDeviceData(MyoDeviceData* data)
 {
 	this->pose = (MyoPose)data->pose;

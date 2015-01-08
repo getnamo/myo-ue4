@@ -38,6 +38,12 @@ void Myo::notifyUserAction()
 }
 
 inline
+void Myo::setStreamEmg(StreamEmgType type)
+{
+    libmyo_set_stream_emg(_myo, static_cast<libmyo_stream_emg_t>(type), ThrowOnError());
+}
+
+inline
 libmyo_myo_t Myo::libmyoObject() const
 {
     return _myo;

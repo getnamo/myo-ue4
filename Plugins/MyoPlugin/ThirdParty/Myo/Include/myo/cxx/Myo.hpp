@@ -45,6 +45,15 @@ public:
     /// Will cause Myo to vibrate.
     void notifyUserAction();
 
+    /// Valid EMG streaming modes for a Myo.
+    enum StreamEmgType {
+        streamEmgDisabled = libmyo_stream_emg_disabled,
+        streamEmgEnabled = libmyo_stream_emg_enabled
+    };
+
+    /// Sets the EMG streaming mode for a Myo.
+    void setStreamEmg(StreamEmgType type);
+
     /// @cond MYO_INTERNALS
 
     /// Return the internal libmyo object corresponding to this device.

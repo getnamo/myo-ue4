@@ -55,6 +55,21 @@ enum MyoUnlockType
 	MYO_UNLOCK_HOLD
 };
 
+UENUM(BlueprintType)
+enum MyoStreamEmgType
+{
+	MYO_STREAM_EMG_DISABLED = 0,
+	MYO_STREAM_EMG_ENABLED
+};
+
+USTRUCT(BlueprintType)
+struct FMyoEmgData
+{
+	GENERATED_USTRUCT_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Emg Data Struct")
+	TArray<int32>streams;
+};
+
 //Latest Data structure
 struct MyoDeviceData{
 	//Raw data (as of beta4)
@@ -120,6 +135,7 @@ public:
 	virtual void MyoOnPose(int32 myoId, uint64 timestamp, int32 pose);
 	virtual void MyoOnArmSync(int32 myoId, uint64 timestamp, int32 arm, int32 direction);
 	virtual void MyoOnArmUnsync(int32 myoId, uint64 timestamp);
+	virtual void MyoOnEmgData(int32 myoId, FMyoEmgData data);
 
 	/*Myo being disabled can occur if we do not have our bluetooth device in before launching app, 
 	 in that case MyoDisabled() will emit.*/
@@ -128,6 +144,7 @@ public:
 	/** Callable Functions */
 	virtual void MyoVibrateDevice(int32 myoId, int32 type);
 	virtual void MyoSetLockingPolicy(MyoLockingPolicy policy);
+	virtual void MyoSetStreamEmg(int deviceId, MyoStreamEmgType type);
 	virtual void MyoUnlockMyo(int deviceId, MyoUnlockType type);
 	virtual void MyoLockMyo(int deviceId);
 	virtual bool MyoIsHubEnabled();

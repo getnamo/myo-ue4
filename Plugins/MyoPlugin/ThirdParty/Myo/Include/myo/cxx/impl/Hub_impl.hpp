@@ -177,6 +177,18 @@ void Hub::onDeviceEvent(libmyo_event_t event)
         case libmyo_event_rssi:
             listener->onRssi(myo, time, libmyo_event_get_rssi(event));
             break;
+        case libmyo_event_emg: {
+            int8_t emg[] = { libmyo_event_get_emg(event, 0),
+                             libmyo_event_get_emg(event, 1),
+                             libmyo_event_get_emg(event, 2),
+                             libmyo_event_get_emg(event, 3),
+                             libmyo_event_get_emg(event, 4),
+                             libmyo_event_get_emg(event, 5),
+                             libmyo_event_get_emg(event, 6),
+                             libmyo_event_get_emg(event, 7) };
+            listener->onEmgData(myo, time, emg);
+            break;
+        }
         }
     }
 }

@@ -1,7 +1,7 @@
 myo-ue4
 =======
 
-A [Thalmic Myo](https://www.thalmic.com/en/myo/) Plugin for Unreal Engine 4. Latest plugin is bound to beta 7, requires Myos to have [firmware 1.1.0](https://developer.thalmic.com/downloads) or later.
+A [Thalmic Myo](https://www.thalmic.com/en/myo/) Plugin for Unreal Engine 4. Latest plugin is bound to beta 8, requires Myos to have [firmware 1.1.5](https://developer.thalmic.com/downloads) or later.
 
 [Main discussion thread](https://forums.unrealengine.com/showthread.php?37876-Plugin-Myo)
 
@@ -10,16 +10,17 @@ A [Thalmic Myo](https://www.thalmic.com/en/myo/) Plugin for Unreal Engine 4. Lat
 2. Browse to your project (typically found at *Documents/Unreal Project/{Your Project Root}*)
 3. Copy *Plugins* folder into your Project root.
 4. Copy *Binaries* folder into your Project root.
-5. Restart the Editor and open your project again.
-6. Select Window->Plugins. Click on Installed and you should see a category called Input and a plugin called Myo Plugin now available. Select Enabled. The Editor will warn you to restart, click restart.
-7. When your project has reloaded, the plugin should be enabled and ready to use. 
+5. (Optional) Copy *Content* folder into your Project root if you wish to use the optional convenience content.
+6. Restart the Editor and open your project again.
+7. Select Window->Plugins. Click on Installed and you should see a category called Input and a plugin called Myo Plugin now available. Select Enabled. The Editor will warn you to restart, click restart.
+8. When your project has reloaded, the plugin should be enabled and ready to use. 
 
 (Optional) You can confirm it has successfully loaded by opening the Class Viewer, searching "myo" should show you one actor class added by the plugin called *MyoPluginActor*.
 
-## Usage ##
+## How to Use##
 The plugin is designed with an event driven architecture through a delegate interface. You can access device events through the UE4 Input Mapping system, adding myo support to any blueprint through the Myo Component and Myo Interface, the convenience Blueprint classes provided, or through C++. C++ supports both subclassing of provided example class or by inheriting the MyoDelegate, you can extend your own class to support Myo events. Additionally callable functions support polling for latest data.
 
-### Input Mapping ###
+## Input Mapping ##
 
  1.	For a good example start with a template project.
  2.	Use the MyoPluginController or the MyoPluginActor (NB the convenience actor needs to be placed), or any blueprint with the Myo Component attached.
@@ -59,7 +60,7 @@ FKey MyoGyroY;
 FKey MyoGyroZ;
 ```
 
-###Events through Blueprint - Component Based Support for Any Blueprint###
+##Events through Blueprint - Component Based Support for Any Blueprint##
 
 Available since v0.7, this method works by adding a Myo Component and then subscribing to the events through a MyoInterface.
 
@@ -80,8 +81,6 @@ Available since v0.7, this method works by adding a Myo Component and then subsc
 
 </ol>
 
-### How to Use
-
 ####Calibration
 If you're using only delta values, you may wish to use the raw values instead. If you would like to use absolute orientations (e.g. copying an arm orientation, or getting acceleration in component space) however you may wish to use the calibrated arm space values.
 
@@ -91,6 +90,35 @@ example of how to calibrate:
 <img src="http://i.imgur.com/yQcd5NH.png">
 
 Note that you should perform a 'Sync Gesture' first in order to establish which arm the myo is on and which direction it is facing (toward wrist/arm), calibration picks this up and automatically adjusts for it as well, but if your arm isn't detected (synced), your movements may be inverse if you have the device on the opposite direction compared to default.
+
+#### Locking Policy ####
+Since myo beta 7, the SDK implements a locking policy. This means you can perform a double-tap pose on your myo to unlock and make a gesture, which then locks itself automatically again. By default this plugin has no locking policy, if you wish to use one however simply set it at an appropriate time e.g. in your begin play.
+
+<img src="http://i.imgur.com/2x0lZpG.png">
+
+
+#### Raw Data Streams ####
+Since 0.7.7 the plugin supports raw streams. You have to first enable the raw streams for your myo
+
+e.g. using the double tap pose
+
+<img src="http://i.imgur.com/OacMVYW.png">
+
+or using a key event (note that this targets your primary myo since we don't have a myo pointer emitted with a key event)
+
+<img src="http://i.imgur.com/XMC9Ftz.png">
+
+Then subscribing to the OnEmgData event with the optional content library function
+
+<img src="http://i.imgur.com/DsAzDlz.png">
+
+Yields the following results in the rolling template (with Debug Orientation shown and Debug Poses printed to log)
+
+<img src ="http://i.imgur.com/moXdgn8.gif">
+
+To do something useful with the stream, break the struct which encapsulates an int array, one for each of the 8 data streams. The value range for each int is -127 to 128 (int8)
+
+<img src="http://i.imgur.com/GfH30ke.png">
 
 ####*Blueprint Events Available*####
 
@@ -111,7 +139,7 @@ For example you can show a debug myo orientation like this
 
 <img src="http://i.imgur.com/zrd95U2.png">
 
-with a Draw Orientation function like this
+with a Draw Orientation function like this (note that this function is included in the optional Content Myo Utility BP Library)
 
 <img src="http://i.imgur.com/aNBewsH.png">
 
@@ -121,7 +149,24 @@ which gives the following result in the Rolling template
 
 Note in this example two myos were paired and the orientation was obtained from calibrated values thus needed a calibration call to each myo when the user was pointing them toward the screen (e.g. point to screen and bind calibration to make fist).
 
-###Events through Blueprint - Convenience Classes###
+### Convenience Myo Blueprint Library ###
+Since 0.7.7 the plugin includes optional Content such as the Myo Utility BP Library
+
+<img src="http://i.imgur.com/uV37oa4.png">
+
+Simply by copying the content folder into your project root exposes the library and you can use the utility functions to e.g.
+
+Debug your orientation
+
+<img src="http://i.imgur.com/9fVTYB8.png">
+
+Draw debug arrows representing each of the 8 raw streams
+
+<img src="http://i.imgur.com/DsAzDlz.png">
+
+or print them out instead using the respective function.
+
+##Events through Blueprint - Convenience Classes##
 1. Select Window->Class Viewer.
 2. Search for "MyoPluginActor"
 3. Right click the actor and Create a new Blueprint e.g. "MyoPluginActorBP"
@@ -134,9 +179,7 @@ e.g. If you want to get the acceleration data from your Myo/s add the Event "On 
 
 Compile and Play to see the accelerometer data stream as printed output after the myo/s automatically connect and pair.
 
-
-
-###Events through C++###
+##Events through C++##
 
 ####*Simple Version*####
 1. Extend or Subclass MyoPluginActor and Override functions you wish to subscribe to e.g. 
@@ -178,13 +221,7 @@ struct MyoDeviceData{
 
 defined in MyoDelegate.h
 
-###Calibrated Values###
-
-Fully supported. Call ```Calibrate Myo Orientation``` on your Myo Controller when facing toward screen. All Arm Moved events from then on will emit Arm space orientation and acceleration.
-
-<img src="http://i.imgur.com/pWXZhmW.png">
-
-###Shipping/Packaged Builds###
+##Shipping/Packaged Builds##
 <ol>
 <li> Projects require code, if you are using a blueprint only project, add an empty class and compile your project module. You simply do File->Add Code to Project and it can be anything so I usually just pick None->Create Class and then it will ask you to open visual studio where you just hit compile (Build solution). If you haven't added code before follow the unreal engine <a href="https://docs.unrealengine.com/latest/INT/Programming/QuickStart/1/index.html">programming Quick Start guide</a>. Essentially it boils down to downloading the free Visual Studio Community and changing a few small configs.</li>
 <li> Add the following line to your DefaultEngine.ini </li>
@@ -201,8 +238,6 @@ find <i>WindowsNoEditor/MyoPluginTest</i>, this is your packaged project root. A
 ##Bugs and Todo##
 * Hub runs on the main thread, adds 1ms to render loop. Should be separated into its own thread or reduced to near 0ms.
 * Platforms apart from Windows are untested
-* While Plugin does support hot plugging Myos (turning them on/off, running out of range), it does not support hot plugging of the bluetooth hub. This is a limitation of the Myo SDK. If you run your game with the hub disabled (e.g. bluetooth usb unplugged), you will receive the event *MyoDisabled()* and no further notifications. Plugging in the bluetooth hub and restarting the game will re-enable it.
-
 
 ##Credits and License##
 * Plugin by Getnamo, Myo SDK provided by Thalmic Labs

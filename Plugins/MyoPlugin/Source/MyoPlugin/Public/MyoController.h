@@ -59,11 +59,11 @@ public:
 	int32 myoId;
 
 	//Convenience Call, optionally check hand possession property
-	UFUNCTION(BlueprintCallable, Category = "Myo Frame")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Myo Frame")
 	bool isOnLeftArm();
 
 	//Convenience Call, optionally check hand possession property
-	UFUNCTION(BlueprintCallable, Category = "Myo Frame")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Myo Frame")
 	bool isOnRightArm();
 
 	/**
@@ -95,6 +95,12 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = MyoFunctions)
 	void Lock();
+
+	/**
+	* Sets the EMG streaming mode for this Myo
+	*/
+	UFUNCTION(BlueprintCallable, Category = MyoFunctions)
+	void SetStreamEmg(MyoStreamEmgType streamType);
 
 	//Conversion
 	void setFromMyoDeviceData(MyoDeviceData* data);

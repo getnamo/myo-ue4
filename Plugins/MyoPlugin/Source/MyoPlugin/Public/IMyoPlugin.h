@@ -57,5 +57,6 @@ public:
 	virtual void SetLockingPolicy(enum MyoLockingPolicy policy){};
 	virtual void UnlockMyo(int deviceId, enum MyoUnlockType type){};
 	virtual void LockMyo(int deviceId){};
+	virtual void SetStreamEmg(int deviceId, enum MyoStreamEmgType type){};
 };
 

@@ -36,6 +36,7 @@ void MyoDelegate::MyoOnGyroscopeData(int32 myoId, uint64 timestamp, FVector gyro
 void MyoDelegate::MyoOnPose(int32 myoId, uint64 timestamp, int32 pose){}
 void MyoDelegate::MyoOnArmSync(int32 myoId, uint64 timestamp, int32 arm, int32 direction){}
 void MyoDelegate::MyoOnArmUnsync(int32 myoId, uint64 timestamp){}
+void MyoDelegate::MyoOnEmgData(int32 myoId, FMyoEmgData data) {}
 
 void MyoDelegate::MyoDisabled(){}
 
@@ -53,6 +54,14 @@ void MyoDelegate::MyoSetLockingPolicy(MyoLockingPolicy policy)
 	if (IMyoPlugin::IsAvailable())
 	{
 		IMyoPlugin::Get().SetLockingPolicy(policy);
+	}
+}
+
+void MyoDelegate::MyoSetStreamEmg(int deviceId, MyoStreamEmgType type)
+{
+	if (IMyoPlugin::IsAvailable())
+	{
+		IMyoPlugin::Get().SetStreamEmg(deviceId, type);
 	}
 }
 

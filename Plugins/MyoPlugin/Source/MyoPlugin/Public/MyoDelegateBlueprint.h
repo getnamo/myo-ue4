@@ -41,6 +41,8 @@ private:
 	virtual void MyoOnPose(int32 myoId, uint64 timestamp, int32 pose) override;
 	virtual void MyoOnArmSync(int32 myoId, uint64 timestamp, int32 arm, int32 direction) override;
 	virtual void MyoOnArmUnsync(int32 myoId, uint64 timestamp) override;
+	virtual void MyoOnEmgData(int32 myoId, FMyoEmgData data) override;
+
 	virtual void MyoDisabled() override;
 
 	UMyoController* InternalAddController(int newId);

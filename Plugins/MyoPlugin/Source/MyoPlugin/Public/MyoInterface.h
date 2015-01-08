@@ -99,6 +99,14 @@ public:
 	void OnArmUnsync(UMyoController* myo);
 
 	/**
+	* Called whenever a new raw streams are available.
+	* @param myo (out) pointer to emitted myo controller class, branch to read other data.
+	* @param data (out) struct containing an array of ints containing raw myo stream data; there are 8 streams.
+	*/
+	UFUNCTION(BlueprintImplementableEvent, Category = MyoEvents)
+	void OnEmgData(UMyoController* myo, FMyoEmgData data);
+
+	/**
 	* Called when a problem occurs such as bluetooth usb device not being detected (unplugged).
 	* If you receive this event further Myo events will not work until you plug in the hub and restart the application.
 	*/

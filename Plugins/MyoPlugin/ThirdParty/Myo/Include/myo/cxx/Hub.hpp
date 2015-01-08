@@ -84,6 +84,7 @@ private:
 
 /// @example hello-myo.cpp
 /// @example multiple-myos.cpp
+/// @example emg-data-sample.cpp
 
 } // namespace myo
 

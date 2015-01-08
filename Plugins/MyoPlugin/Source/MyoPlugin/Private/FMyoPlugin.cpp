@@ -19,7 +19,7 @@ IMPLEMENT_MODULE(FMyoPlugin, MyoPlugin)
 #define ORIENTATION_SCALE_YAWROLL 0.00555555555 //1/180
 #define GYRO_SCALE 0.02222222222				//1/45
 
-#define PLUGIN_VERSION "0.7.6"
+#define PLUGIN_VERSION "0.7.7"
 
 //Private API - This is where the magic happens
 
@@ -416,6 +416,27 @@ public:
 		}
 	}
 
+	void onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* emg)
+	{
+		int myoIndex = myoIndexForMyo(myo);
+
+		//Gather and organize
+		//There are 8 streams one for each plate
+		/*FMyoEmgData data;
+		for (int i = 0; i < 8; i++) {
+			data.streams.Add(emg[i]);
+		}*/
+
+		TArray<int32> data;
+		for (int i = 0; i < 8; i++) {
+			data.Add(emg[i]);
+		}
+		
+		//Emit
+		myoDelegate->MyoOnEmgData(	myoIndex + 1,
+									data);
+	}
+
 	// This is a utility function implemented for this sample that maps a myo::Myo* to a unique ID starting at 1.
 	// It does so by looking for the Myo pointer in knownMyos, which onPair() adds each Myo into as it is paired.
 	size_t identifyMyo(myo::Myo* myo) {
@@ -673,6 +694,29 @@ void FMyoPlugin::SetLockingPolicy(MyoLockingPolicy policy)
 
 	//Reflect the locking policy in our data
 	collector->SetLockingPolicy(hubLockingPolicy);
+}
+
+void FMyoPlugin::SetStreamEmg(int deviceId, MyoStreamEmgType type)
+{
+	if (!this->IsValidDeviceId(deviceId)) return;
+
+	myo::Myo* myo = collector->knownMyos[deviceId - 1];
+
+	myo::Myo::StreamEmgType myoNativeStreamType;
+	switch (type)
+	{
+	case MYO_STREAM_EMG_DISABLED:
+		myoNativeStreamType = myo::Myo::streamEmgDisabled;
+		break;
+	case MYO_STREAM_EMG_ENABLED:
+		myoNativeStreamType = myo::Myo::streamEmgEnabled;
+		break;
+	default:
+		myoNativeStreamType = myo::Myo::streamEmgDisabled;
+		break;
+	}
+
+	myo->setStreamEmg(myoNativeStreamType);
 }
  
 //Freshest Data

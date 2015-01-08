@@ -16,7 +16,7 @@ public:
 	/**
 	* Check if Myo Hub is enabled, if its not it will remain so until restart.
 	*/
-	UFUNCTION(BlueprintCallable, Category = MyoFunctions)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = MyoFunctions)
 	bool IsHubEnabled();
 
 	/**
@@ -31,19 +31,19 @@ public:
 	/**
 	*	Obtain controller pointer to current left arm myo if attached, otherwise returns none.
 	*/
-	UFUNCTION(BlueprintCallable, Category = MyoFunctions)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = MyoFunctions)
 	UMyoController* LeftMyo();
 
 	/**
 	*	Obtain controller pointer to current right arm myo if attached, otherwise returns none.
 	*/
-	UFUNCTION(BlueprintCallable, Category = MyoFunctions)
+	UFUNCTION(BlueprintCallable, BlueprintPure,  Category = MyoFunctions)
 	UMyoController* RightMyo();
 	
 	/**
 	*	Obtain controller pointer to any last paired myo, if you only have one myo and just want the primary myo, use this.
 	*/
-	UFUNCTION(BlueprintCallable, Category = MyoFunctions)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = MyoFunctions)
 	UMyoController* PrimaryMyo();
 
 	/**
