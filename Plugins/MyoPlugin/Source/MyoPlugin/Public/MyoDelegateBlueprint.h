@@ -24,8 +24,10 @@ public:
 	virtual void MyoTick(float DeltaTime) override;
 
 	//If you want an alternate delegate, set it here
+	virtual bool MyoIsValidId(int32 myoId) override;
 	void SetInterfaceDelegate(UObject* newDelegate);
 protected:
+	bool IsValidDelegate();
 	UObject* ValidSelfPointer;	//REQUIRED: has to be set before MyoStartup by a UObject subclass.
 
 private:

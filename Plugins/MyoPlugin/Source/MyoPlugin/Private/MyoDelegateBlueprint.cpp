@@ -179,6 +179,16 @@ void MyoDelegateBlueprint::MyoTick(float DeltaTime)
 	}
 }
 
+bool MyoDelegateBlueprint::MyoIsValidId(int32 myoId)
+{
+	return (IsValidDelegate() && MyoDelegate::MyoIsValidId(myoId));
+}
+
+bool MyoDelegateBlueprint::IsValidDelegate()
+{
+	return (_interfaceDelegate != NULL);
+}
+
 void MyoDelegateBlueprint::SetInterfaceDelegate(UObject* newDelegate)
 {
 	UE_LOG(LogClass, Log, TEXT("InterfaceDelegate passed: %s"), *newDelegate->GetName());

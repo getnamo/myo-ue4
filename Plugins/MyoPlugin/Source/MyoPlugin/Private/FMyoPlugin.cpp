@@ -19,7 +19,7 @@ IMPLEMENT_MODULE(FMyoPlugin, MyoPlugin)
 #define ORIENTATION_SCALE_YAWROLL 0.00555555555 //1/180
 #define GYRO_SCALE 0.02222222222				//1/45
 
-#define PLUGIN_VERSION "0.7.7"
+#define PLUGIN_VERSION "0.7.8"
 
 //Private API - This is where the magic happens
 
@@ -422,15 +422,15 @@ public:
 
 		//Gather and organize
 		//There are 8 streams one for each plate
-		/*FMyoEmgData data;
+		FMyoEmgData data;
 		for (int i = 0; i < 8; i++) {
 			data.streams.Add(emg[i]);
-		}*/
+		}
 
-		TArray<int32> data;
+		/*TArray<int32> data;
 		for (int i = 0; i < 8; i++) {
 			data.Add(emg[i]);
-		}
+		}*/
 		
 		//Emit
 		myoDelegate->MyoOnEmgData(	myoIndex + 1,
