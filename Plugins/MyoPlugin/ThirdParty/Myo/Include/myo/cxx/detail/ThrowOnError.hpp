@@ -67,4 +67,43 @@ private:
 
 } //namespace libmyo
 
+class TrackOnError {
+public:
+	TrackOnError()
+		: _error()
+	{
+		//lastCallEndedInError = false;
+	}
+
+	~TrackOnError()
+	{
+		if (_error)
+		{
+			switch (libmyo_error_kind(_error)) {
+			case libmyo_error:
+			case libmyo_error_runtime:
+			{
+				break;
+			}
+			case libmyo_error_invalid_argument:
+			{
+				break;
+			}
+			case libmyo_success:
+			{
+				break;
+			}
+			}
+		}
+	}
+
+	operator libmyo_error_details_t*()
+	{
+		return &_error;
+	}
+	libmyo_error_details_t _error;
+
+private:
+};
+
 #endif // MYO_CXX_DETAIL_THROWONERROR_HPP

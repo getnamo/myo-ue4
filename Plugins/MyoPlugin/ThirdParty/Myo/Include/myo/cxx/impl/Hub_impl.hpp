@@ -20,7 +20,24 @@ Hub::Hub(const std::string& applicationIdentifier)
 , _myos()
 , _listeners()
 {
-    libmyo_init_hub(&_hub, applicationIdentifier.c_str(), ThrowOnError());
+	libmyo_error_details_t _error;
+	libmyo_init_hub(&_hub, applicationIdentifier.c_str(), &_error);
+
+	switch (libmyo_error_kind(_error)) {
+		case libmyo_error:
+		case libmyo_error_runtime:
+		case libmyo_error_invalid_argument:
+		{
+			lastInitCausedError = true;
+			break;
+		}
+		case libmyo_success:
+		{
+			lastInitCausedError = false;
+			break;
+		}
+	}
+
 }
 
 inline

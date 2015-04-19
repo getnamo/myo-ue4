@@ -63,6 +63,9 @@ public:
     /// Return the internal libmyo object corresponding to this hub.
     libmyo_hub_t libmyoObject();
 
+	//For tracking errors
+	bool lastInitCausedError;
+
 protected:
     void onDeviceEvent(libmyo_event_t event);
 

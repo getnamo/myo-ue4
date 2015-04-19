@@ -19,7 +19,7 @@ IMPLEMENT_MODULE(FMyoPlugin, MyoPlugin)
 #define ORIENTATION_SCALE_YAWROLL 0.00555555555 //1/180
 #define GYRO_SCALE 0.02222222222				//1/45
 
-#define PLUGIN_VERSION "0.7.8"
+#define PLUGIN_VERSION "0.7.9"
 
 //Private API - This is where the magic happens
 
@@ -508,15 +508,20 @@ public:
 	{
 		if (hub == NULL)
 		{
-			//try{
-				hub = new myo::Hub("com.plugin.unrealengine4");
+			hub = new myo::Hub("com.plugin.unrealengine4");
+
+			if (hub->lastInitCausedError){
+				delete hub;
+				hub = NULL;
+				UE_LOG(MyoPluginLog, Log, TEXT("Myo Hub failed to initialize, did you install and run MyoConnect?"));
+			}
+			else if(hub != NULL){
 				UE_LOG(MyoPluginLog, Log, TEXT("Myo Hub Initialized."));
-			//}
-			//catch (const std::exception& e) {
-				/*UE_LOG(MyoPluginLog, Error, TEXT("Myo did not initialize correctly, check if Myo Connect is running!"));
-				UE_LOG(MyoPluginLog, Error, TEXT("Error: %s"), e.what());
-				hub = NULL;*/
-			//}
+			}
+			
+			/*if (myo::ThrowOnError::lastCallWasError())
+				hu
+				;*/
 		}
 		if (hub){
 			//Start a hub thread
