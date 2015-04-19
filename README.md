@@ -10,12 +10,9 @@ A [Thalmic Myo](https://www.thalmic.com/en/myo/) Plugin for Unreal Engine 4. Lat
 2. Browse to your project (typically found at *Documents/Unreal Project/{Your Project Root}*)
 3. Copy *Plugins* folder into your Project root.
 4. Copy *Binaries* folder into your Project root.
-5. (Optional) Copy *Content* folder into your Project root if you wish to use the optional convenience content.
 6. Restart the Editor and open your project again.
 7. Select Window->Plugins. Click on Installed and you should see a category called Input and a plugin called Myo Plugin now available. Select Enabled. The Editor will warn you to restart, click restart.
 8. When your project has reloaded, the plugin should be enabled and ready to use. 
-
-(Optional) You can confirm it has successfully loaded by opening the Class Viewer, searching "myo" should show you one actor class added by the plugin called *MyoPluginActor*.
 
 ## How to Use##
 The plugin is designed with an event driven architecture through a delegate interface. You can access device events through the UE4 Input Mapping system, adding myo support to any blueprint through the Myo Component and Myo Interface, the convenience Blueprint classes provided, or through C++. C++ supports both subclassing of provided example class or by inheriting the MyoDelegate, you can extend your own class to support Myo events. Additionally callable functions support polling for latest data.
@@ -23,7 +20,7 @@ The plugin is designed with an event driven architecture through a delegate inte
 ## Input Mapping ##
 
  1.	For a good example start with a template project.
- 2.	Use the MyoPluginController or the MyoPluginActor (NB the convenience actor needs to be placed), or any blueprint with the Myo Component attached.
+ 2.	Use the MyoPluginActor (NB the convenience actor needs to be placed), or attach the Myo Component to any desired blueprint.
  3.	Select Edit->Project Settings.
  4.	Select Engine->Input
  5.	Under Action Mappings and Axis Mappings expand the category you wish to add controller movement to. For example if you want to add Forward motion in the standard 3rd person template, click the + sign in MoveForward.
@@ -43,7 +40,7 @@ FKey MyoPoseFist;
 FKey MyoPoseWaveIn;
 FKey MyoPoseWaveOut;
 FKey MyoPoseFingersSpread;
-FKey MyoPoseThumbToPinky;
+FKey MyoPoseDoubleTap;
 FKey MyoPoseUnknown;
 
 //Axis
@@ -81,23 +78,41 @@ Available since v0.7, this method works by adding a Myo Component and then subsc
 
 </ol>
 
-####Calibration
+###Calibration###
+
 If you're using only delta values, you may wish to use the raw values instead. If you would like to use absolute orientations (e.g. copying an arm orientation, or getting acceleration in component space) however you may wish to use the calibrated arm space values.
 
 Myo reports values in myo space, which may be rotated around your wrist and has no fixed reference to which direction your screen is. In order to use arm space data emitted from On Arm Moved correctly, your myo should be calibrated. This is done by pointing your myo forward toward your screen or another known reference direction (adjustable in the function) and calling Calibrate Arm Orientation on the myo you wish to calibrate. After this is done all your arm space orientation, gyro, and acceleration data will be automatically rotated to compensate for any wrist roll offset (myo can be arbitrarily rotated around your wrist), yaw offset (difference between screen and magnetic north) and you can safely use these outputs to drive your 3d data in component space.
 
 example of how to calibrate:
+
 <img src="http://i.imgur.com/yQcd5NH.png">
 
 Note that you should perform a 'Sync Gesture' first in order to establish which arm the myo is on and which direction it is facing (toward wrist/arm), calibration picks this up and automatically adjusts for it as well, but if your arm isn't detected (synced), your movements may be inverse if you have the device on the opposite direction compared to default.
 
-#### Locking Policy ####
+###Specific Arm###
+
+The myo can distinguish your arms after you've done the [sync gesture](https://support.getmyo.com/hc/en-us/articles/200755509-How-to-perform-the-sync-gesture). There are two methods used in the plugin to get your arm possession.
+
+One, you can get the arm possession by dragging off the myo controller pointer you get from an event such as OnPair or OnPose.
+
+For Example if you had a pose and you wanted it to only affect a particular arm you could do something like this
+
+<img src="http://i.imgur.com/cWjHCPd.png">
+
+Two, if you want a reference to specific arms outside an event, you can get them by dragging off of the myo component and using any of the convenience functions
+
+<img src="http://i.imgur.com/W8vqfa8.png">
+
+Remember that all the available functions/properties relevant to the myo are easily searched by dragging off of the Myo Controller or Myo Component and typing 'myo'. 
+
+### Locking Policy ###
 Since myo beta 7, the SDK implements a locking policy. This means you can perform a double-tap pose on your myo to unlock and make a gesture, which then locks itself automatically again. By default this plugin has no locking policy, if you wish to use one however simply set it at an appropriate time e.g. in your begin play.
 
 <img src="http://i.imgur.com/2x0lZpG.png">
 
 
-#### Raw Data Streams ####
+### Raw Data Streams ###
 Since 0.7.7 the plugin supports raw streams. You have to first enable the raw streams for your myo
 
 e.g. using the double tap pose
@@ -154,7 +169,7 @@ Since 0.7.7 the plugin includes optional Content such as the Myo Utility BP Libr
 
 <img src="http://i.imgur.com/uV37oa4.png">
 
-Simply by copying the content folder into your project root exposes the library and you can use the utility functions to e.g.
+To see this content simply select View->Show Plugin Content from your Content browser. Below are a few examples of using this function library.
 
 Debug your orientation
 
@@ -241,7 +256,6 @@ find <i>WindowsNoEditor/MyoPluginTest</i>, this is your packaged project root. A
 
 ##Credits and License##
 * Plugin by Getnamo, Myo SDK provided by Thalmic Labs
-* Bound to Thalmic Myo SDK Beta-5
 * Point any questions and queries to the [plugin unreal engine thread](https://forums.unrealengine.com/showthread.php?37876-Plugin-Myo)
 
 
