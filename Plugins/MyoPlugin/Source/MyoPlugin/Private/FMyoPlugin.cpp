@@ -19,7 +19,7 @@ IMPLEMENT_MODULE(FMyoPlugin, MyoPlugin)
 #define ORIENTATION_SCALE_YAWROLL 0.00555555555 //1/180
 #define GYRO_SCALE 0.02222222222				//1/45
 
-#define PLUGIN_VERSION "0.7.9"
+#define PLUGIN_VERSION "0.7.10"
 
 //Private API - This is where the magic happens
 
@@ -209,7 +209,8 @@ public:
 		}
 	}
 
-	void onArmSync(myo::Myo *myo, uint64_t timestamp, myo::Arm arm, myo::XDirection xDirection){
+	void onArmSync(myo::Myo* myo, uint64_t timestamp, myo::Arm arm, myo::XDirection xDirection, float rotation,
+		myo::WarmupState warmupState){
 		int myoIndex = myoIndexForMyo(myo);
 		m_data[myoIndex].arm = arm;
 		m_data[myoIndex].xDirection = xDirection;

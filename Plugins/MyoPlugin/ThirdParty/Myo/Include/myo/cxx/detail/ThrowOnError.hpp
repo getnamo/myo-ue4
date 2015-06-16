@@ -105,5 +105,4 @@ public:
 
 private:
 };
-
 #endif // MYO_CXX_DETAIL_THROWONERROR_HPP
