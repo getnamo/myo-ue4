@@ -70,7 +70,8 @@ void MyoDelegateBlueprint::MyoOnEmgData(int32 myoId, FMyoEmgData data)
 
 void MyoDelegateBlueprint::MyoDisabled()
 {
-	IMyoInterface::Execute_DeviceDisabled(_interfaceDelegate);
+	if (IsValidDelegate())
+		IMyoInterface::Execute_DeviceDisabled(_interfaceDelegate);
 }
 
 //Blueprint functions forward
