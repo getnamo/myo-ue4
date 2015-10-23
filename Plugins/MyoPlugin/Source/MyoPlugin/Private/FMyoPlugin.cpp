@@ -19,7 +19,7 @@ IMPLEMENT_MODULE(FMyoPlugin, MyoPlugin)
 #define ORIENTATION_SCALE_YAWROLL 0.00555555555 //1/180
 #define GYRO_SCALE 0.02222222222				//1/45
 
-#define PLUGIN_VERSION "0.7.12"
+#define PLUGIN_VERSION "0.7.13"
 
 //Private API - This is where the magic happens
 
@@ -79,7 +79,7 @@ FVector convertAccelerationToBodySpace(FVector armAcceleration, FRotator orienta
 {
 	float directionModifier = 1.f;
 	//something wrong here, also make sure this is applied to the arm space correction as well
-	if (direction == myo::xDirectionTowardWrist){
+	if (direction == myo::xDirectionTowardElbow){
 		directionModifier = -1.f;
 	}
 
@@ -98,7 +98,7 @@ FRotator convertOrientationToArmSpace(FRotator convertedOrientation, FRotator ar
 {
 	float directionModifier = 1.f;
 	//Check for arm direction, compensate if needed by reversing pitch and roll
-	if (direction == myo::xDirectionTowardWrist){
+	if (direction == myo::xDirectionTowardElbow){
 		directionModifier = -1.f;
 		convertedOrientation = FRotator(convertedOrientation.Pitch*directionModifier, convertedOrientation.Yaw, convertedOrientation.Roll*directionModifier);
 	}

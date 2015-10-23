@@ -30,7 +30,7 @@ enum MyoPose
 	MYO_POSE_WAVEOUT,
 	MYO_POSE_FINGERSPREAD,
 	MYO_POSE_DOUBLETAP,
-	MYO_POSE_UNKNOWN = 255	//this needs to be properly switched...
+	MYO_POSE_MAX = 255
 };
 
 UENUM(BlueprintType)
