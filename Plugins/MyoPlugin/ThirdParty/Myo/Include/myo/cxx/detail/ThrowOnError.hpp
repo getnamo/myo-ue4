@@ -26,7 +26,7 @@ public:
     {
     }
 
-    ~ThrowOnError() LIBMYO_NOEXCEPT(false)
+    ~ThrowOnError() LIBMYO_NOEXCEPT(true)
     {
         if (_error)
         {
@@ -36,13 +36,13 @@ public:
             {
                 std::runtime_error exception(libmyo_error_cstring(_error));
                 libmyo_free_error_details(_error);
-                throw exception;
+                //throw exception;
             }
             case libmyo_error_invalid_argument:
             {
                 std::invalid_argument exception(libmyo_error_cstring(_error));
                 libmyo_free_error_details(_error);
-                throw exception;
+                //throw exception;
             }
             case libmyo_success:
             {
