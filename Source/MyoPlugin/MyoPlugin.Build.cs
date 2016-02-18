@@ -13,10 +13,25 @@ namespace UnrealBuildTool.Rules
 
         private string ThirdPartyPath
         {
-            get { return Path.GetFullPath(Path.Combine(ModulePath, "../../ThirdParty/")); }
+            get { return Path.GetFullPath(Path.Combine(ModulePath, "../ThirdParty/")); }
         }
 
-		public MyoPlugin(TargetInfo Target)
+        private string LibrariesPath
+        {
+            get { return Path.Combine(ThirdPartyPath, "Thalmic", "Lib"); }
+        }
+
+        private string IncludePath
+        {
+            get { return Path.Combine(ThirdPartyPath, "Thalmic", "Include"); }
+        }
+
+        private string BinariesPath
+        {
+            get { return Path.Combine(ThirdPartyPath, "Thalmic", "Binaries"); }
+        }
+
+        public MyoPlugin(TargetInfo Target)
 		{
 			PublicIncludePaths.AddRange(
 				new string[] {
@@ -28,7 +43,7 @@ namespace UnrealBuildTool.Rules
 			PrivateIncludePaths.AddRange(
 				new string[] {
 					"MyoPlugin/Private",
-                    Path.Combine(ThirdPartyPath, "Myo", "Include"),
+                    IncludePath,
 					// ... add other private include paths required here ...
 				}
 				);
@@ -72,14 +87,13 @@ namespace UnrealBuildTool.Rules
                 isLibrarySupported = true;
 
                 string PlatformString = (Target.Platform == UnrealTargetPlatform.Win64) ? "64" : "32";
-                string LibrariesPath = Path.Combine(ThirdPartyPath, "Myo", "Lib");
 
                 PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "myo" + PlatformString + ".lib"));
-            }
 
-            if (isLibrarySupported)
-            {
-                // Include path
+                string DLLString = Path.Combine(BinariesPath, "Win" + PlatformString, "myo" + PlatformString + ".dll");
+                RuntimeDependencies.Add(new RuntimeDependency(DLLString));
+
+                //Include Path
                 PublicIncludePaths.Add(Path.Combine(ThirdPartyPath, "Myo", "Include"));
             }
 

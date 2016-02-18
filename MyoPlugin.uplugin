@@ -2,13 +2,14 @@
     "FileVersion" : 3,
 	
 	"FriendlyName" : "Myo Plugin",
-	"Version" : 7,
-	"VersionName" : "0.7.14",
+	"Version" : 1,
+	"VersionName" : "0.8.0",
 	"CreatedBy" : "Getnamo",
-	"CreatedByURL" : "http://syntheticinsights.com",
-	"EngineVersion" : "4.10+",
+	"CreatedByURL" : "https://github.com/getnamo/myo-ue4",
+	"EngineVersion" : "4.11",
 	"Description" : "Unofficial Plugin for Thalmic Myo.",
 	"Category" : "Input.Controller",
+	"EnabledByDefault" : true,
 	
     "Modules" :
 	[

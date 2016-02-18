@@ -4,3 +4,6 @@
 *.o
 *.obj
 *.pdb
+
+#Directories
+Intermediate
