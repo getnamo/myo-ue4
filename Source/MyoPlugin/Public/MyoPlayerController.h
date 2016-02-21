@@ -8,7 +8,7 @@
  * 
  */
 UCLASS()
-class AMyoPlayerController : public APlayerController, public MyoDelegateBlueprint, public IMyoInterface
+class MYOPLUGIN_API AMyoPlayerController : public APlayerController, public MyoDelegateBlueprint, public IMyoInterface
 {
 	GENERATED_UCLASS_BODY()
 

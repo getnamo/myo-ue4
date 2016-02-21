@@ -10,7 +10,7 @@ struct MyoDeviceData;
 /**
  * The public interface to this module
  */
-class IMyoPlugin : public IModuleInterface
+class MYOPLUGIN_API IMyoPlugin : public IModuleInterface
 {
 
 public:

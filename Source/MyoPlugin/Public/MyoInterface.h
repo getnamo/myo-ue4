@@ -9,7 +9,7 @@ class UMyoInterface : public UInterface
 	GENERATED_UINTERFACE_BODY()
 };
 
-class IMyoInterface
+class MYOPLUGIN_API IMyoInterface
 {
 	GENERATED_IINTERFACE_BODY()
 

@@ -3,7 +3,7 @@
 class DataCollector;
 class MyoDelegate;
 
-class FMyoPlugin : public IMyoPlugin
+class MYOPLUGIN_API FMyoPlugin : public IMyoPlugin
 {
 public:
 	/** IModuleInterface implementation */

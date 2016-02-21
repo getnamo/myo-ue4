@@ -12,14 +12,12 @@
 #include <vector>
 #include <myo/myo.hpp>
 
-IMPLEMENT_MODULE(FMyoPlugin, MyoPlugin)
-
 #define LOCTEXT_NAMESPACE "MyoPlugin"
 #define ORIENTATION_SCALE_PITCH 0.01111111111	//1/90
 #define ORIENTATION_SCALE_YAWROLL 0.00555555555 //1/180
 #define GYRO_SCALE 0.02222222222				//1/45
 
-#define PLUGIN_VERSION "0.7.14"
+#define PLUGIN_VERSION "0.8.0"
 
 //Private API - This is where the magic happens
 
@@ -847,3 +845,5 @@ void FMyoPlugin::MyoTick(float DeltaTime)
 }
 
 #undef LOCTEXT_NAMESPACE
+
+IMPLEMENT_MODULE(FMyoPlugin, MyoPlugin)

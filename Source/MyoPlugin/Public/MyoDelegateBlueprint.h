@@ -6,7 +6,7 @@
 
 #include "MyoInterface.h"
 
-class MyoDelegateBlueprint : public MyoDelegate
+class MYOPLUGIN_API MyoDelegateBlueprint : public MyoDelegate
 {
 public:
 

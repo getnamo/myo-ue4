@@ -4,7 +4,7 @@
 #include "MyoController.generated.h"
 
 UCLASS(BlueprintType)
-class UMyoController : public UObject
+class MYOPLUGIN_API UMyoController : public UObject
 {
 friend class MyoDelegateBlueprint;
 	GENERATED_UCLASS_BODY()

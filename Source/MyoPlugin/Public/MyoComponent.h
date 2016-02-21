@@ -6,7 +6,7 @@
 #include "MyoComponent.generated.h"
 
 UCLASS(ClassGroup="Input Controller", meta=(BlueprintSpawnableComponent))
-class UMyoComponent : public UActorComponent, public MyoDelegateBlueprint
+class MYOPLUGIN_API UMyoComponent : public UActorComponent, public MyoDelegateBlueprint
 {
 	GENERATED_UCLASS_BODY()
 

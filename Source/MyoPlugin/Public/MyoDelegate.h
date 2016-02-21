@@ -119,7 +119,7 @@ struct EKeysMyo
 	static const FKey MyoGyroZ;
 };
 
-class MyoDelegate
+class MYOPLUGIN_API MyoDelegate
 {
 public:
 	/** Events */

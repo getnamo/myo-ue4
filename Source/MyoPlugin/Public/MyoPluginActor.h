@@ -10,7 +10,7 @@
  * Use or Extend to receive event notifications.
  */
 UCLASS()
-class AMyoPluginActor : public AActor, public MyoDelegateBlueprint, public IMyoInterface
+class MYOPLUGIN_API AMyoPluginActor : public AActor, public MyoDelegateBlueprint, public IMyoInterface
 {
 	GENERATED_UCLASS_BODY()
 

@@ -91,7 +91,8 @@ namespace UnrealBuildTool.Rules
                 PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "myo" + PlatformString + ".lib"));
 
                 string DLLString = Path.Combine(BinariesPath, "Win" + PlatformString, "myo" + PlatformString + ".dll");
-                RuntimeDependencies.Add(new RuntimeDependency(DLLString));
+                PublicDelayLoadDLLs.Add(DLLString);
+                RuntimeDependencies.Add(new RuntimeDependency(Path.Combine(BinariesPath, "Win64", "myo64.dll")));
 
                 //Include Path
                 PublicIncludePaths.Add(Path.Combine(ThirdPartyPath, "Myo", "Include"));
