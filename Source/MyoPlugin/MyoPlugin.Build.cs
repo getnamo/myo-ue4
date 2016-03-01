@@ -33,7 +33,7 @@ namespace UnrealBuildTool.Rules
 
         private string BinariesPath
         {
-            get { return Path.Combine(ThalmicPath, "Binaries"); }
+            get { return Path.GetFullPath(Path.Combine(ModulePath, "../../Binaries")); }
         }
 
         public MyoPlugin(TargetInfo Target)
