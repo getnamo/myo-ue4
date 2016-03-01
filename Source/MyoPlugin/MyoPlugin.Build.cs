@@ -16,19 +16,24 @@ namespace UnrealBuildTool.Rules
             get { return Path.GetFullPath(Path.Combine(ModulePath, "../ThirdParty/")); }
         }
 
+        private string ThalmicPath
+        {
+            get { return Path.GetFullPath(Path.Combine(ThirdPartyPath, "Thalmic")); }
+        }
+
         private string LibrariesPath
         {
-            get { return Path.Combine(ThirdPartyPath, "Thalmic", "Lib"); }
+            get { return Path.Combine(ThalmicPath, "Lib"); }
         }
 
         private string IncludePath
         {
-            get { return Path.Combine(ThirdPartyPath, "Thalmic", "Include"); }
+            get { return Path.Combine(ThalmicPath, "Include"); }
         }
 
         private string BinariesPath
         {
-            get { return Path.Combine(ThirdPartyPath, "Thalmic", "Binaries"); }
+            get { return Path.Combine(ThalmicPath, "Binaries"); }
         }
 
         public MyoPlugin(TargetInfo Target)
@@ -92,7 +97,7 @@ namespace UnrealBuildTool.Rules
 
                 string DLLString = Path.Combine(BinariesPath, "Win" + PlatformString, "myo" + PlatformString + ".dll");
                 PublicDelayLoadDLLs.Add(DLLString);
-                RuntimeDependencies.Add(new RuntimeDependency(Path.Combine(BinariesPath, "Win64", "myo64.dll")));
+                RuntimeDependencies.Add(new RuntimeDependency(DLLString));
 
                 //Include Path
                 PublicIncludePaths.Add(Path.Combine(ThirdPartyPath, "Myo", "Include"));

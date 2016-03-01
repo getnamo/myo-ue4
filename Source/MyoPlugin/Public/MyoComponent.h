@@ -5,6 +5,8 @@
 #include "MyoDelegateBlueprint.h"
 #include "MyoComponent.generated.h"
 
+//TODO: multicast delegates here
+
 UCLASS(ClassGroup="Input Controller", meta=(BlueprintSpawnableComponent))
 class MYOPLUGIN_API UMyoComponent : public UActorComponent, public MyoDelegateBlueprint
 {
