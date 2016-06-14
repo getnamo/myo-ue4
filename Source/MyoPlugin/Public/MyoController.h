@@ -1,6 +1,5 @@
 #pragma once
 
-#include "MyoDelegate.h"
 #include "MyoController.generated.h"
 
 UCLASS(BlueprintType)
@@ -12,51 +11,51 @@ public:
 
 	//Can be rest, fist, waveIn, waveOut, fingersSpread, reserved1, DoubleTap, unknown
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Myo Frame")
-	TEnumAsByte<MyoPose> pose;
+	TEnumAsByte<EMyoPose> Pose;
 
 	//acceleration in units of g
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Myo Frame")
-	FVector acceleration;
+	FVector Acceleration;
 
 	//orientation in rotator format
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Myo Frame")
-	FRotator orientation;
+	FRotator Orientation;
 
 	// gyroscope vector in deg / s
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Myo Frame")
-	FVector gyro;
+	FVector Gyro;
 
 	//right, left, unknown
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Myo Frame")
-	TEnumAsByte<MyoArm> arm;
+	TEnumAsByte<EMyoArm> Arm;
 
 	//toward wrist, toward elbow, unknown
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Myo Frame")
-	TEnumAsByte<MyoArmDirection> xDirection;
+	TEnumAsByte<EMyoArmDirection> ArmDirection;
 
 	//acceleration in arm space given in units of g
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Myo Frame")
-	FVector armAcceleration;
+	FVector ArmAcceleration;
 
 	//orientation in arm space
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Myo Frame")
-	FRotator armOrientation;
+	FRotator ArmOrientation;
 
 	//gyro in arm space
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Myo Frame")
-	FVector armGyro;
+	FVector ArmGyro;
 
 	//the correction rotation to transform raw into arm space
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Myo Frame")
-	FRotator armSpaceCorrection;
+	FRotator ArmSpaceCorrection;
 
 	//BodySpaceAcceleration(out) acceleration in calibrated body space, with gravity removed. (This value is used for velocity and position integration)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Myo Frame")
-	FVector bodySpaceNullAcceleration;
+	FVector BodySpaceNullAcceleration;
 
 	//Id identifying myo, used for calling functions
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Myo Frame")
-	int32 myoId;
+	int32 MyoId;
 
 	//Convenience Call, optionally check hand possession property
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Myo Frame")
@@ -72,7 +71,7 @@ public:
 	* @param type (in) Options: Short, Medium, Long
 	*/
 	UFUNCTION(BlueprintCallable, Category = MyoFunctions)
-	void VibrateDevice(MyoVibrationType type);
+	void VibrateDevice(EMyoVibrationType Type);
 
 	/**
 	* Calibrate the Orientation for Arm Space. Ask the user to point their arm to the screen, then call this function and all orientation will be
@@ -81,14 +80,14 @@ public:
 	* @param direction (in) orientation of the calibrated myo with respect to the user forward vector (R0,P0,Y0) specifies into the screen, (R0,P0,Y90) specifies pointing right, etc.
 	*/
 	UFUNCTION(BlueprintCallable, Category = MyoFunctions)
-	void CalibrateArmOrientation(FRotator direction);
+	void CalibrateArmOrientation(FRotator Direction);
 
 	/**
 	* Unlocks the Myo if locked to detect gestures
 	* @param type (in) type of unlock (short period or indefinite hold)
 	*/
 	UFUNCTION(BlueprintCallable, Category = MyoFunctions)
-	void Unlock(MyoUnlockType type);
+	void Unlock(EMyoUnlockType Type);
 
 	/**
 	* Tell the Myo to stay unlocked until told otherwise.
@@ -100,11 +99,11 @@ public:
 	* Sets the EMG streaming mode for this Myo
 	*/
 	UFUNCTION(BlueprintCallable, Category = MyoFunctions)
-	void SetStreamEmg(MyoStreamEmgType streamType);
+	void SetStreamEmg(EMyoStreamEmgType StreamType);
 
 	//Conversion
-	void setFromMyoDeviceData(MyoDeviceData* data);
+	void setFromMyoDeviceData(FMyoDeviceData* Data);
 
 private:
-	MyoDelegate* _myoDelegate;
+	MyoDataDelegate* PrivateMyoDelegate;
 };
