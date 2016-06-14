@@ -16,15 +16,15 @@ void UMyoComponent::OnRegister()
 	Super::OnRegister();
 
 	//Attach the delegate pointer automatically to the owner of the component
-	ValidSelfPointer = this;
-	SetInterfaceDelegate(GetOwner());
-	MyoStartup();
+	//ValidSelfPointer = this;
+	//SetInterfaceDelegate(GetOwner());
+	//MyoStartup();
 }
 
 void UMyoComponent::OnUnregister()
 {
 	Super::OnUnregister();
-	MyoShutdown();
+	//MyoShutdown();
 }
 
 void UMyoComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,
@@ -33,38 +33,38 @@ void UMyoComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	//Forward the component tick
-	MyoTick(DeltaTime);
+	//MyoTick(DeltaTime);
 }
 
 //Functions forwards, required implementations
 bool UMyoComponent::IsHubEnabled()
 {
-	return MyoIsHubEnabled();
+	return false; //MyoIsHubEnabled();
 }
 
 void UMyoComponent::SetLockingPolicy(TEnumAsByte<EMyoLockingPolicy> policy)
 {
-	MyoSetLockingPolicy(policy);
+	return; // MyoSetLockingPolicy(policy);
 }
 
 UMyoController* UMyoComponent::LeftMyo()
 {
-	return MyoLeftMyo();
+	return nullptr; // MyoLeftMyo();
 }
 
 UMyoController* UMyoComponent::RightMyo()
 {
-	return MyoRightMyo();
+	return nullptr; // MyoRightMyo();
 }
 
 UMyoController* UMyoComponent::PrimaryMyo()
 {
-	return MyoPrimaryMyo();
+	return nullptr;// MyoPrimaryMyo();
 }
 
 void UMyoComponent::ConvertToMyoOrientationSpace(FRotator orientation, FRotator& converted)
 {
-	return MyoConvertToMyoOrientationSpace(orientation, converted);
+	return; // MyoConvertToMyoOrientationSpace(orientation, converted);
 }
 
 

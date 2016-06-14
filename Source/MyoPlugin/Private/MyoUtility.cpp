@@ -1,6 +1,23 @@
 #include "MyoPluginPrivatePCH.h"
 #include "MyoUtility.h"
-#include "Myo.h"
+
+//Input Mapping EKey definitions
+const FKey EKeysMyo::MyoPoseRest("MyoPoseRest");
+const FKey EKeysMyo::MyoPoseFist("MyoPoseFist");
+const FKey EKeysMyo::MyoPoseWaveIn("MyoPoseWaveIn");
+const FKey EKeysMyo::MyoPoseWaveOut("MyoPoseWaveOut");
+const FKey EKeysMyo::MyoPoseFingersSpread("MyoPoseFingersSpread");
+const FKey EKeysMyo::MyoPoseDoubleTap("MyoPoseDoubleTap");
+const FKey EKeysMyo::MyoPoseUnknown("MyoPoseUnknown");
+const FKey EKeysMyo::MyoAccelerationX("MyoAccelerationX");
+const FKey EKeysMyo::MyoAccelerationY("MyoAccelerationY");
+const FKey EKeysMyo::MyoAccelerationZ("MyoAccelerationZ");
+const FKey EKeysMyo::MyoOrientationPitch("MyoOrientationPitch");
+const FKey EKeysMyo::MyoOrientationYaw("MyoOrientationYaw");
+const FKey EKeysMyo::MyoOrientationRoll("MyoOrientationRoll");
+const FKey EKeysMyo::MyoGyroX("MyoGyroX");
+const FKey EKeysMyo::MyoGyroY("MyoGyroY");
+const FKey EKeysMyo::MyoGyroZ("MyoGyroZ");
 
 namespace MyoUtility 
 {

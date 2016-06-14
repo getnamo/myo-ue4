@@ -8,11 +8,9 @@
 
 namespace MyoUtility
 {
-	#define LOCTEXT_NAMESPACE "MyoPlugin"
 	#define ORIENTATION_SCALE_PITCH 0.01111111111	//1/90
 	#define ORIENTATION_SCALE_YAWROLL 0.00555555555 //1/180
 	#define GYRO_SCALE 0.02222222222				//1/45
-
 
 	//UE IM event wrappers
 	bool EmitKeyUpEventForKey(FKey key, int32 user, bool repeat);
