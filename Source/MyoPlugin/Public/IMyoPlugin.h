@@ -3,14 +3,15 @@
 #pragma once
 
 #include "ModuleManager.h"
+#include "IInputDeviceModule.h"
 
-class MyoDelegate;
-struct MyoDeviceData;
+class MyoDataDelegate;
+class UMyoComponent;
 
 /**
  * The public interface to this module
  */
-class MYOPLUGIN_API IMyoPlugin : public IModuleInterface
+class MYOPLUGIN_API IMyoPlugin : public IInputDeviceModule
 {
 
 public:
@@ -37,26 +38,10 @@ public:
 	}
 
 	/**
-	 * Public API, implemented in FMyoPlugin.cpp
-	 * Optional way of getting data is to subscribe to the MyoDelegate class through inheritance
+	 * Public API
 	 */
-	virtual void SetDelegate(MyoDelegate* newDelegate) {};
-	virtual void RemoveDelegate(){};
-	virtual void MyoTick(float DeltaTime) {};
+	virtual MyoDataDelegate* DataDelegate() { return nullptr; };
+	virtual void DeferedAddDelegate(UMyoComponent* delegate) {};
 
-	virtual void VibrateDevice(int deviceId, int vibrationType) {};
-	virtual MyoDeviceData* LatestData(int deviceId) { return NULL; };
-	virtual void WhichArm(int deviceId, int& arm){};
-	virtual void LeftMyoId(bool& available, int& deviceId){};
-	virtual void RightMyoId(bool& available, int& deviceId){};
-	virtual void PrimaryMyoId(bool& available, int& deviceId){};
-	virtual void MaxMyoId(int& size){};
-	virtual bool IsHubEnabled() = 0;
-	virtual bool IsValidDeviceId(int myoId) = 0;
-	virtual void CalibrateOrientation(int deviceId, FRotator direction){};
-	virtual void SetLockingPolicy(enum MyoLockingPolicy policy){};
-	virtual void UnlockMyo(int deviceId, enum MyoUnlockType type){};
-	virtual void LockMyo(int deviceId){};
-	virtual void SetStreamEmg(int deviceId, enum MyoStreamEmgType type){};
 };
 

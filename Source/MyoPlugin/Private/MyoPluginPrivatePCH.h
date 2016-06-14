@@ -5,3 +5,5 @@
 
 #include "Engine.h"
 #include "CoreUObject.h"
+#include "InputDevice.h"
+#include "MyoEnum.h"

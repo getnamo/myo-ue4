@@ -1,14 +1,13 @@
 #pragma once
 
 #include "MyoPluginPrivatePCH.h"
-#include "MyoDelegate.h"
-#include "MyoDelegateBlueprint.h"
+#include "MyoEnum.h"
 #include "MyoComponent.generated.h"
 
 //TODO: multicast delegates here
 
 UCLASS(ClassGroup="Input Controller", meta=(BlueprintSpawnableComponent))
-class MYOPLUGIN_API UMyoComponent : public UActorComponent, public MyoDelegateBlueprint
+class MYOPLUGIN_API UMyoComponent : public UActorComponent //delegate here
 {
 	GENERATED_UCLASS_BODY()
 
@@ -25,9 +24,7 @@ public:
 	* Set the Locking Policy of the Myo Hub see myo documentation for details.
 	*/
 	UFUNCTION(BlueprintCallable, Category = MyoFunctions)
-	void SetLockingPolicy(enum MyoLockingPolicy policy);
-
-	//TODO: add historical support later and latest if in demand
+	void SetLockingPolicy(TEnumAsByte<EMyoLockingPolicy> policy);
 
 	//Convenience Methods - Get
 	/**

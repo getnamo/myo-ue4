@@ -48,7 +48,7 @@ public:
 	*	Event (non-thalmic api) giving calibrated values
 	*/
 	UFUNCTION(BlueprintImplementableEvent, Category = MyoEvents)
-	void OnArmMoved(UMyoController* myo, FVector armAcceleration, FRotator armOrientation, FVector armGyro, MyoPose pose);
+	void OnArmMoved(UMyoController* myo, FVector armAcceleration, FRotator armOrientation, FVector armGyro, EMyoPose pose);
 
 	/**
 	* Event on a Myo receiving orientation data, typically each frame.
@@ -80,7 +80,7 @@ public:
 	* @param pose (out): EMG pose, refer to Thalmic API rest, fist, waveIn, waveOut, fingersSpread, reserved1, DoubleTap, unknown
 	*/
 	UFUNCTION(BlueprintImplementableEvent, Category = MyoEvents)
-	void OnPose(UMyoController* myo, MyoPose pose);
+	void OnPose(UMyoController* myo, EMyoPose pose);
 
 	/**
 	* On arm detection, typically after a wave out gesture
@@ -89,7 +89,7 @@ public:
 	* @param direction (out) 0 = toward wrist, 1 = toward elbow, 2 = unknown
 	*/
 	UFUNCTION(BlueprintImplementableEvent, Category = MyoEvents)
-	void OnArmSync(UMyoController* myo, MyoArm arm, MyoArmDirection direction);
+	void OnArmSync(UMyoController* myo, EMyoArm arm, EMyoArmDirection direction);
 
 	/**
 	* Called when a myo has been removed from arm.
@@ -103,8 +103,8 @@ public:
 	* @param myo (out) pointer to emitted myo controller class, branch to read other data.
 	* @param data (out) struct containing an array of ints containing raw myo stream data; there are 8 streams.
 	*/
-	UFUNCTION(BlueprintImplementableEvent, Category = MyoEvents)
-	void OnEmgData(UMyoController* myo, FMyoEmgData data);
+	//UFUNCTION(BlueprintImplementableEvent, Category = MyoEvents)
+	//void OnEmgData(UMyoController* myo, FMyoEmgData data);
 
 	/**
 	* Called when a problem occurs such as bluetooth usb device not being detected (unplugged).

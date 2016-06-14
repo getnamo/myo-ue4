@@ -2,9 +2,6 @@
 
 #include "IMyoPlugin.h"
 #include "FMyoPlugin.h"
-#include "MyoDelegate.h"
-#include "MyoDelegateBlueprint.h"
-#include "MyoHubWorker.h"
 #include "SlateBasics.h"
 
 #include <iostream>
@@ -21,7 +18,7 @@
 
 //Private API - This is where the magic happens
 
-//UE v4.6 IM event wrappers
+//UE IM event wrappers
 bool EmitKeyUpEventForKey(FKey key, int32 user, bool repeat)
 {
 	FKeyEvent KeyEvent(key, FSlateApplication::Get().GetModifierKeys(), user, repeat, 0, 0);
@@ -258,7 +255,7 @@ public:
 		if (myoIndex == -1){
 			knownMyos.push_back(myo);
 
-			MyoDeviceData data;
+			FMyoDeviceData data;
 			//ensure we initialize values to proper start points
 			data.xDirection = myo::xDirectionUnknown;
 			data.arm = myo::armUnknown;
@@ -335,7 +332,7 @@ public:
 		if (myoDelegate)
 		{
 			myoDelegate->MyoOnAccelerometerData(myoIndex + 1, timestamp, m_data[myoIndex].acceleration);
-			myoDelegate->MyoOnArmMoved(myoIndex + 1, m_data[myoIndex].armAcceleration, m_data[myoIndex].armOrientation, m_data[myoIndex].armGyro, (MyoPose)m_data[myoIndex].pose);	//non-thalmic api
+			myoDelegate->MyoOnArmMoved(myoIndex + 1, m_data[myoIndex].armAcceleration, m_data[myoIndex].armOrientation, m_data[myoIndex].armGyro, (EMyoPose)m_data[myoIndex].pose);	//non-thalmic api
 
 			//InputMapping - only supports controller 1 for now
 			if (myoIsValidForInputMapping(myo))
@@ -573,7 +570,7 @@ public:
 	int leftMyo;
 	int rightMyo;
 	myo::Myo* lastPairedMyo;
-	std::vector<MyoDeviceData>  m_data;	//up to n devices supported
+	std::vector<FMyoDeviceData>  m_data;	//up to n devices supported
 	MyoDelegate* myoDelegate;
 	bool Enabled;
 	bool Listening;
@@ -647,7 +644,7 @@ void FMyoPlugin::LockMyo(int deviceId)
 	myo::Myo* myo = collector->knownMyos[deviceId - 1];
 	myo->lock();
 }
-void FMyoPlugin::UnlockMyo(int deviceId, MyoUnlockType type)
+void FMyoPlugin::UnlockMyo(int deviceId, EMyoUnlockType type)
 {
 	if (!this->IsValidDeviceId(deviceId)) return;
 
@@ -669,7 +666,7 @@ void FMyoPlugin::UnlockMyo(int deviceId, MyoUnlockType type)
 	myo->unlock(myoUnlockType);
 }
 
-void FMyoPlugin::SetLockingPolicy(MyoLockingPolicy policy)
+void FMyoPlugin::SetLockingPolicy(EMyoLockingPolicy policy)
 {
 	if (collector->hub == NULL){
 		UE_LOG(MyoPluginLog, Log, TEXT("(FMyoPlugin)Hub hasn't been initialized, locking policy setting failed."))
@@ -700,7 +697,7 @@ void FMyoPlugin::SetLockingPolicy(MyoLockingPolicy policy)
 	collector->SetLockingPolicy(hubLockingPolicy);
 }
 
-void FMyoPlugin::SetStreamEmg(int deviceId, MyoStreamEmgType type)
+void FMyoPlugin::SetStreamEmg(int deviceId, EMyoStreamEmgType type)
 {
 	if (!this->IsValidDeviceId(deviceId)) return;
 
@@ -724,7 +721,7 @@ void FMyoPlugin::SetStreamEmg(int deviceId, MyoStreamEmgType type)
 }
  
 //Freshest Data
-MyoDeviceData* FMyoPlugin::LatestData(int deviceId)
+FMyoDeviceData* FMyoPlugin::LatestData(int deviceId)
 {
 	if (!this->IsValidDeviceId(deviceId)) return NULL;
 

@@ -42,7 +42,7 @@ bool UMyoComponent::IsHubEnabled()
 	return MyoIsHubEnabled();
 }
 
-void UMyoComponent::SetLockingPolicy(MyoLockingPolicy policy)
+void UMyoComponent::SetLockingPolicy(TEnumAsByte<EMyoLockingPolicy> policy)
 {
 	MyoSetLockingPolicy(policy);
 }

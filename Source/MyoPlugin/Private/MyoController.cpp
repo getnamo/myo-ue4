@@ -1,5 +1,5 @@
 #include "MyoPluginPrivatePCH.h"
-#include "MyoDelegate.h"
+#include "MyoEnum.h"
 #include "MyoController.h"
 
 UMyoController::UMyoController(const FObjectInitializer &init) : UObject(init)
@@ -8,53 +8,53 @@ UMyoController::UMyoController(const FObjectInitializer &init) : UObject(init)
 
 bool UMyoController::isOnLeftArm()
 {
-	return arm == MyoArm::MYO_ARM_LEFT;
+	return Arm == EMyoArm::MYO_ARM_LEFT;
 }
 
 bool UMyoController::isOnRightArm()
 {
-	return arm == MyoArm::MYO_ARM_RIGHT;
+	return Arm == EMyoArm::MYO_ARM_RIGHT;
 }
 
-void UMyoController::CalibrateArmOrientation(FRotator direction)
+void UMyoController::CalibrateArmOrientation(FRotator Direction)
 {
-	_myoDelegate->MyoCalibrateArmOrientation(this->myoId, direction);
+	PrivateMyoDelegate->MyoCalibrateArmOrientation(this->MyoId, Direction);
 }
 
-void UMyoController::VibrateDevice(MyoVibrationType type)
+void UMyoController::VibrateDevice(EMyoVibrationType Type)
 {
-	_myoDelegate->MyoVibrateDevice(this->myoId, type);
+	PrivateMyoDelegate->MyoVibrateDevice(this->MyoId, Type);
 }
 
-void UMyoController::Unlock(MyoUnlockType type)
+void UMyoController::Unlock(EMyoUnlockType Type)
 {
-	_myoDelegate->MyoUnlockMyo(this->myoId, type);
+	PrivateMyoDelegate->MyoUnlockMyo(this->MyoId, Type);
 }
 void UMyoController::Lock()
 {
-	_myoDelegate->MyoLockMyo(this->myoId);
+	PrivateMyoDelegate->MyoLockMyo(this->MyoId);
 }
 
-void UMyoController::SetStreamEmg(MyoStreamEmgType streamType)
+void UMyoController::SetStreamEmg(EMyoStreamEmgType StreamType)
 {
-	_myoDelegate->MyoSetStreamEmg(this->myoId, streamType);
+	PrivateMyoDelegate->MyoSetStreamEmg(this->MyoId, StreamType);
 }
 
-void UMyoController::setFromMyoDeviceData(MyoDeviceData* data)
+void UMyoController::setFromMyoDeviceData(FMyoDeviceData* Data)
 {
-	this->pose = (MyoPose)data->pose;
+	this->Pose = Data->Pose;
 	
-	this->acceleration = data->acceleration;	
-	this->orientation = data->orientation;
-	this->gyro = data->gyro;
+	this->Acceleration = Data->Acceleration;
+	this->Orientation = Data->Orientation;
+	this->Gyro = Data->Gyro;
 
-	this->arm = (MyoArm)data->arm;
-	this->xDirection = (MyoArmDirection)data->xDirection;
+	this->Arm = Data->Arm;
+	this->ArmDirection = Data->ArmDirection;
 
-	this->armAcceleration = data->armAcceleration;
-	this->armOrientation = data->armOrientation;
-	this->armGyro = data->armGyro;
-	this->armSpaceCorrection = data->armSpaceCorrection;
+	this->ArmAcceleration = Data->ArmAcceleration;
+	this->ArmOrientation = Data->ArmOrientation;
+	this->ArmGyro = Data->ArmGyro;
+	this->ArmSpaceCorrection = Data->ArmSpaceCorrection;
 
-	this->bodySpaceNullAcceleration = data->bodySpaceNullAcceleration;
+	this->BodySpaceNullAcceleration = Data->BodySpaceNullAcceleration;
 }
