@@ -103,7 +103,4 @@ public:
 
 	//Conversion
 	void setFromMyoDeviceData(FMyoDeviceData* Data);
-
-private:
-	MyoDataDelegate* PrivateMyoDelegate;
 };

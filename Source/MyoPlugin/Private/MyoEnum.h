@@ -2,6 +2,8 @@
 
 #include "CoreUObject.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(MyoPluginLog, Log, All);
+
 UENUM(BlueprintType)
 enum EMyoArm
 {

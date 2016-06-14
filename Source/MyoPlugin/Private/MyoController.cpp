@@ -1,4 +1,5 @@
 #include "MyoPluginPrivatePCH.h"
+#include "FMyoPlugin.h"
 #include "MyoEnum.h"
 #include "MyoController.h"
 
@@ -18,26 +19,41 @@ bool UMyoController::isOnRightArm()
 
 void UMyoController::CalibrateArmOrientation(FRotator Direction)
 {
-	PrivateMyoDelegate->MyoCalibrateArmOrientation(this->MyoId, Direction);
+	if (IMyoPlugin::IsAvailable())
+	{
+		IMyoPlugin::Get().CalibrateOrientation(this->MyoId, Direction);
+	}
 }
 
 void UMyoController::VibrateDevice(EMyoVibrationType Type)
 {
-	PrivateMyoDelegate->MyoVibrateDevice(this->MyoId, Type);
+	if (IMyoPlugin::IsAvailable())
+	{
+		IMyoPlugin::Get().VibrateDevice(this->MyoId, Type);
+	}
 }
 
 void UMyoController::Unlock(EMyoUnlockType Type)
 {
-	PrivateMyoDelegate->MyoUnlockMyo(this->MyoId, Type);
+	if (IMyoPlugin::IsAvailable())
+	{
+		IMyoPlugin::Get().UnlockMyo(this->MyoId, Type);
+	}
 }
 void UMyoController::Lock()
 {
-	PrivateMyoDelegate->MyoLockMyo(this->MyoId);
+	if (IMyoPlugin::IsAvailable())
+	{
+		IMyoPlugin::Get().LockMyo(this->MyoId);
+	}
 }
 
 void UMyoController::SetStreamEmg(EMyoStreamEmgType StreamType)
 {
-	PrivateMyoDelegate->MyoSetStreamEmg(this->MyoId, StreamType);
+	if (IMyoPlugin::IsAvailable())
+	{
+		IMyoPlugin::Get().SetStreamEmg(this->MyoId, StreamType);
+	}
 }
 
 void UMyoController::setFromMyoDeviceData(FMyoDeviceData* Data)

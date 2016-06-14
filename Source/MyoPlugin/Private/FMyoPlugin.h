@@ -1,7 +1,7 @@
 #pragma once
 
-class DataCollector;
-class MyoDelegate;
+class MyoDataCollector;
+class UMyoController;
 
 class FMyoPlugin : public IMyoPlugin
 {
@@ -35,7 +35,9 @@ public:
 	void UnlockMyo(int deviceId, EMyoUnlockType type);
 	void LockMyo(int deviceId);
 
+	UMyoController* ControllerForMyoId(int myoID);
+
 	virtual TSharedPtr< class IInputDevice > CreateInputDevice(const TSharedRef< FGenericApplicationMessageHandler >& InMessageHandler) override;
 private:
-	DataCollector *collector;
+	MyoDataCollector *collector;
 };
