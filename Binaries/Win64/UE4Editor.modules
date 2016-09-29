@@ -1,8 +1,0 @@
-{
-	"Changelist" : 3005592,
-	"BuildId" : "19bdaab0-d405-4a51-8d71-82dd75251508",
-	"Modules" : 
-	{
-		"MyoPlugin" : "UE4Editor-MyoPlugin.dll"
-	}
-}
