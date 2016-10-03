@@ -15,21 +15,27 @@ FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHan
 	MyoLambdaRunnable::RunLambdaOnBackGroundThread([&] 
 	{
 		//initialize hub
-		//MyoHub
+		MyoHub = new Hub("com.epicgames.unrealengine");
 
 		//did we initialize correctly?
+		if (MyoHub->lastInitCausedError)
+		{
+			UE_LOG(MyoPluginLog, Log, TEXT("Hub initialization failed. Do you have Myo Connect installed and updated?"));
+			return;
+		}
 
 		//Start thread loop
 		while (bRunnning)
 		{
 			MyoHub->run(MYO_RUNTIME_MS);
 		}
+		delete MyoHub;
 	});
 }
 
 FMyoInputDevice::~FMyoInputDevice()
 {
-
+	bRunnning = false;
 }
 
 void FMyoInputDevice::Tick(float DeltaTime)
@@ -83,10 +89,15 @@ void FMyoInputDevice::RemoveComponentDelegate(UMyoComponent* Component)
 
 void FMyoInputDevice::RunFunctionOnComponents(TFunction<void(UMyoComponent*)> InFunction)
 {
-	for (auto Component : ComponentDelegates)
+	const SafeComponentDelegates& = ComponentDelegates;
+	MyoLambdaRunnable::RunShortLambdaOnGameThread([&, SafeComponentDelegates]
 	{
-		InFunction(Component);
-	}
+		for (auto Component : SafeComponentDelegates)
+		{
+			//Call the function on the game thread
+			InFunction(Component);
+		}
+	});
 }
 
 #pragma endregion Components
@@ -98,7 +109,11 @@ void FMyoInputDevice::RunFunctionOnComponents(TFunction<void(UMyoComponent*)> In
 
 void FMyoInputDevice::onPair(Myo* myo, uint64_t timestamp, FirmwareVersion firmwareVersion)
 {
-
+	const int32 IdForMyo(myo);
+	RunFunctionOnComponents([&](UMyoComponent* Component)
+	{
+		//Component->B
+	});
 }
 void FMyoInputDevice::onUnpair(Myo* myo, uint64_t timestamp)
 {
@@ -107,12 +122,17 @@ void FMyoInputDevice::onUnpair(Myo* myo, uint64_t timestamp)
 
 void FMyoInputDevice::onConnect(Myo* myo, uint64_t timestamp, FirmwareVersion firmwareVersion)
 {
+	//Myo connected, track it
+	ConnectedMyos.Add(myo);
 
+	//todo: make/spawn uactor as required
+
+	//emit
 }
 
 void FMyoInputDevice::onDisconnect(Myo* myo, uint64_t timestamp)
 {
-
+	ConnectedMyos.Remove(myo);
 }
 
 void FMyoInputDevice::onArmSync(Myo* myo, uint64_t timestamp, Arm arm, XDirection xDirection, float rotation, WarmupState warmupState)
@@ -173,6 +193,23 @@ void FMyoInputDevice::onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t*
 void FMyoInputDevice::onWarmupCompleted(myo::Myo* myo, uint64_t timestamp, WarmupResult warmupResult)
 {
 
+}
+
+int32 FMyoInputDevice::IdForMyo(Myo* myo)
+{
+	return ConnectedMyos.Find(myo);
+}
+
+myo::Myo* FMyoInputDevice::MyoForId(int32 MyoId)
+{
+	if(MyoId<ConnectedMyos.Num())
+	{
+		return ConnectedMyos[MyoId];
+	}
+	else
+	{
+		return nullptr;
+	}
 }
 
 #pragma  endregion DeviceListener
