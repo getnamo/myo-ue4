@@ -5,8 +5,6 @@
 #include "ModuleManager.h"
 #include "IInputDeviceModule.h"
 
-//class UMyoComponent;
-
 /**
  * The public interface to this module
  */
@@ -39,8 +37,7 @@ public:
 	/**
 	 * Public API
 	 */
-	//virtual MyoDataDelegate* DataDelegate() { return nullptr; };
-	//virtual void DeferedAddDelegate(UMyoComponent* delegate) {};
-
+	virtual void AddComponentDelegate(UMyoComponent* Component) {};
+	virtual void RemoveComponentDelegate(UMyoComponent* Component) {};
 };
 
