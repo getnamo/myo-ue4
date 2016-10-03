@@ -2,6 +2,8 @@
 
 #include "MyoController.generated.h"
 
+//todo: decide, should this be an fstruct wrapped?
+
 UCLASS(BlueprintType)
 class MYOPLUGIN_API UMyoController : public UObject
 {

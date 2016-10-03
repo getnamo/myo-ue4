@@ -13,6 +13,8 @@ class MYOPLUGIN_API UMyoComponent : public UActorComponent //delegate here
 
 public:
 
+	//todo: add 
+
 	//Callable Blueprint functions - Need to be defined for direct access
 	/**
 	* Check if Myo Hub is enabled, if its not it will remain so until restart.
