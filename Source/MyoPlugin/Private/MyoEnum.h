@@ -19,6 +19,22 @@ enum EMyoArmDirection
 };
 
 UENUM(BlueprintType)
+enum EMyoWarmupState
+{
+	MYO_WARMUP_STATE_UNKNOWN = 0,
+	MYO_WARMUP_STATE_COLD,
+	MYO_WARMUP_STATE_WARM
+};
+
+UENUM(BlueprintType)
+enum EMyoWarmupResult
+{
+	MYO_WARMUP_RESULT_UNKNOWN = 0,
+	MYO_WARMUP_RESULT_SUCCESS,
+	MYO_WARMUP_RESULT_FAILED_TIMEOUT
+};
+
+UENUM(BlueprintType)
 enum EMyoPose
 {
 	MYO_POSE_REST = 0,
@@ -58,6 +74,25 @@ enum EMyoStreamEmgType
 	MYO_STREAM_EMG_DISABLED = 0,
 	MYO_STREAM_EMG_ENABLED
 };
+
+USTRUCT()
+struct FMyoFirmwareVersion
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = MyoFirmwareVersion)
+	int32 VersionMajor;
+
+	UPROPERTY(BlueprintReadOnly, Category = MyoFirmwareVersion)
+	int32 VersionMinor;
+
+	UPROPERTY(BlueprintReadOnly, Category = MyoFirmwareVersion)
+	int32 VersionPatch;
+
+	UPROPERTY(BlueprintReadOnly, Category = MyoFirmwareVersion)
+	int32 VersionHardwareRev;
+};
+
 
 //USTRUCT()
 struct FMyoEmgData
