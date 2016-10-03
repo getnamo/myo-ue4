@@ -6,6 +6,7 @@
 #include "Engine.h"
 #include "CoreUObject.h"
 #include "InputDevice.h"
+#include "MyoControllerData.h"
 #include "MyoComponent.h"
 #include "MyoEnum.h"
 #include <myo/myo.hpp>
