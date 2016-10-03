@@ -11,6 +11,9 @@ class MYOPLUGIN_API UMyoController : public UObject
 	GENERATED_UCLASS_BODY()
 public:
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Myo Frame")
+	FMyoControllerData FrameData;
+
 	//Convenience Call, optionally check hand possession property
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Myo Frame")
 	bool isOnLeftArm();
@@ -54,7 +57,4 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = MyoFunctions)
 	void SetStreamEmg(EMyoStreamEmgType StreamType);
-
-	//Conversion
-	void setFromMyoDeviceData(FMyoDeviceData* Data);
 };
