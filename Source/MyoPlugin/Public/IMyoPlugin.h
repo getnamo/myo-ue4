@@ -39,5 +39,17 @@ public:
 	 */
 	virtual void AddComponentDelegate(UMyoComponent* Component) {};
 	virtual void RemoveComponentDelegate(UMyoComponent* Component) {};
+
+	//Manipulating the hub
+	virtual void SetLockingPolicy(EMyoLockingPolicy Policy) {};
+	virtual bool IsHubEnabled() { return false; }
+	 
+	//Manipulating the device
+	virtual void CalibrateOrientation(int32 MyoId, FRotator Direction) {};
+	virtual void VibrateDevice(int32 MyoId, EMyoVibrationType VibrationType) {};
+	virtual void UnlockDevice(int32 MyoId, EMyoUnlockType UnlockType) {};
+	virtual void LockDevice(int32 MyoId) {};
+	virtual void SetEMGStreamType(int32 MyoId, EMyoStreamEmgType StreamType) {};
+	
 };
 

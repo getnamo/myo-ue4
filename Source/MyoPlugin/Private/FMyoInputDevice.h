@@ -36,10 +36,21 @@ public:
 	void AddComponentDelegate(UMyoComponent* Component);
 	void RemoveComponentDelegate(UMyoComponent* Component);
 
+	//Manipulating the hub, this should be a hub object
+	void SetLockingPolicy(EMyoLockingPolicy Policy);
+	bool IsHubEnabled()
+
+	//Manipulating the device, this should be on a device object...
+	void CalibrateOrientation(int32 MyoId, FRotator Direction);
+	void VibrateDevice(int32 MyoId, EMyoVibrationType VibrationType);
+	void UnlockDevice(int32 MyoId, EMyoUnlockType UnlockType);
+	void LockDevice(int32 MyoId);
+	void SetEMGStreamType(int32 MyoId, EMyoStreamEmgType StreamType);
+
+private:
 	//Convenience Lambdas
 	void RunFunctionOnComponents(TFunction<void(UMyoComponent*)> InFunction);
 
-private:
 	//Delegate pointers
 	TArray<UMyoComponent*> ComponentDelegates;
 
@@ -65,4 +76,9 @@ private:
 	FThreadSafeBool bRunnning;
 
 	Hub* MyoHub;
+
+	//Finding and translating connected myos
+	TArray<Myo*> ConnectedMyos;
+	int32 IdForMyo(Myo* myo);
+	Myo* MyoForId(int32 MyoId); 
 };
