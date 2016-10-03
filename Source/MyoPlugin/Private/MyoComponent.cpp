@@ -1,8 +1,6 @@
 #include "MyoPluginPrivatePCH.h"
 #include "MyoComponent.h"
-#include "MyoInterface.h"
-#include "Engine.h"
-#include "CoreUObject.h"
+#include "IMyoPlugin.h"
 
 UMyoComponent::UMyoComponent(const FObjectInitializer &init) : UActorComponent(init)
 {
@@ -14,37 +12,25 @@ UMyoComponent::UMyoComponent(const FObjectInitializer &init) : UActorComponent(i
 void UMyoComponent::OnRegister()
 {
 	Super::OnRegister();
-
-	//Attach the delegate pointer automatically to the owner of the component
-	//ValidSelfPointer = this;
-	//SetInterfaceDelegate(GetOwner());
-	//MyoStartup();
+	IMyoPlugin::Get().AddComponentDelegate(this);
 }
 
 void UMyoComponent::OnUnregister()
 {
+	IMyoPlugin::Get().RemoveComponentDelegate(this);
 	Super::OnUnregister();
-	//MyoShutdown();
 }
 
-void UMyoComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,
-	FActorComponentTickFunction *ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	//Forward the component tick
-	//MyoTick(DeltaTime);
-}
 
 //Functions forwards, required implementations
 bool UMyoComponent::IsHubEnabled()
 {
-	return false; //MyoIsHubEnabled();
+	return IMyoPlugin::Get().IsHubEnabled();
 }
 
-void UMyoComponent::SetLockingPolicy(TEnumAsByte<EMyoLockingPolicy> policy)
+void UMyoComponent::SetLockingPolicy(TEnumAsByte<EMyoLockingPolicy> Policy)
 {
-	return; // MyoSetLockingPolicy(policy);
+	return IMyoPlugin::Get().SetLockingPolicy(Policy); 
 }
 
 UMyoController* UMyoComponent::LeftMyo()
