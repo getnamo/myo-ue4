@@ -38,7 +38,7 @@ public:
 
 	//Manipulating the hub, this should be a hub object
 	void SetLockingPolicy(EMyoLockingPolicy Policy);
-	bool IsHubEnabled()
+	bool IsHubEnabled();
 
 	//Manipulating the device, this should be on a device object...
 	void CalibrateOrientation(int32 MyoId, FRotator Direction);

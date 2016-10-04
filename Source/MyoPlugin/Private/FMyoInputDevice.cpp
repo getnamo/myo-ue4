@@ -24,11 +24,15 @@ FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHan
 			return;
 		}
 
+		MyoHub->addListener(this);
+
 		//Start thread loop
 		while (bRunnning)
 		{
 			MyoHub->run(MYO_RUNTIME_MS);
 		}
+
+		MyoHub->removeListener(this);
 		delete MyoHub;
 	});
 }
@@ -89,7 +93,7 @@ void FMyoInputDevice::RemoveComponentDelegate(UMyoComponent* Component)
 
 void FMyoInputDevice::RunFunctionOnComponents(TFunction<void(UMyoComponent*)> InFunction)
 {
-	const SafeComponentDelegates& = ComponentDelegates;
+	const TArray<UMyoComponent*>& SafeComponentDelegates = ComponentDelegates;
 	MyoLambdaRunnable::RunShortLambdaOnGameThread([&, SafeComponentDelegates]
 	{
 		for (auto Component : SafeComponentDelegates)
@@ -109,9 +113,10 @@ void FMyoInputDevice::RunFunctionOnComponents(TFunction<void(UMyoComponent*)> In
 
 void FMyoInputDevice::onPair(Myo* myo, uint64_t timestamp, FirmwareVersion firmwareVersion)
 {
-	const int32 IdForMyo(myo);
+	const int32 MyoId = IdForMyo(myo);
 	RunFunctionOnComponents([&](UMyoComponent* Component)
 	{
+		//todo: emit locally stored MyoComponents
 		//Component->B
 	});
 }
@@ -210,6 +215,41 @@ myo::Myo* FMyoInputDevice::MyoForId(int32 MyoId)
 	{
 		return nullptr;
 	}
+}
+
+void FMyoInputDevice::SetLockingPolicy(EMyoLockingPolicy Policy)
+{
+
+}
+
+void FMyoInputDevice::CalibrateOrientation(int32 MyoId, FRotator Direction)
+{
+
+}
+
+void FMyoInputDevice::VibrateDevice(int32 MyoId, EMyoVibrationType VibrationType)
+{
+
+}
+
+void FMyoInputDevice::UnlockDevice(int32 MyoId, EMyoUnlockType UnlockType)
+{
+
+}
+
+void FMyoInputDevice::LockDevice(int32 MyoId)
+{
+
+}
+
+void FMyoInputDevice::SetEMGStreamType(int32 MyoId, EMyoStreamEmgType StreamType)
+{
+
+}
+
+bool FMyoInputDevice::IsHubEnabled()
+{
+	return false;
 }
 
 #pragma  endregion DeviceListener

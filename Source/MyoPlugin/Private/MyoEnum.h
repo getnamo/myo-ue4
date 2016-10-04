@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreUObject.h"
+#include "MyoEnum.generated.h"
 
 UENUM(BlueprintType)
 enum EMyoArm
@@ -75,7 +76,7 @@ enum EMyoStreamEmgType
 	MYO_STREAM_EMG_ENABLED
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FMyoFirmwareVersion
 {
 	GENERATED_USTRUCT_BODY()
