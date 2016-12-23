@@ -8,7 +8,6 @@
 #include "FMyoPlugin.h"
 
 #define LOCTEXT_NAMESPACE "MyoPlugin"
-#define PLUGIN_VERSION "0.8.0"
 
 DEFINE_LOG_CATEGORY_STATIC(MyoPluginLog, Log, All);
 
@@ -20,7 +19,7 @@ DEFINE_LOG_CATEGORY_STATIC(MyoPluginLog, Log, All);
 //Init and Runtime
 void FMyoPlugin::StartupModule()
 {
-	UE_LOG(MyoPluginLog, Log, TEXT("Using Myo Plugin version %s"), TEXT(PLUGIN_VERSION));
+	UE_LOG(MyoPluginLog, Log, TEXT("Myo Plugin startup."));
 
 	// Instantiate the PrintMyoEvents class we defined above, and attach it as a listener to our Hub.
 	//collector = new MyoDataCollector;
