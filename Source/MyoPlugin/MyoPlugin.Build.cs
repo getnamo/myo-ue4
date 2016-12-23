@@ -13,7 +13,7 @@ namespace UnrealBuildTool.Rules
 
         private string ThirdPartyPath
         {
-            get { return Path.GetFullPath(Path.Combine(ModulePath, "../ThirdParty/")); }
+            get { return Path.GetFullPath(Path.Combine(ModulePath, "../../ThirdParty/")); }
         }
 
         private string ThalmicPath
