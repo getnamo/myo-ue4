@@ -4,9 +4,8 @@
 
 #include "ModuleManager.h"
 #include "MyoControllerComponent.h"
+#include "MyoEnum.h"
 #include "IInputDeviceModule.h"
-
-//class UMyoComponent;
 
 /**
  * The public interface to this module
@@ -40,7 +39,20 @@ public:
 	/**
 	 * Public API
 	 */
+
+	//Component delegate tracking
 	virtual void AddComponentDelegate(UMyoControllerComponent* DelegateComponent) {};
 	virtual void RemoveComponentDelegate(UMyoControllerComponent* DelegateComponent) {};
+
+	//Controlling myos
+	virtual void UnlockMyo(UMyoController* Controller) {};
+	virtual void LockMyo(UMyoController* Controller) {};
+	virtual void SetLockingPolicy(EMyoLockingPolicy Policy) {};
+	virtual void SetStreamEmgType(EMyoStreamEmgType StreamType) {};
+	virtual void VibrateMyo(UMyoController* Controller, EMyoVibrationType VibrationType) {};
+	virtual void AddComponentDelegate(UMyoComponent* Component) {};
+	virtual void RemoveComponentDelegate(UMyoComponent* Component) {};
+	virtual bool IsHubEnabled() { return false; }
+	virtual void CalibrateOrientation(int32 MyoId, FRotator Direction) {};
 };
 

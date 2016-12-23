@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreUObject.h"
+#include "MyoEnum.generated.h"
 
 UENUM(BlueprintType)
 enum EMyoArm
@@ -59,14 +60,13 @@ enum EMyoStreamEmgType
 	MYO_STREAM_EMG_ENABLED
 };
 
-//USTRUCT()
+USTRUCT(BlueprintType)
 struct FMyoEmgData
 {
-	//GENERATED_BODY()
+	GENERATED_USTRUCT_BODY()
 
-	//UPROPERTY()
-	//BlueprintReadWrite, Category = "Emg Data Struct")
-	//TArray<int32> streams;
+	UPROPERTY(BlueprintReadWrite, Category = "Emg Data Struct")
+	TArray<int32> Streams;
 };
 
 /**

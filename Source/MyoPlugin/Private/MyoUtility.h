@@ -6,6 +6,8 @@
 #include <myo/myo.hpp>
 #include "SlateBasics.h"
 
+DEFINE_LOG_CATEGORY_STATIC(MyoPluginLog, Log, All);
+
 namespace MyoUtility
 {
 	#define ORIENTATION_SCALE_PITCH 0.01111111111	//1/90
@@ -29,4 +31,6 @@ namespace MyoUtility
 	FVector convertAccelerationToBodySpace(FVector armAcceleration, FRotator orientation, FRotator armCorrection, myo::XDirection direction);
 
 	FRotator convertOrientationToArmSpace(FRotator convertedOrientation, FRotator armCorrection, myo::XDirection direction);
+
+	void AddMyoFKeys();
 }

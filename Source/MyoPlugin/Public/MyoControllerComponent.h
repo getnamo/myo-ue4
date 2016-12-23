@@ -10,6 +10,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMyoControllerSignature, const FMyoC
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMyoPoseSignature, const FMyoControllerData&, Controller, TEnumAsByte<EMyoPose>, Pose);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FMyoSyncSignature, const FMyoControllerData&, Controller, TEnumAsByte<EMyoArm>, arm, TEnumAsByte<EMyoArmDirection>, ArmDirection);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FMyoMovedSignature, const FMyoControllerData&, Controller, FVector, ArmAcceleration, FRotator, ArmOrientation, FVector, ArmGyro);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMyoRawEmgSignature, const FMyoControllerData&, Controller, FMyoEmgData, EmgData);
 
 UCLASS(ClassGroup="Input Controller", meta=(BlueprintSpawnableComponent))
 class MYOPLUGIN_API UMyoControllerComponent : public UActorComponent //delegate here
@@ -45,6 +46,12 @@ public:
 	*/
 	UPROPERTY(BlueprintAssignable, Category = "Myo Events")
 	FMyoMovedSignature OnArmMoved;
+
+	/**
+	*	Event received when new raw data becomes available
+	*/
+	UPROPERTY(BlueprintAssignable, Category = "Myo Events")
+	FMyoRawEmgSignature OnEmgData;
 
 	/**
 	* Event on a Myo connecting
