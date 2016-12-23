@@ -6,9 +6,8 @@
 	"VersionName" : "0.8.0",
 	"CreatedBy" : "Getnamo",
 	"CreatedByURL" : "https://github.com/getnamo/myo-ue4",
-	"EngineVersion" : "4.11",
 	"Description" : "Unofficial Plugin for Thalmic Myo.",
-	"Category" : "Input.Controller",
+	"Category" : "Input Devices",
 	"EnabledByDefault" : true,
 	
     "Modules" :
