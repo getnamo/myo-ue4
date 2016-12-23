@@ -10,10 +10,10 @@
 FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHandler >& InMessageHandler) : MessageHandler(InMessageHandler)
 {
 	//Startup the background handler
-	bRunnning = false;
+	bRunning = false;
 
 	//Start our background threading
-	MyoLambdaRunnable::RunLambdaOnBackGroundThread([&] 
+	FMyoLambdaRunnable::RunLambdaOnBackGroundThread([&] 
 	{
 		//initialize hub
 		MyoHub = new Hub("com.epicgames.unrealengine");
@@ -28,7 +28,7 @@ FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHan
 		MyoHub->addListener(this);
 
 		//Start thread loop
-		while (bRunnning)
+		while (bRunning)
 		{
 			MyoHub->run(MYO_RUNTIME_MS);
 		}
@@ -40,7 +40,7 @@ FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHan
 
 FMyoInputDevice::~FMyoInputDevice()
 {
-	bRunnning = false;
+	bRunning = false;
 }
 
 void FMyoInputDevice::Tick(float DeltaTime)
@@ -82,20 +82,20 @@ void FMyoInputDevice::SetChannelValues(int32 ControllerId, const FForceFeedbackV
 
 #pragma region Components
 
-void FMyoInputDevice::AddComponentDelegate(UMyoComponent* Component)
+void FMyoInputDevice::AddComponentDelegate(UMyoControllerComponent* Component)
 {
 	ComponentDelegates.Add(Component);
 }
 
-void FMyoInputDevice::RemoveComponentDelegate(UMyoComponent* Component)
+void FMyoInputDevice::RemoveComponentDelegate(UMyoControllerComponent* Component)
 {
 	ComponentDelegates.Remove(Component);
 }
 
-void FMyoInputDevice::RunFunctionOnComponents(TFunction<void(UMyoComponent*)> InFunction)
+void FMyoInputDevice::RunFunctionOnComponents(TFunction<void(UMyoControllerComponent*)> InFunction)
 {
-	const TArray<UMyoComponent*>& SafeComponentDelegates = ComponentDelegates;
-	MyoLambdaRunnable::RunShortLambdaOnGameThread([&, SafeComponentDelegates]
+	const TArray<UMyoControllerComponent*>& SafeComponentDelegates = ComponentDelegates;
+	FMyoLambdaRunnable::RunShortLambdaOnGameThread([&, SafeComponentDelegates]
 	{
 		for (auto Component : SafeComponentDelegates)
 		{
@@ -114,8 +114,8 @@ void FMyoInputDevice::RunFunctionOnComponents(TFunction<void(UMyoComponent*)> In
 
 void FMyoInputDevice::onPair(Myo* myo, uint64_t timestamp, FirmwareVersion firmwareVersion)
 {
-	const int32 MyoId = IdForMyo(myo);
-	RunFunctionOnComponents([&](UMyoComponent* Component)
+	//const int32 MyoId = IdForMyo(myo);
+	RunFunctionOnComponents([&](UMyoControllerComponent* Component)
 	{
 		//todo: emit locally stored MyoComponents
 		//Component->B
@@ -132,11 +132,6 @@ void FMyoInputDevice::onConnect(Myo* myo, uint64_t timestamp, FirmwareVersion fi
 }
 
 void FMyoInputDevice::onDisconnect(Myo* myo, uint64_t timestamp)
-{
-
-}
-
-void onArmUnsync(Myo* myo, uint64_t timestamp)
 {
 
 }

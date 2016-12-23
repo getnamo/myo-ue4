@@ -50,8 +50,7 @@ public:
 	virtual void SetLockingPolicy(EMyoLockingPolicy Policy) {};
 	virtual void SetStreamEmgType(EMyoStreamEmgType StreamType) {};
 	virtual void VibrateMyo(UMyoController* Controller, EMyoVibrationType VibrationType) {};
-	virtual void AddComponentDelegate(UMyoComponent* Component) {};
-	virtual void RemoveComponentDelegate(UMyoComponent* Component) {};
+
 	virtual bool IsHubEnabled() { return false; }
 	virtual void CalibrateOrientation(int32 MyoId, FRotator Direction) {};
 };

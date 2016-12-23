@@ -34,7 +34,7 @@ bool UMyoControllerComponent::IsHubEnabled()
 	return IMyoPlugin::Get().IsHubEnabled();
 }
 
-void UMyoControllerComponent::SetLockingPolicy(TEnumAsByte<EMyoLockingPolicy> policy)
+void UMyoControllerComponent::SetLockingPolicy(TEnumAsByte<EMyoLockingPolicy> Policy)
 {
 	return IMyoPlugin::Get().SetLockingPolicy(Policy); 
 }

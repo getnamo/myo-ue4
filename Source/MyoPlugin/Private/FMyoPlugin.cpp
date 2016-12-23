@@ -7,8 +7,6 @@
 
 #define LOCTEXT_NAMESPACE "MyoPlugin"
 
-DEFINE_LOG_CATEGORY_STATIC(MyoPluginLog, Log, All);
-
 //Private API - This is where the magic happens
 
 //Init and Runtime
@@ -25,31 +23,6 @@ void FMyoPlugin::StartupModule()
 void FMyoPlugin::ShutdownModule()
 {
 	UE_LOG(MyoPluginLog, Log, TEXT("Myo clean shutdown."));
-}
-
-
-void FMyoPlugin::AddComponentDelegate(UMyoComponent* Component)
-{
-	if (bInputCreated)
-	{
-		MyoInputDevice->AddComponentDelegate(Component);
-	}
-	else
-	{
-		DeferredDelegates.Add(Component);
-	}
-}
-
-void FMyoPlugin::RemoveComponentDelegate(UMyoComponent* Component)
-{
-	if (bInputCreated)
-	{
-		MyoInputDevice->RemoveComponentDelegate(Component);
-	}
-	else
-	{
-		DeferredDelegates.Remove(Component);
-	}
 }
 
 TSharedPtr< class IInputDevice > FMyoPlugin::CreateInputDevice(const TSharedRef< FGenericApplicationMessageHandler >& InMessageHandler)
@@ -69,14 +42,28 @@ TSharedPtr< class IInputDevice > FMyoPlugin::CreateInputDevice(const TSharedRef<
 	bInputCreated = true;
 }
 
-void FMyoPlugin::AddComponentDelegate(UMyoControllerComponent* DelegateComponent)
+void FMyoPlugin::AddComponentDelegate(UMyoControllerComponent* Component)
 {
-
+	if (bInputCreated)
+	{
+		MyoInputDevice->AddComponentDelegate(Component);
+	}
+	else
+	{
+		DeferredDelegates.Add(Component);
+	}
 }
 
-void FMyoPlugin::RemoveComponentDelegate(UMyoControllerComponent* DelegateComponent)
+void FMyoPlugin::RemoveComponentDelegate(UMyoControllerComponent* Component)
 {
-
+	if (bInputCreated)
+	{
+		MyoInputDevice->RemoveComponentDelegate(Component);
+	}
+	else
+	{
+		DeferredDelegates.Remove(Component);
+	}
 }
 
 void FMyoPlugin::UnlockMyo(UMyoController* Controller)

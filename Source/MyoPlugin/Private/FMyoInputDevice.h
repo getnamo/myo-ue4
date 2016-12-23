@@ -33,16 +33,14 @@ public:
 	virtual void SetChannelValue(int32 ControllerId, FForceFeedbackChannelType ChannelType, float Value) override;
 	virtual void SetChannelValues(int32 ControllerId, const FForceFeedbackValues &values) override;
 
-	virtual ~FMyoInputDevice();
-
 
 	TArray<UMyoController*> Controllers;
 	TMap<Myo*, UMyoController*> ControllerMap;
 
 	//Custom Private data structure
 	//Pass-through functions for plugin methods accessible publicly
-	void AddComponentDelegate(UMyoComponent* Component);
-	void RemoveComponentDelegate(UMyoComponent* Component);
+	void AddComponentDelegate(UMyoControllerComponent* Component);
+	void RemoveComponentDelegate(UMyoControllerComponent* Component);
 
 	//Manipulating the hub, this should be a hub object
 	void SetLockingPolicy(EMyoLockingPolicy Policy);
@@ -57,10 +55,10 @@ public:
 
 private:
 	//Convenience Lambdas
-	void RunFunctionOnComponents(TFunction<void(UMyoComponent*)> InFunction);
+	void RunFunctionOnComponents(TFunction<void(UMyoControllerComponent*)> InFunction);
 
 	//Delegate pointers
-	TArray<UMyoComponent*> ComponentDelegates;
+	TArray<UMyoControllerComponent*> ComponentDelegates;
 
 	//Myo events, these will be called on the background thread and will require a foreground thread call
 	virtual void onPair(Myo* myo, uint64_t timestamp, FirmwareVersion firmwareVersion) override;
@@ -68,7 +66,6 @@ private:
 	virtual void onConnect(Myo* myo, uint64_t timestamp, FirmwareVersion firmwareVersion) override;
 	virtual void onDisconnect(Myo* myo, uint64_t timestamp) override;
 	virtual void onArmSync(Myo* myo, uint64_t timestamp, Arm arm, XDirection xDirection, float rotation, WarmupState warmupState) override;
-
 	virtual void onArmUnsync(Myo* myo, uint64_t timestamp) override;
 	virtual void onUnlock(Myo* myo, uint64_t timestamp) override;
 	virtual void onLock(Myo* myo, uint64_t timestamp) override;
