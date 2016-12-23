@@ -2,9 +2,14 @@
 
 #include "MyoPluginPrivatePCH.h"
 #include "MyoEnum.h"
+#include "MyoController.h"
 #include "MyoControllerComponent.generated.h"
 
-//TODO: multicast delegates here
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMyoControllerSignature, const FMyoControllerData&, Controller);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMyoPoseSignature, const FMyoControllerData&, Controller, TEnumAsByte<EMyoPose>, Pose);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMyoSyncSignature, const FMyoControllerData&, Controller, TEnumAsByte<EMyoArmDirection>, ArmDirection);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FMyoMovedSignature, const FMyoControllerData&, Controller, FVector, ArmAcceleration, FRotator, ArmOrientation, FVector, ArmGyro);
 
 UCLASS(ClassGroup="Input Controller", meta=(BlueprintSpawnableComponent))
 class MYOPLUGIN_API UMyoControllerComponent : public UActorComponent //delegate here
@@ -12,6 +17,30 @@ class MYOPLUGIN_API UMyoControllerComponent : public UActorComponent //delegate 
 	GENERATED_UCLASS_BODY()
 
 public:
+
+	UPROPERTY(BlueprintAssignable, Category = "Myo Events")
+	FMyoControllerSignature OnPair;
+
+	UPROPERTY(BlueprintAssignable, Category = "Myo Events")
+	FMyoControllerSignature OnUnpair;
+
+	UPROPERTY(BlueprintAssignable, Category = "Myo Events")
+	FMyoPoseSignature OnPoseChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "Myo Events")
+	FMyoMovedSignature OnArmMoved;
+
+	UPROPERTY(BlueprintAssignable, Category = "Myo Events")
+	FMyoControllerSignature OnConnect;
+
+	UPROPERTY(BlueprintAssignable, Category = "Myo Events")
+	FMyoControllerSignature OnDisconnect;
+
+	UPROPERTY(BlueprintAssignable, Category = "Myo Events")
+	FMyoSyncSignature OnArmSync;
+
+	UPROPERTY(BlueprintAssignable, Category = "Myo Events")
+	FMyoControllerSignature OnArmUnsync;
 
 	//Callable Blueprint functions - Need to be defined for direct access
 	/**
