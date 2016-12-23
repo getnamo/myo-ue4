@@ -22,7 +22,7 @@ void FMyoPlugin::StartupModule()
 
 void FMyoPlugin::ShutdownModule()
 {
-	UE_LOG(MyoPluginLog, Log, TEXT("Myo clean shutdown."));
+	UE_LOG(MyoPluginLog, Log, TEXT("Myo Plugin clean shutdown."));
 }
 
 TSharedPtr< class IInputDevice > FMyoPlugin::CreateInputDevice(const TSharedRef< FGenericApplicationMessageHandler >& InMessageHandler)

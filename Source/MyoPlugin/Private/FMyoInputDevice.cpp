@@ -3,7 +3,7 @@
 #include "MyoUtility.h"
 #include "MyoLambdaRunnable.h"
 
-#define MYO_RUNTIME_MS 10
+#define MYO_RUNTIME_MS 10	//default to 100 fps rate
 
 #pragma region FMyoInputDevice
 
@@ -26,6 +26,9 @@ FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHan
 		}
 
 		MyoHub->addListener(this);
+		MyoHub->setLockingPolicy(Hub::lockingPolicyNone);	//default to no locking policy
+
+		UE_LOG(MyoPluginLog, Log, TEXT("Myo Initialized, thread loop started."));
 
 		//Start thread loop
 		while (bRunning)
@@ -115,6 +118,9 @@ void FMyoInputDevice::RunFunctionOnComponents(TFunction<void(UMyoControllerCompo
 void FMyoInputDevice::onPair(Myo* myo, uint64_t timestamp, FirmwareVersion firmwareVersion)
 {
 	//const int32 MyoId = IdForMyo(myo);
+
+	UE_LOG(MyoPluginLog, Log, TEXT("Paired."));
+
 	RunFunctionOnComponents([&](UMyoControllerComponent* Component)
 	{
 		//todo: emit locally stored MyoComponents
@@ -123,42 +129,42 @@ void FMyoInputDevice::onPair(Myo* myo, uint64_t timestamp, FirmwareVersion firmw
 }
 void FMyoInputDevice::onUnpair(Myo* myo, uint64_t timestamp)
 {
-
+	UE_LOG(MyoPluginLog, Log, TEXT("Unpaired."));
 }
 
 void FMyoInputDevice::onConnect(Myo* myo, uint64_t timestamp, FirmwareVersion firmwareVersion)
 {
-
+	UE_LOG(MyoPluginLog, Log, TEXT("onConnect."));
 }
 
 void FMyoInputDevice::onDisconnect(Myo* myo, uint64_t timestamp)
 {
-
+	UE_LOG(MyoPluginLog, Log, TEXT("onDisconnect."));
 }
 
 void FMyoInputDevice::onArmSync(Myo* myo, uint64_t timestamp, Arm arm, XDirection xDirection, float rotation, WarmupState warmupState)
 {
-
+	UE_LOG(MyoPluginLog, Log, TEXT("onArmSync."));
 }
 
 void FMyoInputDevice::onArmUnsync(Myo* myo, uint64_t timestamp)
 {
-
+	UE_LOG(MyoPluginLog, Log, TEXT("onArmUnsync."));
 }
 
 void FMyoInputDevice::onUnlock(Myo* myo, uint64_t timestamp)
 {
-
+	UE_LOG(MyoPluginLog, Log, TEXT("onUnlock."));
 }
 
 void FMyoInputDevice::onLock(Myo* myo, uint64_t timestamp)
 {
-
+	UE_LOG(MyoPluginLog, Log, TEXT("onLock."));
 }
 
 void FMyoInputDevice::onPose(Myo* myo, uint64_t timestamp, Pose pose)
 {
-
+	UE_LOG(MyoPluginLog, Log, TEXT("onPose."));
 }
 
 void FMyoInputDevice::onOrientationData(Myo* myo, uint64_t timestamp, const Quaternion<float>& rotation)
@@ -183,7 +189,7 @@ void FMyoInputDevice::onRssi(Myo* myo, uint64_t timestamp, int8_t rssi)
 
 void FMyoInputDevice::onBatteryLevelReceived(myo::Myo* myo, uint64_t timestamp, uint8_t level)
 {
-
+	UE_LOG(MyoPluginLog, Log, TEXT("onBatteryLevelReceived."));
 }
 
 void FMyoInputDevice::onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* emg)
@@ -193,12 +199,15 @@ void FMyoInputDevice::onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t*
 
 void FMyoInputDevice::onWarmupCompleted(myo::Myo* myo, uint64_t timestamp, WarmupResult warmupResult)
 {
-
+	UE_LOG(MyoPluginLog, Log, TEXT("onWarmupCompleted."));
 }
+
+
+//Controlling the Myo
 
 void FMyoInputDevice::SetLockingPolicy(EMyoLockingPolicy Policy)
 {
-
+	MyoHub->setLockingPolicy((Hub::LockingPolicy)Policy);
 }
 
 void FMyoInputDevice::CalibrateOrientation(int32 MyoId, FRotator Direction)
