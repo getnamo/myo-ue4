@@ -8,7 +8,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMyoControllerSignature, const FMyoControllerData&, Controller);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMyoPoseSignature, const FMyoControllerData&, Controller, TEnumAsByte<EMyoPose>, Pose);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMyoSyncSignature, const FMyoControllerData&, Controller, TEnumAsByte<EMyoArmDirection>, ArmDirection);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FMyoSyncSignature, const FMyoControllerData&, Controller, TEnumAsByte<EMyoArm>, arm, TEnumAsByte<EMyoArmDirection>, ArmDirection);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FMyoMovedSignature, const FMyoControllerData&, Controller, FVector, ArmAcceleration, FRotator, ArmOrientation, FVector, ArmGyro);
 
 UCLASS(ClassGroup="Input Controller", meta=(BlueprintSpawnableComponent))
@@ -18,27 +18,61 @@ class MYOPLUGIN_API UMyoControllerComponent : public UActorComponent //delegate 
 
 public:
 
+	/**
+	* Event on a Myo pairing
+	* @param myo (out) pointer to emitted myo controller class, branch to read other data.
+	*/
 	UPROPERTY(BlueprintAssignable, Category = "Myo Events")
 	FMyoControllerSignature OnPair;
 
+	/**
+	* Event on a Myo unpairing
+	* @param myo (out) pointer to emitted myo controller class, branch to read other data.
+	*/
 	UPROPERTY(BlueprintAssignable, Category = "Myo Events")
 	FMyoControllerSignature OnUnpair;
 
+	/**
+	* Event on a Myo detecting a pose.
+	* @param myo (out) pointer to emitted myo controller class, branch to read other data.
+	* @param pose (out): EMG pose, refer to Thalmic API rest, fist, waveIn, waveOut, fingersSpread, reserved1, DoubleTap, unknown
+	*/
 	UPROPERTY(BlueprintAssignable, Category = "Myo Events")
 	FMyoPoseSignature OnPoseChanged;
 
+	/**
+	*	Event called whenever the myo is connected with arm oriented data
+	*/
 	UPROPERTY(BlueprintAssignable, Category = "Myo Events")
 	FMyoMovedSignature OnArmMoved;
 
+	/**
+	* Event on a Myo connecting
+	* @param myo (out) pointer to emitted myo controller class, branch to read other data.
+	*/
 	UPROPERTY(BlueprintAssignable, Category = "Myo Events")
 	FMyoControllerSignature OnConnect;
 
+	/**
+	* Event on a Myo disconnecting
+	* @param myo (out) pointer to emitted myo controller class, branch to read other data.
+	*/
 	UPROPERTY(BlueprintAssignable, Category = "Myo Events")
 	FMyoControllerSignature OnDisconnect;
 
+	/**
+	* On arm detection, typically after a wave out gesture
+	* @param myo (out) pointer to emitted myo controller class, branch to read other data.
+	* @param arm (out) 0 = right, 1 = left, 2 = unknown
+	* @param direction (out) 0 = toward wrist, 1 = toward elbow, 2 = unknown
+	*/
 	UPROPERTY(BlueprintAssignable, Category = "Myo Events")
 	FMyoSyncSignature OnArmSync;
 
+	/**
+	* Called when a myo has been removed from arm.
+	* @param myo (out) pointer to emitted myo controller class, branch to read other data.
+	*/
 	UPROPERTY(BlueprintAssignable, Category = "Myo Events")
 	FMyoControllerSignature OnArmUnsync;
 
