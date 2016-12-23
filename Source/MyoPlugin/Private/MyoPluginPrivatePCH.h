@@ -7,3 +7,6 @@
 #include "CoreUObject.h"
 #include "InputDevice.h"
 #include "MyoEnum.h"
+#include "MyoInterface.h"
+#include "MyoController.h"
+#include "MyoControllerComponent.h"

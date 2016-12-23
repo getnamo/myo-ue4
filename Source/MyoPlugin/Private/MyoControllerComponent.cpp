@@ -1,5 +1,5 @@
 #include "MyoPluginPrivatePCH.h"
-#include "MyoComponent.h"
+#include "MyoControllerComponent.h"
 #include "MyoInterface.h"
 #include "Engine.h"
 #include "CoreUObject.h"

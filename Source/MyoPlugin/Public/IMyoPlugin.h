@@ -3,6 +3,7 @@
 #pragma once
 
 #include "ModuleManager.h"
+#include "MyoControllerComponent.h"
 #include "IInputDeviceModule.h"
 
 //class UMyoComponent;
@@ -39,8 +40,7 @@ public:
 	/**
 	 * Public API
 	 */
-	//virtual MyoDataDelegate* DataDelegate() { return nullptr; };
-	//virtual void DeferedAddDelegate(UMyoComponent* delegate) {};
-
+	virtual void AddComponentDelegate(UMyoControllerComponent* DelegateComponent) {};
+	virtual void RemoveComponentDelegate(UMyoControllerComponent* DelegateComponent) {};
 };
 

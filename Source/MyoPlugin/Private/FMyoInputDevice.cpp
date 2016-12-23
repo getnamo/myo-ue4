@@ -1,6 +1,7 @@
 #include "MyoPluginPrivatePCH.h"
 #include "FMyoInputDevice.h"
 #include "MyoUtility.h"
+#include <myo/myo.hpp>
 
 FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHandler >& InMessageHandler) : MessageHandler(InMessageHandler)
 {

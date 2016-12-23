@@ -2,7 +2,7 @@
 
 #include "MyoPluginPrivatePCH.h"
 #include "MyoEnum.h"
-#include "MyoComponent.generated.h"
+#include "MyoControllerComponent.generated.h"
 
 //TODO: multicast delegates here
 
