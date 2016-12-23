@@ -7,7 +7,7 @@
 //TODO: multicast delegates here
 
 UCLASS(ClassGroup="Input Controller", meta=(BlueprintSpawnableComponent))
-class MYOPLUGIN_API UMyoComponent : public UActorComponent //delegate here
+class MYOPLUGIN_API UMyoControllerComponent : public UActorComponent //delegate here
 {
 	GENERATED_UCLASS_BODY()
 
