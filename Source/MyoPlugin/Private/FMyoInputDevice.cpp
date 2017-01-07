@@ -5,25 +5,25 @@
 
 #define MYO_RUNTIME_MS 10	//default to 100 fps rate
 
-#pragma region FMyoInputDevice
-
 void EmitKeyUpEventForKey(FKey key, int32 user, bool repeat)
 {
-	FMyoLambdaRunnable::RunShortLambdaOnGameThread([&, key, user, repeat]
-	{
-		FKeyEvent KeyEvent(key, FSlateApplication::Get().GetModifierKeys(), user, repeat, 0, 0);
-		FSlateApplication::Get().ProcessKeyUpEvent(KeyEvent);
-	});
+	FKeyEvent KeyEvent(key, FSlateApplication::Get().GetModifierKeys(), user, repeat, 0, 0);
+	FSlateApplication::Get().ProcessKeyUpEvent(KeyEvent);
 }
 
 void EmitKeyDownEventForKey(FKey key, int32 user, bool repeat)
 {
-	FMyoLambdaRunnable::RunShortLambdaOnGameThread([&, key, user, repeat]
-	{
-		FKeyEvent KeyEvent(key, FSlateApplication::Get().GetModifierKeys(), user, repeat, 0, 0);
-		FSlateApplication::Get().ProcessKeyDownEvent(KeyEvent);
-	});
+	FKeyEvent KeyEvent(key, FSlateApplication::Get().GetModifierKeys(), user, repeat, 0, 0);
+	FSlateApplication::Get().ProcessKeyDownEvent(KeyEvent);
 }
+
+bool EmitAnalogInputEventForKey(FKey key, float value, int32 user)
+{
+	FAnalogInputEvent AnalogInputEvent(key, FSlateApplication::Get().GetModifierKeys(), user, false, 0, 0, value);
+	return FSlateApplication::Get().ProcessAnalogInputEvent(AnalogInputEvent);
+}
+
+#pragma region FMyoInputDevice
 
 FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHandler >& InMessageHandler) : MessageHandler(InMessageHandler)
 {
@@ -94,8 +94,7 @@ void FMyoInputDevice::SendControllerEvents()
 
 	//For Each myo, broadcast it's movements
 	for (auto myo : ConnectedMyos) {
-		FMyoControllerData MyoData;
-		DataForMyo(MyoData, myo);
+		FMyoControllerData& MyoData = MyoDataMap[myo];
 
 		for (auto Component : ComponentDelegates)
 		{
@@ -105,6 +104,23 @@ void FMyoInputDevice::SendControllerEvents()
 	}
 
 	//for the primary myo also emit IM events
+	Myo* PrimaryMyo = ConnectedMyos[0];
+	FMyoControllerData& MyoData = MyoDataMap[PrimaryMyo];
+	
+	//Orientation - Scale input mapping to -1.0-> 1.0 range
+	EmitAnalogInputEventForKey(EKeysMyo::MyoOrientationPitch, MyoData.ArmOrientation.Pitch * ORIENTATION_SCALE_PITCH, 0);
+	EmitAnalogInputEventForKey(EKeysMyo::MyoOrientationYaw, MyoData.ArmOrientation.Yaw * ORIENTATION_SCALE_YAWROLL, 0);
+	EmitAnalogInputEventForKey(EKeysMyo::MyoOrientationRoll, MyoData.ArmOrientation.Roll * ORIENTATION_SCALE_YAWROLL, 0);
+
+	//Acceleration - No scaling needed, 1.0 = 1g.
+	EmitAnalogInputEventForKey(EKeysMyo::MyoAccelerationX, MyoData.ArmAcceleration.X, 0);
+	EmitAnalogInputEventForKey(EKeysMyo::MyoAccelerationY, MyoData.ArmAcceleration.Y, 0);
+	EmitAnalogInputEventForKey(EKeysMyo::MyoAccelerationZ, MyoData.ArmAcceleration.Z, 0);
+
+	//Gyro - scaled down by 1/45. Fast flicks should be close to 1.0, slower gyro motions may need scaling up if used in input mapping
+	EmitAnalogInputEventForKey(EKeysMyo::MyoGyroX, MyoData.ArmGyro.X * GYRO_SCALE, 0);
+	EmitAnalogInputEventForKey(EKeysMyo::MyoGyroY, MyoData.ArmGyro.Y * GYRO_SCALE, 0);
+	EmitAnalogInputEventForKey(EKeysMyo::MyoGyroZ, MyoData.ArmGyro.Z * GYRO_SCALE, 0);
 }
 
 void FMyoInputDevice::ParseEvents()
@@ -380,7 +396,7 @@ void FMyoInputDevice::SetLockingPolicy(EMyoLockingPolicy Policy)
 
 void FMyoInputDevice::CalibrateOrientation(int32 MyoId, FRotator Direction)
 {
-
+	//todo: implement old style calibration function
 }
 
 void FMyoInputDevice::VibrateDevice(int32 MyoId, EMyoVibrationType VibrationType)
@@ -507,15 +523,18 @@ EMyoPose FMyoInputDevice::ConvertedPose(myo::Pose::Type Pose)
 
 void FMyoInputDevice::PressPose(EMyoPose pose)
 {
-	EmitKeyDownEventForKey(KeyFromPose(pose), 0, 0);
+	FMyoLambdaRunnable::RunShortLambdaOnGameThread([&, pose]
+	{
+		EmitKeyDownEventForKey(KeyFromPose(pose), 0, 0);
+	});
 }
 
 void FMyoInputDevice::ReleasePose(EMyoPose pose)
 {
-	EmitKeyUpEventForKey(KeyFromPose(pose), 0, 0);
+	FMyoLambdaRunnable::RunShortLambdaOnGameThread([&, pose]
+	{
+		EmitKeyUpEventForKey(KeyFromPose(pose), 0, 0);
+	});
 }
 
-
-
 #pragma  endregion DeviceListener
-
