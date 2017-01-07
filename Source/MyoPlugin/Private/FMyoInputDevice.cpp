@@ -17,6 +17,8 @@ FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHan
 	//Start our background threading
 	FMyoLambdaRunnable::RunLambdaOnBackGroundThread([&] 
 	{
+		MyoIdCounter = 0;	//reset the id counter
+
 		//initialize hub
 		MyoHub = new Hub("com.epicgames.unrealengine");
 
@@ -59,7 +61,7 @@ void FMyoInputDevice::Tick(float DeltaTime)
 
 void FMyoInputDevice::SendControllerEvents()
 {
-	ParseEvents();
+	//We use an external thread to forward the events, this is unused
 }
 
 void FMyoInputDevice::ParseEvents()
@@ -123,34 +125,68 @@ void FMyoInputDevice::RunFunctionOnComponents(TFunction<void(UMyoControllerCompo
 
 void FMyoInputDevice::onPair(Myo* myo, uint64_t timestamp, FirmwareVersion firmwareVersion)
 {
-	//const int32 MyoId = IdForMyo(myo);
+	//Track paired myos
+	PairedMyos.Add(myo);
 
+	//Add id links
+	MyoIdCounter++;				//always bump the counter
+	int32 MyoId = MyoIdCounter;
+	MyoToIdMap.Add(myo, MyoId);
+	IdToMyoMap.Add(MyoId, myo);
+
+	//Add the map data container
+	FMyoControllerData DefaultData;
+	MyoDataMap.Add(myo, DefaultData);
+	
 	UE_LOG(MyoPluginLog, Log, TEXT("Paired."));
 
-	RunFunctionOnComponents([&](UMyoControllerComponent* Component)
+	RunFunctionOnComponents([&, DefaultData](UMyoControllerComponent* Component)
 	{
 		//todo: emit locally stored MyoComponents
-		//Component->B
+		Component->OnPair.Broadcast(DefaultData);
 	});
 }
 void FMyoInputDevice::onUnpair(Myo* myo, uint64_t timestamp)
 {
+	//Remove the myo and links
+	FMyoControllerData MyoData = MyoDataMap[myo];
+	MyoDataMap.Remove(myo);
+	IdToMyoMap.Remove(IdForMyo(myo));
+	MyoToIdMap.Remove(myo);
+	PairedMyos.Remove(myo);
+
 	UE_LOG(MyoPluginLog, Log, TEXT("Unpaired."));
+	RunFunctionOnComponents([&, MyoData](UMyoControllerComponent* Component)
+	{
+		Component->OnUnpair.Broadcast(MyoData);
+	});
+	
 }
 
 void FMyoInputDevice::onConnect(Myo* myo, uint64_t timestamp, FirmwareVersion firmwareVersion)
 {
+	ConnectedMyos.Add(myo);
+
 	UE_LOG(MyoPluginLog, Log, TEXT("onConnect."));
 }
 
 void FMyoInputDevice::onDisconnect(Myo* myo, uint64_t timestamp)
 {
+	ConnectedMyos.Remove(myo);
+
 	UE_LOG(MyoPluginLog, Log, TEXT("onDisconnect."));
 }
 
 void FMyoInputDevice::onArmSync(Myo* myo, uint64_t timestamp, Arm arm, XDirection xDirection, float rotation, WarmupState warmupState)
 {
 	UE_LOG(MyoPluginLog, Log, TEXT("onArmSync."));
+
+	//Register
+
+	RunFunctionOnComponents([&](UMyoControllerComponent* Component)
+	{
+		//Component->OnArmSync.Broadcast()
+	});
 }
 
 void FMyoInputDevice::onArmUnsync(Myo* myo, uint64_t timestamp)
@@ -249,6 +285,30 @@ bool FMyoInputDevice::IsHubEnabled()
 void FMyoInputDevice::ShutDownLoop()
 {
 	bRunning = false;
+}
+
+int32 FMyoInputDevice::IdForMyo(Myo* myo)
+{
+	if (MyoToIdMap.Contains(myo))
+	{
+		return MyoToIdMap[myo];
+	}
+	else
+	{
+		return -1;
+	}
+}
+
+Myo* FMyoInputDevice::MyoForId(int32 MyoId)
+{
+	if (IdToMyoMap.Contains(MyoId))
+	{
+		return IdToMyoMap[MyoId];
+	}
+	else
+	{
+		return nullptr;
+	}
 }
 
 #pragma  endregion DeviceListener

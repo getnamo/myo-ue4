@@ -80,12 +80,21 @@ private:
 	virtual void onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* emg) override;
 	virtual void onWarmupCompleted(myo::Myo* myo, uint64_t timestamp, WarmupResult warmupResult) override;
 	
+	//Thread communication
 	FThreadSafeBool bRunning;
 
 	Hub* MyoHub;
 
 	//Finding and translating connected myos
-	//TArray<Myo*> ConnectedMyos;
-	//int32 IdForMyo(Myo* myo);
-	//Myo* MyoForId(int32 MyoId); 
+	int32 MyoIdCounter;		//always increments never decreases during app life cycle
+	TArray<Myo*> PairedMyos;
+	TArray<Myo*> ConnectedMyos;
+	TMap<Myo*, FMyoControllerData> MyoDataMap;
+
+	TMap<Myo*, int32> MyoToIdMap;
+	TMap<int32, Myo*> IdToMyoMap;
+
+	//Safe getters for the maps
+	int32 IdForMyo(Myo* myo);
+	Myo* MyoForId(int32 MyoId);
 };
