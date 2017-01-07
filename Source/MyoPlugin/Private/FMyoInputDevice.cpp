@@ -7,16 +7,22 @@
 
 #pragma region FMyoInputDevice
 
-bool EmitKeyUpEventForKey(FKey key, int32 user, bool repeat)
+void EmitKeyUpEventForKey(FKey key, int32 user, bool repeat)
 {
-	FKeyEvent KeyEvent(key, FSlateApplication::Get().GetModifierKeys(), user, repeat, 0, 0);
-	return FSlateApplication::Get().ProcessKeyUpEvent(KeyEvent);
+	FMyoLambdaRunnable::RunShortLambdaOnGameThread([&, key, user, repeat]
+	{
+		FKeyEvent KeyEvent(key, FSlateApplication::Get().GetModifierKeys(), user, repeat, 0, 0);
+		FSlateApplication::Get().ProcessKeyUpEvent(KeyEvent);
+	});
 }
 
-bool EmitKeyDownEventForKey(FKey key, int32 user, bool repeat)
+void EmitKeyDownEventForKey(FKey key, int32 user, bool repeat)
 {
-	FKeyEvent KeyEvent(key, FSlateApplication::Get().GetModifierKeys(), user, repeat, 0, 0);
-	return FSlateApplication::Get().ProcessKeyDownEvent(KeyEvent);
+	FMyoLambdaRunnable::RunShortLambdaOnGameThread([&, key, user, repeat]
+	{
+		FKeyEvent KeyEvent(key, FSlateApplication::Get().GetModifierKeys(), user, repeat, 0, 0);
+		FSlateApplication::Get().ProcessKeyDownEvent(KeyEvent);
+	});
 }
 
 FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHandler >& InMessageHandler) : MessageHandler(InMessageHandler)
@@ -79,6 +85,26 @@ void FMyoInputDevice::Tick(float DeltaTime)
 void FMyoInputDevice::SendControllerEvents()
 {
 	//We use an external thread to forward the events, this is unused. Should we poll push latest controller data instead?
+
+	//Do we have a valid number of myos connected?
+	if (ConnectedMyos.Num() == 0)
+	{
+		return;
+	}
+
+	//For Each myo, broadcast it's movements
+	for (auto myo : ConnectedMyos) {
+		FMyoControllerData MyoData;
+		DataForMyo(MyoData, myo);
+
+		for (auto Component : ComponentDelegates)
+		{
+			//Call the function on the game thread
+			Component->OnArmMoved.Broadcast(MyoData, MyoData.Acceleration, MyoData.Orientation, MyoData.Gyro);
+		}
+	}
+
+	//for the primary myo also emit IM events
 }
 
 void FMyoInputDevice::ParseEvents()
@@ -112,7 +138,18 @@ void FMyoInputDevice::SetChannelValues(int32 ControllerId, const FForceFeedbackV
 
 void FMyoInputDevice::AddComponentDelegate(UMyoControllerComponent* Component)
 {
-	ComponentDelegates.Add(Component);
+	//Only game component should receive callbacks
+	UWorld* ComponentWorld = Component->GetOwner()->GetWorld();
+	if (ComponentWorld == nullptr)
+	{
+		return;
+	}
+	if (ComponentWorld->WorldType == EWorldType::Game ||
+		ComponentWorld->WorldType == EWorldType::GamePreview ||
+		ComponentWorld->WorldType == EWorldType::PIE)
+	{
+		ComponentDelegates.Add(Component);
+	}
 }
 
 void FMyoInputDevice::RemoveComponentDelegate(UMyoControllerComponent* Component)
@@ -123,7 +160,7 @@ void FMyoInputDevice::RemoveComponentDelegate(UMyoControllerComponent* Component
 void FMyoInputDevice::RunFunctionOnComponents(TFunction<void(UMyoControllerComponent*)> InFunction)
 {
 	const TArray<UMyoControllerComponent*>& SafeComponentDelegates = ComponentDelegates;
-	FMyoLambdaRunnable::RunShortLambdaOnGameThread([&, SafeComponentDelegates]
+	FMyoLambdaRunnable::RunShortLambdaOnGameThread([&, SafeComponentDelegates, InFunction]
 	{
 		for (auto Component : SafeComponentDelegates)
 		{
@@ -154,6 +191,7 @@ void FMyoInputDevice::onPair(Myo* myo, uint64_t timestamp, FirmwareVersion firmw
 	//Add the map data container
 	FMyoControllerData DefaultData;
 	DefaultData.MyoId = MyoId;
+	DefaultData.Pose = EMyoPose::MYO_POSE_UNKNOWN;
 	MyoDataMap.Add(myo, DefaultData);
 	
 	UE_LOG(MyoPluginLog, Log, TEXT("Paired."));
@@ -218,6 +256,7 @@ void FMyoInputDevice::onArmSync(Myo* myo, uint64_t timestamp, Arm arm, XDirectio
 	DataForMyo(Data, myo);
 	Data.Arm = (EMyoArm)arm;
 	Data.ArmDirection = (EMyoArmDirection)xDirection;
+	Data.bIsArmSynced = true;
 
 	RunFunctionOnComponents([&, Data](UMyoControllerComponent* Component)
 	{
@@ -229,7 +268,8 @@ void FMyoInputDevice::onArmUnsync(Myo* myo, uint64_t timestamp)
 {
 	UE_LOG(MyoPluginLog, Log, TEXT("onArmUnsync."));
 
-	const FMyoControllerData& MyoData = MyoDataMap[myo];
+	FMyoControllerData& MyoData = MyoDataMap[myo];
+	MyoData.bIsArmSynced = false;
 
 	RunFunctionOnComponents([&, MyoData](UMyoControllerComponent* Component)
 	{
@@ -275,12 +315,6 @@ void FMyoInputDevice::onAccelerometerData(Myo* myo, uint64_t timestamp, const Ve
 {
 	FMyoControllerData& MyoData = MyoDataMap[myo];
 	MyoData.Acceleration = FVector(accel.x(), accel.y(), accel.z());
-
-	//for now broadcast move on accelerometer data (later move this into ticking...
-	RunFunctionOnComponents([&, MyoData](UMyoControllerComponent* Component)
-	{
-		Component->OnArmMoved.Broadcast(MyoData, MyoData.Acceleration, MyoData.Orientation, MyoData.Gyro);
-	});
 }
 
 void FMyoInputDevice::onGyroscopeData(Myo* myo, uint64_t timestamp, const Vector3<float>& gyro)
@@ -432,7 +466,7 @@ FKey FMyoInputDevice::KeyFromPose(EMyoPose Pose)
 		return EKeysMyo::MyoPoseFingersSpread;
 	case MYO_POSE_DOUBLETAP:
 		return EKeysMyo::MyoPoseDoubleTap;
-	case MYO_POSE_MAX:
+	case MYO_POSE_UNKNOWN:
 		return EKeysMyo::MyoPoseUnknown;
 	default:
 		return EKeysMyo::MyoPoseUnknown;
@@ -467,7 +501,7 @@ EMyoPose FMyoInputDevice::ConvertedPose(myo::Pose::Type Pose)
 	}
 	else
 	{//unknown
-		return EMyoPose::MYO_POSE_MAX;
+		return EMyoPose::MYO_POSE_UNKNOWN;
 	}
 }
 
