@@ -73,11 +73,11 @@ namespace MyoUtility
 		return FVector(rawAcceleration.X, -rawAcceleration.Y, -rawAcceleration.Z);
 	}
 
-	FVector convertAccelerationToBodySpace(FVector armAcceleration, FRotator orientation, FRotator armCorrection, myo::XDirection direction)
+	FVector convertAccelerationToBodySpace(FVector armAcceleration, FRotator orientation, FRotator armCorrection, EMyoArmDirection direction)
 	{
 		float directionModifier = 1.f;
 		//something wrong here, also make sure this is applied to the arm space correction as well
-		if (direction == myo::xDirectionTowardElbow) {
+		if (direction == EMyoArmDirection::MYO_TOWARD_ELBOW) {
 			directionModifier = -1.f;
 		}
 
@@ -92,11 +92,11 @@ namespace MyoUtility
 		return ((reactionAcceleration * FVector(directionModifier, directionModifier, 1.f)) + FVector(0, 0, 1)) * -1.f;
 	}
 
-	FRotator convertOrientationToArmSpace(FRotator convertedOrientation, FRotator armCorrection, myo::XDirection direction)
+	FRotator convertOrientationToArmSpace(FRotator convertedOrientation, FRotator armCorrection, EMyoArmDirection direction)
 	{
 		float directionModifier = 1.f;
 		//Check for arm direction, compensate if needed by reversing pitch and roll
-		if (direction == myo::xDirectionTowardElbow) {
+		if (direction == EMyoArmDirection::MYO_TOWARD_ELBOW) {
 			directionModifier = -1.f;
 			convertedOrientation = FRotator(convertedOrientation.Pitch*directionModifier, convertedOrientation.Yaw, convertedOrientation.Roll*directionModifier);
 		}

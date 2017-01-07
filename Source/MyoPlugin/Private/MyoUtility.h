@@ -28,9 +28,9 @@ namespace MyoUtility
 
 	FVector convertVectorToUE(FVector rawAcceleration);
 
-	FVector convertAccelerationToBodySpace(FVector armAcceleration, FRotator orientation, FRotator armCorrection, myo::XDirection direction);
+	FVector convertAccelerationToBodySpace(FVector armAcceleration, FRotator orientation, FRotator armCorrection, EMyoArmDirection direction);
 
-	FRotator convertOrientationToArmSpace(FRotator convertedOrientation, FRotator armCorrection, myo::XDirection direction);
+	FRotator convertOrientationToArmSpace(FRotator convertedOrientation, FRotator armCorrection, EMyoArmDirection direction);
 
 	void AddMyoFKeys();
 }

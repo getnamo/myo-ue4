@@ -5,23 +5,7 @@
 
 #define MYO_RUNTIME_MS 10	//default to 100 fps rate
 
-void EmitKeyUpEventForKey(FKey key, int32 user, bool repeat)
-{
-	FKeyEvent KeyEvent(key, FSlateApplication::Get().GetModifierKeys(), user, repeat, 0, 0);
-	FSlateApplication::Get().ProcessKeyUpEvent(KeyEvent);
-}
-
-void EmitKeyDownEventForKey(FKey key, int32 user, bool repeat)
-{
-	FKeyEvent KeyEvent(key, FSlateApplication::Get().GetModifierKeys(), user, repeat, 0, 0);
-	FSlateApplication::Get().ProcessKeyDownEvent(KeyEvent);
-}
-
-bool EmitAnalogInputEventForKey(FKey key, float value, int32 user)
-{
-	FAnalogInputEvent AnalogInputEvent(key, FSlateApplication::Get().GetModifierKeys(), user, false, 0, 0, value);
-	return FSlateApplication::Get().ProcessAnalogInputEvent(AnalogInputEvent);
-}
+using namespace MyoUtility;
 
 #pragma region FMyoInputDevice
 
@@ -324,19 +308,26 @@ void FMyoInputDevice::onPose(Myo* myo, uint64_t timestamp, Pose pose)
 void FMyoInputDevice::onOrientationData(Myo* myo, uint64_t timestamp, const Quaternion<float>& rotation)
 {
 	FMyoControllerData& MyoData = MyoDataMap[myo];
-	MyoData.Orientation = FQuat(rotation.x(), rotation.y(), rotation.z(), rotation.w()).Rotator();
+	MyoData.Orientation = convertOrientationToUE(FQuat(rotation.x(), rotation.y(), rotation.z(), rotation.w()).Rotator());
+	MyoData.ArmOrientation = convertOrientationToArmSpace(MyoData.Orientation, MyoData.ArmSpaceCorrection, MyoData.ArmDirection);
 }
 
 void FMyoInputDevice::onAccelerometerData(Myo* myo, uint64_t timestamp, const Vector3<float>& accel)
 {
 	FMyoControllerData& MyoData = MyoDataMap[myo];
-	MyoData.Acceleration = FVector(accel.x(), accel.y(), accel.z());
+	MyoData.Acceleration = convertVectorToUE(FVector(accel.x(), accel.y(), accel.z()));
+	MyoData.ArmAcceleration = MyoData.Acceleration;
+	MyoData.BodySpaceNullAcceleration = convertAccelerationToBodySpace( MyoData.ArmAcceleration,
+																		MyoData.ArmOrientation, 
+																		MyoData.ArmSpaceCorrection, 
+																		MyoData.ArmDirection);
 }
 
 void FMyoInputDevice::onGyroscopeData(Myo* myo, uint64_t timestamp, const Vector3<float>& gyro)
 {
 	FMyoControllerData& MyoData = MyoDataMap[myo];
 	MyoData.Gyro = FVector(gyro.x(), gyro.y(), gyro.z());
+	MyoData.ArmGyro = convertVectorToUE(MyoData.Gyro);
 }
 
 void FMyoInputDevice::onRssi(Myo* myo, uint64_t timestamp, int8_t rssi)
@@ -397,6 +388,9 @@ void FMyoInputDevice::SetLockingPolicy(EMyoLockingPolicy Policy)
 void FMyoInputDevice::CalibrateOrientation(int32 MyoId, FRotator Direction)
 {
 	//todo: implement old style calibration function
+	FMyoControllerData& MyoData = MyoDataMap[MyoForId(MyoId)];
+
+	MyoData.ArmSpaceCorrection = combineRotators(MyoData.Orientation*-1.f, Direction);
 }
 
 void FMyoInputDevice::VibrateDevice(int32 MyoId, EMyoVibrationType VibrationType)
