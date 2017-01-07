@@ -18,29 +18,21 @@ void FMyoPlugin::StartupModule()
 	MyoUtility::AddMyoFKeys();
 
 	bInputCreated = false;
+
+	IModularFeatures::Get().RegisterModularFeature(IInputDeviceModule::GetModularFeatureName(), this);
 }
+
+#undef LOCTEXT_NAMESPACE
 
 void FMyoPlugin::ShutdownModule()
 {
+	MyoInputDevice->ShutDownLoop();
+
 	UE_LOG(MyoPluginLog, Log, TEXT("Myo Plugin clean shutdown."));
+	IModularFeatures::Get().UnregisterModularFeature(IInputDeviceModule::GetModularFeatureName(), this);
 }
 
-TSharedPtr< class IInputDevice > FMyoPlugin::CreateInputDevice(const TSharedRef< FGenericApplicationMessageHandler >& InMessageHandler)
-{
-	MyoInputDevice = MakeShareable(new FMyoInputDevice(InMessageHandler));
-	return TSharedPtr< class IInputDevice >(MyoInputDevice);
 
-	//Delegates may have been added before the input device is created, add them to our input device to handle
-	if (DeferredDelegates.Num() > 0)
-	{
-		for (auto Component : DeferredDelegates)
-		{
-			MyoInputDevice->AddComponentDelegate(Component);
-		}
-		DeferredDelegates.Empty();
-	}
-	bInputCreated = true;
-}
 
 void FMyoPlugin::AddComponentDelegate(UMyoControllerComponent* Component)
 {
@@ -91,6 +83,23 @@ void FMyoPlugin::VibrateMyo(UMyoController* Controller, EMyoVibrationType Vibrat
 
 }
 
-#undef LOCTEXT_NAMESPACE
+TSharedPtr< class IInputDevice > FMyoPlugin::CreateInputDevice(const TSharedRef< FGenericApplicationMessageHandler >& InMessageHandler)
+{
+	UE_LOG(MyoPluginLog, Log, TEXT("Creating Input device"));
+
+	MyoInputDevice = MakeShareable(new FMyoInputDevice(InMessageHandler));
+	return TSharedPtr< class IInputDevice >(MyoInputDevice);
+
+	//Delegates may have been added before the input device is created, add them to our input device to handle
+	if (DeferredDelegates.Num() > 0)
+	{
+		for (auto Component : DeferredDelegates)
+		{
+			MyoInputDevice->AddComponentDelegate(Component);
+		}
+		DeferredDelegates.Empty();
+	}
+	bInputCreated = true;
+}
 
 IMPLEMENT_MODULE(FMyoPlugin, MyoPlugin)

@@ -12,6 +12,8 @@ FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHan
 	//Startup the background handler
 	bRunning = false;
 
+	UE_LOG(MyoPluginLog, Log, TEXT("Myo Input device booting up."));
+
 	//Start our background threading
 	FMyoLambdaRunnable::RunLambdaOnBackGroundThread([&] 
 	{
@@ -30,11 +32,15 @@ FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHan
 
 		UE_LOG(MyoPluginLog, Log, TEXT("Myo Initialized, thread loop started."));
 
+		bRunning = true;
+
 		//Start thread loop
 		while (bRunning)
 		{
 			MyoHub->run(MYO_RUNTIME_MS);
 		}
+
+		UE_LOG(MyoPluginLog, Log, TEXT("Myo thread loop stopped."));
 
 		MyoHub->removeListener(this);
 		delete MyoHub;
@@ -238,6 +244,11 @@ void FMyoInputDevice::SetEMGStreamType(int32 MyoId, EMyoStreamEmgType StreamType
 bool FMyoInputDevice::IsHubEnabled()
 {
 	return false;
+}
+
+void FMyoInputDevice::ShutDownLoop()
+{
+	bRunning = false;
 }
 
 #pragma  endregion DeviceListener

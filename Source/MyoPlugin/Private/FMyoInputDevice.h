@@ -14,6 +14,8 @@ public:
 	FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHandler >& MessageHandler);
 	virtual ~FMyoInputDevice();
 
+	void ShutDownLoop();
+
 	
 	/** Tick the interface (e.g. check for new controllers) */
 	virtual void Tick(float DeltaTime) override;
