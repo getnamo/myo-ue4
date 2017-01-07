@@ -62,6 +62,9 @@ struct MYOPLUGIN_API FMyoControllerData
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Myo Controller Data")
 	int32 RSSI;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Myo Controller Data")
+	bool bIsArmSynced;
+
 	//Conversion
 	void setFromMyoDeviceData(FMyoDeviceData* Data);
 };

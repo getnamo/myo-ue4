@@ -28,7 +28,7 @@ enum EMyoPose
 	MYO_POSE_WAVEOUT,
 	MYO_POSE_FINGERSPREAD,
 	MYO_POSE_DOUBLETAP,
-	MYO_POSE_MAX = 255
+	MYO_POSE_UNKNOWN = 254	//should be 255 but needs to be 254 due to ue4 max enum quirks
 };
 
 UENUM(BlueprintType)

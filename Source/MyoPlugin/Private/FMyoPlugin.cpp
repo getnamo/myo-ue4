@@ -88,7 +88,6 @@ TSharedPtr< class IInputDevice > FMyoPlugin::CreateInputDevice(const TSharedRef<
 	UE_LOG(MyoPluginLog, Log, TEXT("Creating Input device"));
 
 	MyoInputDevice = MakeShareable(new FMyoInputDevice(InMessageHandler));
-	return TSharedPtr< class IInputDevice >(MyoInputDevice);
 
 	//Delegates may have been added before the input device is created, add them to our input device to handle
 	if (DeferredDelegates.Num() > 0)
@@ -100,6 +99,8 @@ TSharedPtr< class IInputDevice > FMyoPlugin::CreateInputDevice(const TSharedRef<
 		DeferredDelegates.Empty();
 	}
 	bInputCreated = true;
+
+	return TSharedPtr< class IInputDevice >(MyoInputDevice);
 }
 
 IMPLEMENT_MODULE(FMyoPlugin, MyoPlugin)
