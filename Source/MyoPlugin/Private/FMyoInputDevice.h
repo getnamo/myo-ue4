@@ -97,4 +97,10 @@ private:
 	//Safe getters for the maps
 	int32 IdForMyo(Myo* myo);
 	Myo* MyoForId(int32 MyoId);
+	void DataForMyo(FMyoControllerData& Data, Myo* myo);
+
+	EMyoPose ConvertedPose(myo::Pose::Type Pose);
+	FKey KeyFromPose(EMyoPose Pose);
+	void PressPose(EMyoPose pose);
+	void ReleasePose(EMyoPose pose);
 };

@@ -7,10 +7,23 @@
 
 #pragma region FMyoInputDevice
 
+bool EmitKeyUpEventForKey(FKey key, int32 user, bool repeat)
+{
+	FKeyEvent KeyEvent(key, FSlateApplication::Get().GetModifierKeys(), user, repeat, 0, 0);
+	return FSlateApplication::Get().ProcessKeyUpEvent(KeyEvent);
+}
+
+bool EmitKeyDownEventForKey(FKey key, int32 user, bool repeat)
+{
+	FKeyEvent KeyEvent(key, FSlateApplication::Get().GetModifierKeys(), user, repeat, 0, 0);
+	return FSlateApplication::Get().ProcessKeyDownEvent(KeyEvent);
+}
+
 FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHandler >& InMessageHandler) : MessageHandler(InMessageHandler)
 {
 	//Startup the background handler
 	bRunning = false;
+	MyoHub = nullptr;
 
 	UE_LOG(MyoPluginLog, Log, TEXT("Myo Input device booting up."));
 
@@ -26,6 +39,8 @@ FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHan
 		if (MyoHub->lastInitCausedError)
 		{
 			UE_LOG(MyoPluginLog, Log, TEXT("Hub initialization failed. Do you have Myo Connect installed and updated?"));
+			delete MyoHub;
+			MyoHub = nullptr;
 			return;
 		}
 
@@ -35,6 +50,8 @@ FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHan
 		UE_LOG(MyoPluginLog, Log, TEXT("Myo Initialized, thread loop started."));
 
 		bRunning = true;
+
+		//MyoHub->waitForMyo()	//optimization, wait stall thread?
 
 		//Start thread loop
 		while (bRunning)
@@ -61,7 +78,7 @@ void FMyoInputDevice::Tick(float DeltaTime)
 
 void FMyoInputDevice::SendControllerEvents()
 {
-	//We use an external thread to forward the events, this is unused
+	//We use an external thread to forward the events, this is unused. Should we poll push latest controller data instead?
 }
 
 void FMyoInputDevice::ParseEvents()
@@ -136,6 +153,7 @@ void FMyoInputDevice::onPair(Myo* myo, uint64_t timestamp, FirmwareVersion firmw
 
 	//Add the map data container
 	FMyoControllerData DefaultData;
+	DefaultData.MyoId = MyoId;
 	MyoDataMap.Add(myo, DefaultData);
 	
 	UE_LOG(MyoPluginLog, Log, TEXT("Paired."));
@@ -168,6 +186,13 @@ void FMyoInputDevice::onConnect(Myo* myo, uint64_t timestamp, FirmwareVersion fi
 	ConnectedMyos.Add(myo);
 
 	UE_LOG(MyoPluginLog, Log, TEXT("onConnect."));
+
+	const FMyoControllerData& MyoData = MyoDataMap[myo];
+
+	RunFunctionOnComponents([&, MyoData](UMyoControllerComponent* Component)
+	{
+		Component->OnConnect.Broadcast(MyoData);
+	});
 }
 
 void FMyoInputDevice::onDisconnect(Myo* myo, uint64_t timestamp)
@@ -175,23 +200,41 @@ void FMyoInputDevice::onDisconnect(Myo* myo, uint64_t timestamp)
 	ConnectedMyos.Remove(myo);
 
 	UE_LOG(MyoPluginLog, Log, TEXT("onDisconnect."));
+
+	const FMyoControllerData& MyoData = MyoDataMap[myo];
+
+	RunFunctionOnComponents([&, MyoData](UMyoControllerComponent* Component)
+	{
+		Component->OnDisconnect.Broadcast(MyoData);
+	});
 }
 
 void FMyoInputDevice::onArmSync(Myo* myo, uint64_t timestamp, Arm arm, XDirection xDirection, float rotation, WarmupState warmupState)
 {
 	UE_LOG(MyoPluginLog, Log, TEXT("onArmSync."));
 
-	//Register
+	//Update the data for the myo
+	FMyoControllerData Data; 
+	DataForMyo(Data, myo);
+	Data.Arm = (EMyoArm)arm;
+	Data.ArmDirection = (EMyoArmDirection)xDirection;
 
-	RunFunctionOnComponents([&](UMyoControllerComponent* Component)
+	RunFunctionOnComponents([&, Data](UMyoControllerComponent* Component)
 	{
-		//Component->OnArmSync.Broadcast()
+		Component->OnArmSync.Broadcast(Data, Data.Arm, Data.ArmDirection);
 	});
 }
 
 void FMyoInputDevice::onArmUnsync(Myo* myo, uint64_t timestamp)
 {
 	UE_LOG(MyoPluginLog, Log, TEXT("onArmUnsync."));
+
+	const FMyoControllerData& MyoData = MyoDataMap[myo];
+
+	RunFunctionOnComponents([&, MyoData](UMyoControllerComponent* Component)
+	{
+		Component->OnArmUnsync.Broadcast(MyoData);
+	});
 }
 
 void FMyoInputDevice::onUnlock(Myo* myo, uint64_t timestamp)
@@ -207,41 +250,90 @@ void FMyoInputDevice::onLock(Myo* myo, uint64_t timestamp)
 void FMyoInputDevice::onPose(Myo* myo, uint64_t timestamp, Pose pose)
 {
 	UE_LOG(MyoPluginLog, Log, TEXT("onPose."));
+
+	FMyoControllerData& MyoData = MyoDataMap[myo];
+	
+	ReleasePose(MyoData.Pose);
+	
+	MyoData.Pose = ConvertedPose(pose.type());
+
+	PressPose(MyoData.Pose);
+
+	RunFunctionOnComponents([&, MyoData](UMyoControllerComponent* Component)
+	{
+		Component->OnPoseChanged.Broadcast(MyoData, MyoData.Pose);
+	});
 }
 
 void FMyoInputDevice::onOrientationData(Myo* myo, uint64_t timestamp, const Quaternion<float>& rotation)
 {
-
+	FMyoControllerData& MyoData = MyoDataMap[myo];
+	MyoData.Orientation = FQuat(rotation.x(), rotation.y(), rotation.z(), rotation.w()).Rotator();
 }
 
 void FMyoInputDevice::onAccelerometerData(Myo* myo, uint64_t timestamp, const Vector3<float>& accel)
 {
+	FMyoControllerData& MyoData = MyoDataMap[myo];
+	MyoData.Acceleration = FVector(accel.x(), accel.y(), accel.z());
 
+	//for now broadcast move on accelerometer data (later move this into ticking...
+	RunFunctionOnComponents([&, MyoData](UMyoControllerComponent* Component)
+	{
+		Component->OnArmMoved.Broadcast(MyoData, MyoData.Acceleration, MyoData.Orientation, MyoData.Gyro);
+	});
 }
 
 void FMyoInputDevice::onGyroscopeData(Myo* myo, uint64_t timestamp, const Vector3<float>& gyro)
 {
-
+	FMyoControllerData& MyoData = MyoDataMap[myo];
+	MyoData.Gyro = FVector(gyro.x(), gyro.y(), gyro.z());
 }
 
 void FMyoInputDevice::onRssi(Myo* myo, uint64_t timestamp, int8_t rssi)
 {
+	FMyoControllerData& MyoData = MyoDataMap[myo];
+	MyoData.RSSI = rssi;
 
+	RunFunctionOnComponents([&, MyoData](UMyoControllerComponent* Component)
+	{
+		Component->OnRSSIChanged.Broadcast(MyoData, MyoData.RSSI);
+	});
 }
 
 void FMyoInputDevice::onBatteryLevelReceived(myo::Myo* myo, uint64_t timestamp, uint8_t level)
 {
-	UE_LOG(MyoPluginLog, Log, TEXT("onBatteryLevelReceived."));
+	UE_LOG(MyoPluginLog, Log, TEXT("onBatteryLevelReceived: %d"), level);
+	FMyoControllerData& MyoData = MyoDataMap[myo];
+	MyoData.BatteryLevel = level;
+
+	RunFunctionOnComponents([&, MyoData](UMyoControllerComponent* Component)
+	{
+		Component->OnBatteryLevelChanged.Broadcast(MyoData, MyoData.BatteryLevel);
+	});
 }
 
 void FMyoInputDevice::onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* emg)
 {
+	FMyoControllerData& MyoData = MyoDataMap[myo];
+	FMyoEmgData EmgData;
+	EmgData.setFromArray(emg);
 
+	RunFunctionOnComponents([&, MyoData, EmgData](UMyoControllerComponent* Component)
+	{
+		Component->OnEmgData.Broadcast(MyoData, EmgData);
+	});
 }
 
 void FMyoInputDevice::onWarmupCompleted(myo::Myo* myo, uint64_t timestamp, WarmupResult warmupResult)
 {
 	UE_LOG(MyoPluginLog, Log, TEXT("onWarmupCompleted."));
+
+	FMyoControllerData& MyoData = MyoDataMap[myo];
+
+	RunFunctionOnComponents([&, MyoData](UMyoControllerComponent* Component)
+	{
+		Component->OnWarmupCompleted.Broadcast(MyoData);
+	});
 }
 
 
@@ -259,27 +351,31 @@ void FMyoInputDevice::CalibrateOrientation(int32 MyoId, FRotator Direction)
 
 void FMyoInputDevice::VibrateDevice(int32 MyoId, EMyoVibrationType VibrationType)
 {
-
+	Myo* myo = MyoForId(MyoId);
+	myo->vibrate((Myo::VibrationType)VibrationType);
 }
 
 void FMyoInputDevice::UnlockDevice(int32 MyoId, EMyoUnlockType UnlockType)
 {
-
+	Myo* myo = MyoForId(MyoId);
+	myo->unlock((Myo::UnlockType)UnlockType);
 }
 
 void FMyoInputDevice::LockDevice(int32 MyoId)
 {
-
+	Myo* myo = MyoForId(MyoId);
+	myo->lock();
 }
 
 void FMyoInputDevice::SetEMGStreamType(int32 MyoId, EMyoStreamEmgType StreamType)
 {
-
+	Myo* myo = MyoForId(MyoId);
+	myo->setStreamEmg((Myo::StreamEmgType)StreamType);
 }
 
 bool FMyoInputDevice::IsHubEnabled()
 {
-	return false;
+	return MyoHub != nullptr;
 }
 
 void FMyoInputDevice::ShutDownLoop()
@@ -310,6 +406,82 @@ Myo* FMyoInputDevice::MyoForId(int32 MyoId)
 		return nullptr;
 	}
 }
+
+void FMyoInputDevice::DataForMyo(FMyoControllerData& Data, Myo* myo)
+{
+	if (MyoDataMap.Contains(myo))
+	{
+		Data = MyoDataMap[myo];
+	}
+}
+
+//Conversion
+FKey FMyoInputDevice::KeyFromPose(EMyoPose Pose)
+{
+	switch (Pose)
+	{
+	case MYO_POSE_REST:
+		return EKeysMyo::MyoPoseRest;
+	case MYO_POSE_FIST:
+		return EKeysMyo::MyoPoseFist;
+	case MYO_POSE_WAVEIN:
+		return EKeysMyo::MyoPoseWaveIn;
+	case MYO_POSE_WAVEOUT:
+		return EKeysMyo::MyoPoseWaveOut;
+	case MYO_POSE_FINGERSPREAD:
+		return EKeysMyo::MyoPoseFingersSpread;
+	case MYO_POSE_DOUBLETAP:
+		return EKeysMyo::MyoPoseDoubleTap;
+	case MYO_POSE_MAX:
+		return EKeysMyo::MyoPoseUnknown;
+	default:
+		return EKeysMyo::MyoPoseUnknown;
+	}
+}
+
+EMyoPose FMyoInputDevice::ConvertedPose(myo::Pose::Type Pose)
+{
+	if (Pose == myo::Pose::rest)
+	{
+		return EMyoPose::MYO_POSE_REST;
+	}
+	else if (Pose == myo::Pose::fist)
+	{
+		return EMyoPose::MYO_POSE_FIST;
+	}
+	else if (Pose == myo::Pose::waveIn)
+	{
+		return EMyoPose::MYO_POSE_WAVEIN;
+	}
+	else if (Pose == myo::Pose::waveOut)
+	{
+		return EMyoPose::MYO_POSE_WAVEOUT;
+	}
+	else if (Pose == myo::Pose::fingersSpread)
+	{
+		return EMyoPose::MYO_POSE_FINGERSPREAD;
+	}
+	else if (Pose == myo::Pose::doubleTap)
+	{
+		return EMyoPose::MYO_POSE_DOUBLETAP;
+	}
+	else
+	{//unknown
+		return EMyoPose::MYO_POSE_MAX;
+	}
+}
+
+void FMyoInputDevice::PressPose(EMyoPose pose)
+{
+	EmitKeyDownEventForKey(KeyFromPose(pose), 0, 0);
+}
+
+void FMyoInputDevice::ReleasePose(EMyoPose pose)
+{
+	EmitKeyUpEventForKey(KeyFromPose(pose), 0, 0);
+}
+
+
 
 #pragma  endregion DeviceListener
 

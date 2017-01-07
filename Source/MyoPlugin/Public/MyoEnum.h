@@ -67,6 +67,16 @@ struct FMyoEmgData
 
 	UPROPERTY(BlueprintReadWrite, Category = "Emg Data Struct")
 	TArray<int32> Streams;
+
+	//assume 8 streams
+	void setFromArray(const int8_t* emg)
+	{
+		Streams.Empty();
+		for (int i = 0; i < 8; i++)
+		{
+			Streams[i] = emg[i];
+		}
+	}
 };
 
 /**

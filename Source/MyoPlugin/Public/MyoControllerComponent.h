@@ -11,6 +11,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMyoPoseSignature, const FMyoContro
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FMyoSyncSignature, const FMyoControllerData&, Controller, TEnumAsByte<EMyoArm>, arm, TEnumAsByte<EMyoArmDirection>, ArmDirection);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FMyoMovedSignature, const FMyoControllerData&, Controller, FVector, ArmAcceleration, FRotator, ArmOrientation, FVector, ArmGyro);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMyoRawEmgSignature, const FMyoControllerData&, Controller, FMyoEmgData, EmgData);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMyoBatterySignature, const FMyoControllerData&, Controller, int32, BatteryLevel);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMyoRSSISignature, const FMyoControllerData&, Controller, int32, RSSI);
 
 UCLASS(ClassGroup="Input Controller", meta=(BlueprintSpawnableComponent))
 class MYOPLUGIN_API UMyoControllerComponent : public UActorComponent //delegate here
@@ -82,6 +84,29 @@ public:
 	*/
 	UPROPERTY(BlueprintAssignable, Category = "Myo Events")
 	FMyoControllerSignature OnArmUnsync;
+
+	/**
+	* Called when a myo has warmed up and is ready to use
+	* @param myo (out) pointer to emitted myo controller class, branch to read other data.
+	*/
+	UPROPERTY(BlueprintAssignable, Category = "Myo Events")
+	FMyoControllerSignature OnWarmupCompleted;
+	
+	/**
+	* Called when a myo's battery level has changed.
+	* @param myo (out) pointer to emitted myo controller class, branch to read other data.
+	* @param level (out) battery level in int format
+	*/
+	UPROPERTY(BlueprintAssignable, Category = "Myo Events")
+	FMyoBatterySignature OnBatteryLevelChanged;
+
+	/**
+	* Called when a myo's RSSI level has changed.
+	* @param myo (out) pointer to emitted myo controller class, branch to read other data.
+	* @param rssi (out) RSSI level in int format
+	*/
+	UPROPERTY(BlueprintAssignable, Category = "Myo Events")
+	FMyoRSSISignature OnRSSIChanged;
 
 	//Callable Blueprint functions - Need to be defined for direct access
 	/**

@@ -56,6 +56,12 @@ struct MYOPLUGIN_API FMyoControllerData
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Myo Controller Data")
 	int32 MyoId;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Myo Controller Data")
+	int32 BatteryLevel;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Myo Controller Data")
+	int32 RSSI;
+
 	//Conversion
 	void setFromMyoDeviceData(FMyoDeviceData* Data);
 };
