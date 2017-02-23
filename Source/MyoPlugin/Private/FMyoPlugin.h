@@ -21,6 +21,11 @@ private:
 	virtual void SetStreamEmgType(EMyoStreamEmgType StreamType) override;
 	virtual void VibrateMyo(UMyoController* Controller, EMyoVibrationType VibrationType) override;
 
+	virtual UMyoController* LeftMyo() override;
+	virtual UMyoController* RightMyo() override;
+	virtual UMyoController* PrimaryMyo() override;
+	virtual UMyoController* MyoForId(int32 MyoId) override;
+
 	TArray<UMyoControllerComponent*> DeferredDelegates;
 	bool bInputCreated;
 };

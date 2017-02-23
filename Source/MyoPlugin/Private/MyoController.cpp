@@ -41,7 +41,7 @@ void UMyoController::CalibrateArmOrientation(FRotator Direction)
 {
 	if (IMyoPlugin::IsAvailable())
 	{
-		//IMyoPlugin::Get().CalibrateOrientation(this->MyoId, Direction);
+		//IMyoPlugin::Get().CalibrateOrientation(this, Direction);
 	}
 }
 
@@ -49,7 +49,7 @@ void UMyoController::VibrateDevice(EMyoVibrationType Type)
 {
 	if (IMyoPlugin::IsAvailable())
 	{
-		//IMyoPlugin::Get().VibrateDevice(this->MyoId, Type);
+		IMyoPlugin::Get().VibrateMyo(this, Type);
 	}
 }
 
@@ -57,14 +57,14 @@ void UMyoController::Unlock(EMyoUnlockType Type)
 {
 	if (IMyoPlugin::IsAvailable())
 	{
-		//IMyoPlugin::Get().UnlockMyo(this->MyoId, Type);
+		IMyoPlugin::Get().UnlockMyo(this);
 	}
 }
 void UMyoController::Lock()
 {
 	if (IMyoPlugin::IsAvailable())
 	{
-		//IMyoPlugin::Get().LockMyo(this->MyoId);
+		IMyoPlugin::Get().LockMyo(this);
 	}
 }
 
@@ -72,6 +72,6 @@ void UMyoController::SetStreamEmg(EMyoStreamEmgType StreamType)
 {
 	if (IMyoPlugin::IsAvailable())
 	{
-		//IMyoPlugin::Get().SetStreamEmg(this->MyoId, StreamType);
+		IMyoPlugin::Get().SetStreamEmgType(StreamType);
 	}
 }

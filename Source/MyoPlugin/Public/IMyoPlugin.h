@@ -53,5 +53,10 @@ public:
 
 	virtual bool IsHubEnabled() { return false; }
 	virtual void CalibrateOrientation(int32 MyoId, FRotator Direction) {};
+
+	virtual UMyoController* LeftMyo() { return nullptr; }
+	virtual UMyoController* RightMyo() { return nullptr; }
+	virtual UMyoController* PrimaryMyo() { return nullptr; }	//last paired?
+	virtual UMyoController* MyoForId(int32 MyoId) { return nullptr; }
 };
 

@@ -54,6 +54,7 @@ public:
 	void UnlockDevice(int32 MyoId, EMyoUnlockType UnlockType);
 	void LockDevice(int32 MyoId);
 	void SetEMGStreamType(int32 MyoId, EMyoStreamEmgType StreamType);
+	UMyoController* ControllerForId(int32 MyoId);
 
 private:
 	//Convenience Lambdas

@@ -74,7 +74,6 @@ struct MYOPLUGIN_API FMyoControllerData
 UCLASS(BlueprintType)
 class MYOPLUGIN_API UMyoController : public UObject
 {
-friend class MyoDelegateBlueprint;
 	GENERATED_UCLASS_BODY()
 public:
 

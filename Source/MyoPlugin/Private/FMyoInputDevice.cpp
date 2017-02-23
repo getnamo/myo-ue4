@@ -64,6 +64,7 @@ FMyoInputDevice::~FMyoInputDevice()
 void FMyoInputDevice::Tick(float DeltaTime)
 {
 
+	//SendControllerEvents();
 }
 
 void FMyoInputDevice::SendControllerEvents()
@@ -77,7 +78,7 @@ void FMyoInputDevice::SendControllerEvents()
 	}
 
 	//For Each myo, broadcast it's movements
-	for (auto myo : ConnectedMyos) {
+	/*for (auto myo : ConnectedMyos) {
 		FMyoControllerData& MyoData = MyoDataMap[myo];
 
 		for (auto Component : ComponentDelegates)
@@ -85,7 +86,7 @@ void FMyoInputDevice::SendControllerEvents()
 			//Call the function on the game thread
 			Component->OnArmMoved.Broadcast(MyoData, MyoData.Acceleration, MyoData.Orientation, MyoData.Gyro);
 		}
-	}
+	}*/
 
 	//for the primary myo also emit IM events
 	Myo* PrimaryMyo = ConnectedMyos[0];
@@ -187,6 +188,9 @@ void FMyoInputDevice::onPair(Myo* myo, uint64_t timestamp, FirmwareVersion firmw
 	int32 MyoId = MyoIdCounter;
 	MyoToIdMap.Add(myo, MyoId);
 	IdToMyoMap.Add(MyoId, myo);
+
+	//Create the UObject wrapper (on game thread)
+	//UMyoController* Controller = NewObject<UMyoController>(this);
 
 	//Add the map data container
 	FMyoControllerData DefaultData;
@@ -529,6 +533,11 @@ void FMyoInputDevice::ReleasePose(EMyoPose pose)
 	{
 		EmitKeyUpEventForKey(KeyFromPose(pose), 0, 0);
 	});
+}
+
+UMyoController* FMyoInputDevice::ControllerForId(int32 MyoId)
+{
+	return ControllerMap[MyoForId(MyoId)];
 }
 
 #pragma  endregion DeviceListener

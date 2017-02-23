@@ -83,6 +83,26 @@ void FMyoPlugin::VibrateMyo(UMyoController* Controller, EMyoVibrationType Vibrat
 
 }
 
+UMyoController* FMyoPlugin::LeftMyo()
+{
+	return nullptr;
+}
+
+UMyoController* FMyoPlugin::RightMyo()
+{
+	return nullptr;
+}
+
+UMyoController* FMyoPlugin::PrimaryMyo()
+{
+	return nullptr;
+}
+
+UMyoController* FMyoPlugin::MyoForId(int32 MyoId)
+{
+	return MyoInputDevice->ControllerForId(MyoId);
+}
+
 TSharedPtr< class IInputDevice > FMyoPlugin::CreateInputDevice(const TSharedRef< FGenericApplicationMessageHandler >& InMessageHandler)
 {
 	UE_LOG(MyoPluginLog, Log, TEXT("Creating Input device"));
