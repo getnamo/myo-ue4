@@ -84,7 +84,7 @@ private:
 	//Thread communication
 	FThreadSafeBool bRunning;
 
-	//Hub* MyoHub;
+	bool MyoEnabled;
 
 	//Finding and translating connected myos
 	int32 MyoIdCounter;		//always increments never decreases during app life cycle

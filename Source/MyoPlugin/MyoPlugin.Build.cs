@@ -128,7 +128,7 @@ namespace UnrealBuildTool.Rules
                 string ProjectDLLPath = Path.GetFullPath(Path.Combine(GetUProjectPath(), "Binaries", "Win" + PlatformString, dllFile));
 
                 CopyToProjectBinaries(PluginDLLPath, Target);
-                PublicDelayLoadDLLs.Add(dllFile);
+                //PublicDelayLoadDLLs.Add(dllFile);
                 RuntimeDependencies.Add(new RuntimeDependency(ProjectDLLPath));
 
                 //Include Path

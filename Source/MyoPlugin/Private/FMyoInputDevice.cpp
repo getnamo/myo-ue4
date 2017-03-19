@@ -15,7 +15,15 @@ FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHan
 {
 	//Startup the background handler
 	bRunning = false;
-	MyoHub = nullptr;
+
+	/*MyoHub = new Hub("com.epicgames.unrealengine");
+	if (MyoHub->lastInitCausedError)
+	{
+		UE_LOG(MyoPluginLog, Log, TEXT("Hub initialization failed. Do you have Myo Connect installed and updated?"));
+		MyoEnabled = false;
+		MyoHub = nullptr;
+		//return;
+	}*/
 
 	UE_LOG(MyoPluginLog, Log, TEXT("Myo Input device booting up."));
 
@@ -24,17 +32,26 @@ FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHan
 	{
 		MyoIdCounter = 0;	//reset the id counter
 
-		//initialize hub
-		MyoHub = new Hub("com.epicgames.unrealengine");
+		/*FString BinariesRoot = FPaths::Combine(*FPaths::GameDir(), TEXT("Binaries"));
+		FString DllFilepath = FPaths::ConvertRelativePathToFull(FPaths::Combine(*BinariesRoot, "Win64", "myo64.dll"));
+		void* DLLHandle = FPlatformProcess::GetDllHandle(*DllFilepath);
 
-		//did we initialize correctly?
-		if (MyoHub->lastInitCausedError)
-		{
-			UE_LOG(MyoPluginLog, Log, TEXT("Hub initialization failed. Do you have Myo Connect installed and updated?"));
-			delete MyoHub;
-			MyoHub = nullptr;
-			return;
-		}
+		UE_LOG(MyoPluginLog, Log, TEXT("Handle: %d"), DLLHandle);*/
+
+		
+		//while (MyoHub == nullptr)
+		//{
+			FPlatformProcess::Sleep(1.f);
+			MyoHub = new Hub("com.epicgames.unrealengine");
+			if (MyoHub->lastInitCausedError)
+			{
+				UE_LOG(MyoPluginLog, Log, TEXT("Hub initialization failed. Do you have Myo Connect installed and updated?"));
+				MyoHub = nullptr;
+			}
+		//}
+
+		UE_LOG(MyoPluginLog, Log, TEXT("MyoHub found."));
+		MyoEnabled = true;
 
 		MyoHub->addListener(this);
 		MyoHub->setLockingPolicy(Hub::lockingPolicyNone);	//default to no locking policy
@@ -42,6 +59,7 @@ FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHan
 		UE_LOG(MyoPluginLog, Log, TEXT("Myo Initialized, thread loop started."));
 
 		bRunning = true;
+		//MyoEnabled = true;
 
 		//MyoHub->waitForMyo()	//optimization, wait stall thread?
 
@@ -54,13 +72,17 @@ FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHan
 		UE_LOG(MyoPluginLog, Log, TEXT("Myo thread loop stopped."));
 
 		MyoHub->removeListener(this);
-		delete MyoHub;
+		//delete MyoHub;
 	});
 }
 
 FMyoInputDevice::~FMyoInputDevice()
 {
-	MyoHub->removeListener(this);
+	MyoEnabled = false;
+	if (MyoHub)
+	{
+		MyoHub->removeListener(this);
+	}
 	bRunning = false;
 }
 
@@ -75,7 +97,7 @@ void FMyoInputDevice::SendControllerEvents()
 	//We use an external thread to forward the events, this is unused. Should we poll push latest controller data instead?
 
 	//Do we have a valid number of myos connected?
-	if (ConnectedMyos.Num() == 0)
+	if (ConnectedMyos.Num() == 0 || !MyoEnabled)
 	{
 		return;
 	}
@@ -426,6 +448,7 @@ void FMyoInputDevice::SetEMGStreamType(int32 MyoId, EMyoStreamEmgType StreamType
 
 bool FMyoInputDevice::IsHubEnabled()
 {
+	//return true;
 	return MyoHub != nullptr;
 }
 
