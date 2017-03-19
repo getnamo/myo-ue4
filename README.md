@@ -5,7 +5,7 @@ A [Thalmic Myo](https://www.thalmic.com/en/myo/) Plugin for Unreal Engine 4. Lat
 
 [Main discussion thread](https://forums.unrealengine.com/showthread.php?37876-Plugin-Myo)
 
-## Quick Setup ##
+## Quick Setup
 1. Create new or open a project. 
 2. Browse to your project (typically found at *Documents/Unreal Project/{Your Project Root}*)
 3. Copy *Plugins* folder into your Project root.
@@ -14,10 +14,10 @@ A [Thalmic Myo](https://www.thalmic.com/en/myo/) Plugin for Unreal Engine 4. Lat
 7. Select Window->Plugins. Click on Installed and you should see a category called Input and a plugin called Myo Plugin now available. Select Enabled. The Editor will warn you to restart, click restart.
 8. When your project has reloaded, the plugin should be enabled and ready to use. 
 
-## How to Use##
+## How to Use
 The plugin is designed with an event driven architecture through a delegate interface. You can access device events through the UE4 Input Mapping system, adding myo support to any blueprint through the Myo Component and Myo Interface, the convenience Blueprint classes provided, or through C++. C++ supports both subclassing of provided example class or by inheriting the MyoDelegate, you can extend your own class to support Myo events. Additionally callable functions support polling for latest data.
 
-## Input Mapping ##
+## Input Mapping
 
  1.	For a good example start with a template project.
  2.	Use the MyoPluginActor (NB the convenience actor needs to be placed), or attach the Myo Component to any desired blueprint.
@@ -31,7 +31,7 @@ The plugin is designed with an event driven architecture through a delegate inte
 
 Note that only the last paired myo emits input mapping events.
 
-####*Input Axis Events and Buttons Available*####
+#### *Input Axis Events and Buttons Available*
 
 ```
 //Poses
@@ -57,7 +57,7 @@ FKey MyoGyroY;
 FKey MyoGyroZ;
 ```
 
-##Events through Blueprint - Component Based Support for Any Blueprint##
+## Events through Blueprint - Component Based Support for Any Blueprint
 
 Available since v0.7, this method works by adding a Myo Component and then subscribing to the events through a MyoInterface.
 
@@ -78,7 +78,7 @@ Available since v0.7, this method works by adding a Myo Component and then subsc
 
 </ol>
 
-###Calibration###
+### Calibration
 
 If you're using only delta values, you may wish to use the raw values instead. If you would like to use absolute orientations (e.g. copying an arm orientation, or getting acceleration in component space) however you may wish to use the calibrated arm space values.
 
@@ -90,7 +90,7 @@ example of how to calibrate:
 
 Note that you should perform a 'Sync Gesture' first in order to establish which arm the myo is on and which direction it is facing (toward wrist/arm), calibration picks this up and automatically adjusts for it as well, but if your arm isn't detected (synced), your movements may be inverse if you have the device on the opposite direction compared to default.
 
-###Specific Arm###
+### Specific Arm
 
 The myo can distinguish your arms after you've done the [sync gesture](https://support.getmyo.com/hc/en-us/articles/200755509-How-to-perform-the-sync-gesture). There are two methods used in the plugin to get your arm possession.
 
@@ -106,13 +106,13 @@ Two, if you want a reference to specific arms outside an event, you can get them
 
 Remember that all the available functions/properties relevant to the myo are easily searched by dragging off of the Myo Controller or Myo Component and typing 'myo'. 
 
-### Locking Policy ###
+### Locking Policy
 Since myo beta 7, the SDK implements a locking policy. This means you can perform a double-tap pose on your myo to unlock and make a gesture, which then locks itself automatically again. By default this plugin has no locking policy, if you wish to use one however simply set it at an appropriate time e.g. in your begin play.
 
 <img src="http://i.imgur.com/2x0lZpG.png">
 
 
-### Raw Data Streams ###
+### Raw Data Streams
 Since 0.7.7 the plugin supports raw streams. You have to first enable the raw streams for your myo
 
 e.g. using the double tap pose
@@ -135,21 +135,21 @@ To do something useful with the stream, break the struct which encapsulates an i
 
 <img src="http://i.imgur.com/GfH30ke.png">
 
-####*Blueprint Events Available*####
+#### *Blueprint Events Available*
 
 <img src="http://i.imgur.com/h49rgju.png">
 
-####*Blueprint Callable Functions Available*####
+#### *Blueprint Callable Functions Available*
 
-#####*Myo Component/Convenience Class*#####
+##### *Myo Component/Convenience Class*
 
 <img src="http://i.imgur.com/1kncm52.png">
 
-#####*Myo Controller*#####
+##### *Myo Controller*
 
 <img src="http://i.imgur.com/WU3Dumv.png">
 
-####Example####
+#### Example
 For example you can show a debug myo orientation like this
 
 <img src="http://i.imgur.com/zrd95U2.png">
@@ -164,7 +164,7 @@ which gives the following result in the Rolling template
 
 Note in this example two myos were paired and the orientation was obtained from calibrated values thus needed a calibration call to each myo when the user was pointing them toward the screen (e.g. point to screen and bind calibration to make fist).
 
-### Convenience Myo Blueprint Library ###
+### Convenience Myo Blueprint Library
 Since 0.7.7 the plugin includes optional Content such as the Myo Utility BP Library
 
 <img src="http://i.imgur.com/uV37oa4.png">
@@ -181,7 +181,7 @@ Draw debug arrows representing each of the 8 raw streams
 
 or print them out instead using the respective function.
 
-##Events through Blueprint - Convenience Classes##
+## Events through Blueprint - Convenience Classes
 1. Select Window->Class Viewer.
 2. Search for "MyoPluginActor"
 3. Right click the actor and Create a new Blueprint e.g. "MyoPluginActorBP"
@@ -194,9 +194,9 @@ e.g. If you want to get the acceleration data from your Myo/s add the Event "On 
 
 Compile and Play to see the accelerometer data stream as printed output after the myo/s automatically connect and pair.
 
-##Events through C++##
+## Events through C++
 
-####*Simple Version*####
+#### *Simple Version*
 1. Extend or Subclass MyoPluginActor and Override functions you wish to subscribe to e.g. 
 
 ```virtual void onPose(int32 myoId, uint64 timestamp, int32 pose) override;```
@@ -213,7 +213,7 @@ Compile and Play to see the accelerometer data stream as printed output after th
 
 To poll for the latest data call MyoGetLatestData(*Myo Device Index*, *Data Pointer*); where *Data Pointer* is a structure in the form of
 
-```
+```c++
 struct MyoDeviceData{
 	int pose;			//0 = rest, 1 = fist, 2 = waveIn, 3 = waveOut, 4 = fingersSpread, 5 = reserved1, 6 = thumbToPinky, 7 = unknown (as of beta1)
 	FVector acceleration;	//units of g
@@ -236,7 +236,7 @@ struct MyoDeviceData{
 
 defined in MyoDelegate.h
 
-##Shipping/Packaged Builds##
+## Shipping/Packaged Builds
 <ol>
 <li> Projects require code, if you are using a blueprint only project, add an empty class and compile your project module. You simply do File->Add Code to Project and it can be anything so I usually just pick None->Create Class and then it will ask you to open visual studio where you just hit compile (Build solution). If you haven't added code before follow the unreal engine <a href="https://docs.unrealengine.com/latest/INT/Programming/QuickStart/1/index.html">programming Quick Start guide</a>. Essentially it boils down to downloading the free Visual Studio Community and changing a few small configs.</li>
 <li> Add the following line to your DefaultEngine.ini </li>
@@ -250,11 +250,11 @@ under <i>[Plugins]</i>, create this category if missing.
 find <i>WindowsNoEditor/MyoPluginTest</i>, this is your packaged project root. Add the binaries folder there.</li>
 </ol>
 
-##Bugs and Todo##
+## Bugs and Todo
 * Hub runs on the main thread, adds 1ms to render loop. Should be separated into its own thread or reduced to near 0ms.
 * Platforms apart from Windows are untested
 
-##Credits and License##
+## Credits and License
 * Plugin by Getnamo, Myo SDK provided by Thalmic Labs
 * Point any questions and queries to the [plugin unreal engine thread](https://forums.unrealengine.com/showthread.php?37876-Plugin-Myo)
 
