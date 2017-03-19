@@ -26,7 +26,10 @@ void FMyoPlugin::StartupModule()
 
 void FMyoPlugin::ShutdownModule()
 {
-	MyoInputDevice->ShutDownLoop();
+	if (MyoInputDevice.IsValid())
+	{
+		MyoInputDevice->ShutDownLoop();
+	}
 
 	UE_LOG(MyoPluginLog, Log, TEXT("Myo Plugin clean shutdown."));
 	IModularFeatures::Get().UnregisterModularFeature(IInputDeviceModule::GetModularFeatureName(), this);

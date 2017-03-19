@@ -9,6 +9,8 @@ using namespace MyoUtility;
 
 #pragma region FMyoInputDevice
 
+Hub* MyoHub = nullptr;
+
 FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHandler >& InMessageHandler) : MessageHandler(InMessageHandler)
 {
 	//Startup the background handler
@@ -58,6 +60,7 @@ FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHan
 
 FMyoInputDevice::~FMyoInputDevice()
 {
+	MyoHub->removeListener(this);
 	bRunning = false;
 }
 
