@@ -84,6 +84,31 @@ namespace UnrealBuildTool.Rules
             LoadMyoLib(Target);
 		}
 
+        public string GetUProjectPath()
+        {
+            return Path.Combine(ModuleDirectory, "../../../..");
+        }
+
+        private void CopyToProjectBinaries(string Filepath, TargetInfo Target)
+        {
+            System.Console.WriteLine("uprojectpath is: " + Path.GetFullPath(GetUProjectPath()));
+
+            string binariesDir = Path.Combine(GetUProjectPath(), "Binaries", Target.Platform.ToString());
+            string filename = Path.GetFileName(Filepath);
+
+            //convert relative path
+            string fullBinariesDir = Path.GetFullPath(binariesDir);
+
+            if (!Directory.Exists(fullBinariesDir))
+                Directory.CreateDirectory(fullBinariesDir);
+
+            if (!File.Exists(Path.Combine(fullBinariesDir, filename)))
+            {
+                System.Console.WriteLine("Myo Plugin: Copied from " + Filepath + ", to " + Path.Combine(fullBinariesDir, filename));
+                File.Copy(Filepath, Path.Combine(fullBinariesDir, filename), true);
+            }
+        }
+
         public bool LoadMyoLib(TargetInfo Target)
         {
             bool isLibrarySupported = false;
@@ -93,12 +118,18 @@ namespace UnrealBuildTool.Rules
                 isLibrarySupported = true;
 
                 string PlatformString = (Target.Platform == UnrealTargetPlatform.Win64) ? "64" : "32";
+                string dllFile = "myo" + PlatformString + ".dll";
 
+                //lib
                 PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "myo" + PlatformString + ".lib"));
 
-                string DLLString = Path.Combine(BinariesPath, "Win" + PlatformString, "myo" + PlatformString + ".dll");
-                PublicDelayLoadDLLs.Add(DLLString);
-                RuntimeDependencies.Add(new RuntimeDependency(DLLString));
+                //dll
+                string PluginDLLPath = Path.Combine(BinariesPath, "Win" + PlatformString, dllFile);
+                string ProjectDLLPath = Path.GetFullPath(Path.Combine(GetUProjectPath(), "Binaries", "Win" + PlatformString, dllFile));
+
+                CopyToProjectBinaries(PluginDLLPath, Target);
+                PublicDelayLoadDLLs.Add(dllFile);
+                RuntimeDependencies.Add(new RuntimeDependency(ProjectDLLPath));
 
                 //Include Path
                 PublicIncludePaths.Add(Path.Combine(ThirdPartyPath, "Myo", "Include"));
