@@ -73,7 +73,6 @@ FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHan
 
 		UE_LOG(MyoPluginLog, Log, TEXT("Myo Initialized, thread loop started."));
 
-
 		//MyoHub->waitForMyo()	//optimization, wait stall thread?
 
 		//Start thread loop
