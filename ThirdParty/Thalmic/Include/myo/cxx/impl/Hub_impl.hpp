@@ -21,22 +21,39 @@ Hub::Hub(const std::string& applicationIdentifier)
 , _listeners()
 {
 	libmyo_error_details_t _error;
-	libmyo_init_hub(&_hub, applicationIdentifier.c_str(), &_error);
-
-	switch (libmyo_error_kind(_error)) {
-		case libmyo_error:
-		case libmyo_error_runtime:
-		case libmyo_error_invalid_argument:
-		{
-			lastInitCausedError = true;
-			break;
-		}
-		case libmyo_success:
-		{
-			lastInitCausedError = false;
-			break;
-		}
+	
+	try
+	{
+		libmyo_init_hub(&_hub, applicationIdentifier.c_str(), &_error);
 	}
+	catch (int e)
+	{
+		e;
+	}
+	if (_hub == nullptr)
+	{
+		lastInitCausedError = true;
+	}
+	else
+	{
+		lastInitCausedError = false;
+	}
+	/*libmyo_result_t result = libmyo_error_kind(_error);
+
+	switch (result)
+	{
+	case libmyo_error:
+	case libmyo_error_runtime:
+	case libmyo_error_invalid_argument:
+	{
+		lastInitCausedError = true;
+		break;
+	}
+	case libmyo_success:
+	{
+		lastInitCausedError = false;
+		break;
+	}*/
 }
 
 inline
@@ -72,7 +89,7 @@ Myo* Hub::waitForMyo(unsigned int timeout_ms)
     };
 
     do {
-        libmyo_run(_hub, timeout_ms ? timeout_ms : 1000, &local::handler, this, ThrowOnError());
+        libmyo_run(_hub, timeout_ms ? timeout_ms : 1000, &local::handler, this, TrackOnError());
     } while (!timeout_ms && _myos.size() <= prevSize);
 
     if (_myos.size() <= prevSize) {
@@ -107,7 +124,7 @@ void Hub::removeListener(DeviceListener* listener)
 inline
 void Hub::setLockingPolicy(LockingPolicy lockingPolicy)
 {
-    libmyo_set_locking_policy(_hub, static_cast<libmyo_locking_policy_t>(lockingPolicy), ThrowOnError());
+    libmyo_set_locking_policy(_hub, static_cast<libmyo_locking_policy_t>(lockingPolicy), TrackOnError());
 }
 
 inline
@@ -230,7 +247,7 @@ void Hub::run(unsigned int duration_ms)
             return libmyo_handler_continue;
         }
     };
-    libmyo_run(_hub, duration_ms, &local::handler, this, ThrowOnError());
+    libmyo_run(_hub, duration_ms, &local::handler, this, TrackOnError());
 }
 
 inline
@@ -245,7 +262,7 @@ void Hub::runOnce(unsigned int duration_ms)
             return libmyo_handler_stop;
         }
     };
-    libmyo_run(_hub, duration_ms, &local::handler, this, ThrowOnError());
+    libmyo_run(_hub, duration_ms, &local::handler, this, TrackOnError());
 }
 
 inline

@@ -34,13 +34,13 @@ public:
             case libmyo_error:
             case libmyo_error_runtime:
             {
-                std::runtime_error exception(libmyo_error_cstring(_error));
+                //std::runtime_error exception(libmyo_error_cstring(_error));
                 libmyo_free_error_details(_error);
                 //throw exception;
             }
             case libmyo_error_invalid_argument:
             {
-                std::invalid_argument exception(libmyo_error_cstring(_error));
+                //std::invalid_argument exception(libmyo_error_cstring(_error));
                 libmyo_free_error_details(_error);
                 //throw exception;
             }

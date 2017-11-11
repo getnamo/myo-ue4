@@ -41,7 +41,9 @@ bool FMyoLambdaRunnable::Init()
 uint32 FMyoLambdaRunnable::Run()
 {
 	if (FunctionPointer)
+	{
 		FunctionPointer();
+	}
 
 	//UE_LOG(LogClass, Log, TEXT("FLambdaRunnable %d Run complete"), Number);
 	return 0;

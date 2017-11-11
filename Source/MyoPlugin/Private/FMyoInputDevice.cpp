@@ -40,7 +40,7 @@ FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHan
 
 		while (!MyoHub.IsValid())
 		{
-			FPlatformProcess::Sleep(5.f);
+			FPlatformProcess::Sleep(1.f);
 			myo::Hub* RawHub = new Hub("com.epicgames.unrealengine");
 
 			MyoHub = MakeShareable(RawHub);
