@@ -3,26 +3,6 @@
 #include "MyoEnum.h"
 #include "MyoController.h"
 
-void FMyoControllerData::setFromMyoDeviceData(FMyoDeviceData* Data)
-{
-	this->Pose = Data->Pose;
-
-	this->Acceleration = Data->Acceleration;
-	this->Orientation = Data->Orientation;
-	this->Gyro = Data->Gyro;
-
-	this->Arm = Data->Arm;
-	this->ArmDirection = Data->ArmDirection;
-
-	this->ArmAcceleration = Data->ArmAcceleration;
-	this->ArmOrientation = Data->ArmOrientation;
-	this->ArmGyro = Data->ArmGyro;
-	this->ArmSpaceCorrection = Data->ArmSpaceCorrection;
-
-	this->BodySpaceNullAcceleration = Data->BodySpaceNullAcceleration;
-}
-
-
 UMyoController::UMyoController(const FObjectInitializer &init) : UObject(init)
 {
 }

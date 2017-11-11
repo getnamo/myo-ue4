@@ -72,9 +72,6 @@ struct MYOPLUGIN_API FMyoControllerData
 		ArmOrientation = FRotator(0.f);
 		ArmSpaceCorrection = FRotator(0.f);
 	}
-
-	//Conversion
-	void setFromMyoDeviceData(FMyoDeviceData* Data);
 };
 
 

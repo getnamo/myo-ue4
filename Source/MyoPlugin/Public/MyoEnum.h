@@ -83,43 +83,6 @@ struct FMyoEmgData
 	}
 };
 
-/**
-* Converted Controller Data.
-*/
-struct FMyoDeviceData {
-
-	//Sample TimeStamp
-	uint64 TimeStamp;
-
-	//9-Axis Data
-	FVector Acceleration;	//units of g
-	FQuat Quaternion;		//orientation in quaternion format
-	FRotator Orientation;	//orientation
-	FVector Gyro;			//angular speed in deg/s
-
-	//Arm specifics
-	EMyoArm Arm;
-	EMyoArmDirection ArmDirection;
-
-	//Plugin Derived - Values given arm space after arm calibration, otherwise same as raw
-	FVector ArmAcceleration;	//units of g
-	FRotator ArmOrientation;	//orientation
-	FVector ArmGyro;			//angular speed in deg/s
-	FRotator ArmSpaceCorrection;	//used to calibrate the orientation, not exposed to blueprints
-
-									    //Body space, useful for easy component space integration
-	FVector BodySpaceNullAcceleration;	//units of g, in calibrated space, without gravity component
-
-	//Streaming Data
-	EMyoStreamEmgType SteamType;
-
-	//Pose Data
-	EMyoPose Pose;
-
-	bool Valid;
-	bool IsLocked;
-};
-
 //Input Mapping Key Structure
 struct EKeysMyo
 {
