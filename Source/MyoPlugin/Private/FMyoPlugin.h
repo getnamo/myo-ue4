@@ -20,6 +20,7 @@ private:
 	virtual void SetLockingPolicy(EMyoLockingPolicy Policy) override;
 	virtual void SetStreamEmgType(UMyoController* Controller, EMyoStreamEmgType StreamType) override;
 	virtual void VibrateMyo(UMyoController* Controller, EMyoVibrationType VibrationType) override;
+	virtual void CalibrateOrientation(int32 MyoId, FRotator Direction) override;
 
 	virtual UMyoController* LeftMyo() override;
 	virtual UMyoController* RightMyo() override;

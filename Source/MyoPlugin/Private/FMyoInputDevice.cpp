@@ -237,6 +237,13 @@ void FMyoInputDevice::onPair(Myo* myo, uint64_t timestamp, FirmwareVersion firmw
 	DefaultData.MyoId = MyoId;
 	DefaultData.Pose = EMyoPose::MYO_POSE_UNKNOWN;
 	MyoDataMap.Add(myo, DefaultData);
+
+	//spawn our controller wrappers
+	UMyoController* Controller = NewObject<UMyoController>();
+	Controller->AddToRoot();
+	Controller->MyoData = DefaultData;
+	Controllers.Add(Controller);
+	ControllerMap.Add(myo, Controller);
 	
 	UE_LOG(MyoPluginLog, Log, TEXT("Paired."));
 
@@ -254,6 +261,14 @@ void FMyoInputDevice::onUnpair(Myo* myo, uint64_t timestamp)
 	IdToMyoMap.Remove(IdForMyo(myo));
 	MyoToIdMap.Remove(myo);
 	PairedMyos.Remove(myo);
+
+	if (ControllerMap.Contains(myo))
+	{
+		UMyoController* Controller = ControllerMap[myo];
+		Controller->RemoveFromRoot();
+		Controllers.Remove(Controller);
+		ControllerMap.Remove(myo);
+	}
 
 	UE_LOG(MyoPluginLog, Log, TEXT("Unpaired."));
 	RunFunctionOnComponents([&, MyoData](UMyoControllerComponent* Component)
@@ -365,6 +380,14 @@ void FMyoInputDevice::onAccelerometerData(Myo* myo, uint64_t timestamp, const Ve
 																		MyoData.ArmOrientation, 
 																		MyoData.ArmSpaceCorrection, 
 																		MyoData.ArmDirection);
+
+	//Sync Data
+	ControllerMap[myo]->MyoData = MyoData;
+
+	RunFunctionOnComponents([&, MyoData](UMyoControllerComponent* Component)
+	{
+		Component->OnArmMoved.Broadcast(MyoData, MyoData.ArmAcceleration, MyoData.ArmOrientation, MyoData.ArmGyro);
+	});
 }
 
 void FMyoInputDevice::onGyroscopeData(Myo* myo, uint64_t timestamp, const Vector3<float>& gyro)
@@ -564,7 +587,10 @@ void FMyoInputDevice::PressPose(EMyoPose pose)
 {
 	FMyoLambdaRunnable::RunShortLambdaOnGameThread([&, pose]
 	{
-		EmitKeyDownEventForKey(KeyFromPose(pose), 0, 0);
+		if (bRunning)
+		{
+			EmitKeyDownEventForKey(KeyFromPose(pose), 0, 0);
+		}
 	});
 }
 
@@ -572,7 +598,10 @@ void FMyoInputDevice::ReleasePose(EMyoPose pose)
 {
 	FMyoLambdaRunnable::RunShortLambdaOnGameThread([&, pose]
 	{
-		EmitKeyUpEventForKey(KeyFromPose(pose), 0, 0);
+		if (bRunning)
+		{
+			EmitKeyUpEventForKey(KeyFromPose(pose), 0, 0);
+		}
 	});
 }
 

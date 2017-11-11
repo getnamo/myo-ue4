@@ -86,6 +86,11 @@ void FMyoPlugin::VibrateMyo(UMyoController* Controller, EMyoVibrationType Vibrat
 	MyoInputDevice->VibrateDevice(Controller->MyoData.MyoId, VibrationType);
 }
 
+void FMyoPlugin::CalibrateOrientation(int32 MyoId, FRotator Direction)
+{
+	MyoInputDevice->CalibrateOrientation(MyoId, Direction);
+}
+
 UMyoController* FMyoPlugin::LeftMyo()
 {
 	for (auto Controller : MyoInputDevice->Controllers)
