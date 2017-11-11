@@ -65,6 +65,13 @@ struct MYOPLUGIN_API FMyoControllerData
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Myo Controller Data")
 	bool bIsArmSynced;
 
+	FMyoControllerData()
+	{
+		ArmAcceleration = FVector();
+		ArmOrientation = FRotator();
+		ArmSpaceCorrection = FRotator();
+	}
+
 	//Conversion
 	void setFromMyoDeviceData(FMyoDeviceData* Data);
 };

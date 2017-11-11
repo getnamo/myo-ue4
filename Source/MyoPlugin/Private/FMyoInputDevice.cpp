@@ -9,12 +9,11 @@ using namespace MyoUtility;
 
 #pragma region FMyoInputDevice
 
-Hub* MyoHub = nullptr;
-
 FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHandler >& InMessageHandler) : MessageHandler(InMessageHandler)
 {
 	//Startup the background handler
 	bRunning = false;
+	bHubRunHasFinished = false;
 
 	/*MyoHub = new Hub("com.epicgames.unrealengine");
 	if (MyoHub->lastInitCausedError)
@@ -38,17 +37,26 @@ FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHan
 
 		UE_LOG(MyoPluginLog, Log, TEXT("Handle: %d"), DLLHandle);*/
 
-		
-		//while (MyoHub == nullptr)
-		//{
+		while (!MyoHub.IsValid())
+		{
 			FPlatformProcess::Sleep(1.f);
-			MyoHub = new Hub("com.epicgames.unrealengine");
-			if (MyoHub->lastInitCausedError)
+			myo::Hub* RawHub = new Hub("com.epicgames.unrealengine");
+
+			MyoHub = MakeShareable(RawHub);
+			if (MyoHub.IsValid())
 			{
-				UE_LOG(MyoPluginLog, Log, TEXT("Hub initialization failed. Do you have Myo Connect installed and updated?"));
+				if (MyoHub->lastInitCausedError)
+				{
+					UE_LOG(MyoPluginLog, Log, TEXT("Hub initialization failed. Do you have Myo Connect installed and updated?"));
+					MyoHub = nullptr;
+				}
+			}
+			else
+			{
 				MyoHub = nullptr;
 			}
-		//}
+			
+		}
 
 		UE_LOG(MyoPluginLog, Log, TEXT("MyoHub found."));
 		MyoEnabled = true;
@@ -72,18 +80,25 @@ FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHan
 		UE_LOG(MyoPluginLog, Log, TEXT("Myo thread loop stopped."));
 
 		MyoHub->removeListener(this);
-		//delete MyoHub;
+
+		bHubRunHasFinished = true;
 	});
 }
 
 FMyoInputDevice::~FMyoInputDevice()
 {
 	MyoEnabled = false;
-	if (MyoHub)
+	if (MyoHub.IsValid())
 	{
 		MyoHub->removeListener(this);
 	}
 	bRunning = false;
+
+	//Wait for the hub run to complete
+	while (!bHubRunHasFinished)
+	{
+		FPlatformProcess::Sleep(0.01f);
+	}
 }
 
 void FMyoInputDevice::Tick(float DeltaTime)
@@ -449,7 +464,7 @@ void FMyoInputDevice::SetEMGStreamType(int32 MyoId, EMyoStreamEmgType StreamType
 bool FMyoInputDevice::IsHubEnabled()
 {
 	//return true;
-	return MyoHub != nullptr;
+	return MyoHub.IsValid();
 }
 
 void FMyoInputDevice::ShutDownLoop()

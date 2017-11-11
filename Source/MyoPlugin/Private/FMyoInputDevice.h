@@ -38,6 +38,7 @@ public:
 
 	TArray<UMyoController*> Controllers;
 	TMap<Myo*, UMyoController*> ControllerMap;
+	TSharedPtr<Hub> MyoHub;
 
 	//Custom Private data structure
 	//Pass-through functions for plugin methods accessible publicly
@@ -83,6 +84,7 @@ private:
 	
 	//Thread communication
 	FThreadSafeBool bRunning;
+	FThreadSafeBool bHubRunHasFinished;
 
 	bool MyoEnabled;
 

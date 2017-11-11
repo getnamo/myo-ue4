@@ -11,3 +11,5 @@ Binaries/Win64/UE4Editor-MyoPlugin.dll
 Binaries/Win64/UE4Editor.modules
 Plugins/MyoPlugin/Binaries/Win64/UE4Editor.modules
 Binaries/Win64/UE4-MyoPlugin.lib
+Binaries/Win64/UE4Editor-Win64-DebugGame.modules
+Binaries/Win64/UE4Editor-MyoPlugin-Win64-DebugGame.dll
