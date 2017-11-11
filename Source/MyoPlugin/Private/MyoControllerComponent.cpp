@@ -41,17 +41,17 @@ void UMyoControllerComponent::SetLockingPolicy(TEnumAsByte<EMyoLockingPolicy> Po
 
 UMyoController* UMyoControllerComponent::LeftMyo()
 {
-	return nullptr; // MyoLeftMyo();
+	return IMyoPlugin::Get().LeftMyo();
 }
 
 UMyoController* UMyoControllerComponent::RightMyo()
 {
-	return nullptr; // MyoRightMyo();
+	return IMyoPlugin::Get().RightMyo();
 }
 
 UMyoController* UMyoControllerComponent::PrimaryMyo()
 {
-	return nullptr;// MyoPrimaryMyo();
+	return IMyoPlugin::Get().PrimaryMyo();
 }
 
 void UMyoControllerComponent::ConvertToMyoOrientationSpace(FRotator orientation, FRotator& converted)

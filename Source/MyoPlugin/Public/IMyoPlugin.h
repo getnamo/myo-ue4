@@ -48,7 +48,7 @@ public:
 	virtual void UnlockMyo(UMyoController* Controller) {};
 	virtual void LockMyo(UMyoController* Controller) {};
 	virtual void SetLockingPolicy(EMyoLockingPolicy Policy) {};
-	virtual void SetStreamEmgType(EMyoStreamEmgType StreamType) {};
+	virtual void SetStreamEmgType(UMyoController* Controller, EMyoStreamEmgType StreamType) {};
 	virtual void VibrateMyo(UMyoController* Controller, EMyoVibrationType VibrationType) {};
 
 	virtual bool IsHubEnabled() { return false; }

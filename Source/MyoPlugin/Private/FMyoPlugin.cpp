@@ -63,41 +63,63 @@ void FMyoPlugin::RemoveComponentDelegate(UMyoControllerComponent* Component)
 
 void FMyoPlugin::UnlockMyo(UMyoController* Controller)
 {
-
+	MyoInputDevice->UnlockDevice(Controller->MyoData.MyoId, MYO_UNLOCK_HOLD);
 }
 
 void FMyoPlugin::LockMyo(UMyoController* Controller)
 {
-
+	MyoInputDevice->LockDevice(Controller->MyoData.MyoId);
 }
 
 void FMyoPlugin::SetLockingPolicy(EMyoLockingPolicy Policy)
 {
-
+	MyoInputDevice->SetLockingPolicy(Policy);
 }
 
-void FMyoPlugin::SetStreamEmgType(EMyoStreamEmgType StreamType)
+void FMyoPlugin::SetStreamEmgType(UMyoController* Controller, EMyoStreamEmgType StreamType)
 {
-
+	MyoInputDevice->SetEMGStreamType(Controller->MyoData.MyoId, StreamType);
 }
 
 void FMyoPlugin::VibrateMyo(UMyoController* Controller, EMyoVibrationType VibrationType)
 {
-
+	MyoInputDevice->VibrateDevice(Controller->MyoData.MyoId, VibrationType);
 }
 
 UMyoController* FMyoPlugin::LeftMyo()
 {
+	for (auto Controller : MyoInputDevice->Controllers)
+	{
+		if (Controller->MyoData.Arm == EMyoArm::MYO_ARM_LEFT)
+		{
+			return Controller;
+		}
+	}
+	//No left paired controllers available
 	return nullptr;
 }
 
 UMyoController* FMyoPlugin::RightMyo()
 {
+	for (auto Controller : MyoInputDevice->Controllers)
+	{
+		if (Controller->MyoData.Arm == EMyoArm::MYO_ARM_RIGHT)
+		{
+			return Controller;
+		}
+	}
+	//No right paired controllers available
 	return nullptr;
 }
 
 UMyoController* FMyoPlugin::PrimaryMyo()
 {
+	//Grab Latest controller
+	int32 Max = MyoInputDevice->Controllers.Num();
+	if (Max > 0)
+	{
+		return MyoInputDevice->Controllers[Max - 1];
+	}
 	return nullptr;
 }
 

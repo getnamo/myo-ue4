@@ -18,7 +18,7 @@ private:
 	virtual void UnlockMyo(UMyoController* Controller) override;
 	virtual void LockMyo(UMyoController* Controller) override;
 	virtual void SetLockingPolicy(EMyoLockingPolicy Policy) override;
-	virtual void SetStreamEmgType(EMyoStreamEmgType StreamType) override;
+	virtual void SetStreamEmgType(UMyoController* Controller, EMyoStreamEmgType StreamType) override;
 	virtual void VibrateMyo(UMyoController* Controller, EMyoVibrationType VibrationType) override;
 
 	virtual UMyoController* LeftMyo() override;

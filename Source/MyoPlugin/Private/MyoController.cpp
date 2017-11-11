@@ -41,7 +41,7 @@ void UMyoController::CalibrateArmOrientation(FRotator Direction)
 {
 	if (IMyoPlugin::IsAvailable())
 	{
-		//IMyoPlugin::Get().CalibrateOrientation(this, Direction);
+		IMyoPlugin::Get().CalibrateOrientation(MyoData.MyoId, Direction);
 	}
 }
 
@@ -72,6 +72,6 @@ void UMyoController::SetStreamEmg(EMyoStreamEmgType StreamType)
 {
 	if (IMyoPlugin::IsAvailable())
 	{
-		IMyoPlugin::Get().SetStreamEmgType(StreamType);
+		IMyoPlugin::Get().SetStreamEmgType(this, StreamType);
 	}
 }
