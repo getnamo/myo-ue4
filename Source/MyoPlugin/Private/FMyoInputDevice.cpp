@@ -213,7 +213,7 @@ void FMyoInputDevice::RemoveComponentDelegate(UMyoControllerComponent* Component
 	//If we removed our last delegate, clean up our data.
 	if (ComponentDelegates.Num() == 0)
 	{
-
+		//todo: add cleanup
 	}
 }
 
