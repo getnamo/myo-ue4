@@ -19,3 +19,12 @@ FString UMyoBPLibrary::Conv_MyoEmgDataToString(const FMyoEmgData& InData)
 	ResultString.Append(TEXT("]"));
 	return ResultString;
 }
+
+UMyoController* UMyoBPLibrary::Conv_MyoDataToController(const FMyoControllerData& InData)
+{
+	if (IMyoPlugin::Get().IsAvailable())
+	{
+		return IMyoPlugin::Get().MyoForId(InData.MyoId);
+	}
+	return nullptr;
+}
