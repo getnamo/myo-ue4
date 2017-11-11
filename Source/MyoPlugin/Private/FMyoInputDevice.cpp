@@ -119,7 +119,7 @@ void FMyoInputDevice::SendControllerEvents()
 
 	//For Each myo, broadcast it's movements
 	/*for (auto myo : ConnectedMyos) {
-		FMyoControllerData& MyoData = MyoDataMap[myo];
+		FMyoControllerData& MyoData = *MyoDataMap[myo];
 
 		for (auto Component : ComponentDelegates)
 		{
@@ -130,7 +130,7 @@ void FMyoInputDevice::SendControllerEvents()
 
 	//for the primary myo also emit IM events
 	Myo* PrimaryMyo = ConnectedMyos[0];
-	FMyoControllerData& MyoData = MyoDataMap[PrimaryMyo];
+	FMyoControllerData& MyoData = *MyoDataMap[PrimaryMyo];
 	
 	//Orientation - Scale input mapping to -1.0-> 1.0 range
 	EmitAnalogInputEventForKey(EKeysMyo::MyoOrientationPitch, MyoData.ArmOrientation.Pitch * ORIENTATION_SCALE_PITCH, 0);
@@ -236,12 +236,12 @@ void FMyoInputDevice::onPair(Myo* myo, uint64_t timestamp, FirmwareVersion firmw
 	FMyoControllerData DefaultData = FMyoControllerData();
 	DefaultData.MyoId = MyoId;
 	DefaultData.Pose = EMyoPose::MYO_POSE_UNKNOWN;
-	MyoDataMap.Add(myo, DefaultData);
 
 	//spawn our controller wrappers
 	UMyoController* Controller = NewObject<UMyoController>();
 	Controller->AddToRoot();
 	Controller->MyoData = DefaultData;
+	MyoDataMap.Add(myo, &Controller->MyoData);
 	Controllers.Add(Controller);
 	ControllerMap.Add(myo, Controller);
 	
@@ -256,7 +256,7 @@ void FMyoInputDevice::onPair(Myo* myo, uint64_t timestamp, FirmwareVersion firmw
 void FMyoInputDevice::onUnpair(Myo* myo, uint64_t timestamp)
 {
 	//Remove the myo and links
-	FMyoControllerData MyoData = MyoDataMap[myo];
+	FMyoControllerData MyoData = *MyoDataMap[myo];
 	MyoDataMap.Remove(myo);
 	IdToMyoMap.Remove(IdForMyo(myo));
 	MyoToIdMap.Remove(myo);
@@ -284,7 +284,7 @@ void FMyoInputDevice::onConnect(Myo* myo, uint64_t timestamp, FirmwareVersion fi
 
 	UE_LOG(MyoPluginLog, Log, TEXT("onConnect."));
 
-	const FMyoControllerData& MyoData = MyoDataMap[myo];
+	const FMyoControllerData& MyoData = *MyoDataMap[myo];
 
 	RunFunctionOnComponents([&, MyoData](UMyoControllerComponent* Component)
 	{
@@ -298,7 +298,7 @@ void FMyoInputDevice::onDisconnect(Myo* myo, uint64_t timestamp)
 
 	UE_LOG(MyoPluginLog, Log, TEXT("onDisconnect."));
 
-	const FMyoControllerData& MyoData = MyoDataMap[myo];
+	const FMyoControllerData& MyoData = *MyoDataMap[myo];
 
 	RunFunctionOnComponents([&, MyoData](UMyoControllerComponent* Component)
 	{
@@ -327,7 +327,7 @@ void FMyoInputDevice::onArmUnsync(Myo* myo, uint64_t timestamp)
 {
 	UE_LOG(MyoPluginLog, Log, TEXT("onArmUnsync."));
 
-	FMyoControllerData& MyoData = MyoDataMap[myo];
+	FMyoControllerData& MyoData = *MyoDataMap[myo];
 	MyoData.bIsArmSynced = false;
 
 	RunFunctionOnComponents([&, MyoData](UMyoControllerComponent* Component)
@@ -350,7 +350,7 @@ void FMyoInputDevice::onPose(Myo* myo, uint64_t timestamp, Pose pose)
 {
 	UE_LOG(MyoPluginLog, Log, TEXT("onPose."));
 
-	FMyoControllerData& MyoData = MyoDataMap[myo];
+	FMyoControllerData& MyoData = *MyoDataMap[myo];
 	
 	ReleasePose(MyoData.Pose);
 	
@@ -366,23 +366,20 @@ void FMyoInputDevice::onPose(Myo* myo, uint64_t timestamp, Pose pose)
 
 void FMyoInputDevice::onOrientationData(Myo* myo, uint64_t timestamp, const Quaternion<float>& rotation)
 {
-	FMyoControllerData& MyoData = MyoDataMap[myo];
+	FMyoControllerData& MyoData = *MyoDataMap[myo];
 	MyoData.Orientation = convertOrientationToUE(FQuat(rotation.x(), rotation.y(), rotation.z(), rotation.w()).Rotator());
 	MyoData.ArmOrientation = convertOrientationToArmSpace(MyoData.Orientation, MyoData.ArmSpaceCorrection, MyoData.ArmDirection);
 }
 
 void FMyoInputDevice::onAccelerometerData(Myo* myo, uint64_t timestamp, const Vector3<float>& accel)
 {
-	FMyoControllerData& MyoData = MyoDataMap[myo];
+	FMyoControllerData& MyoData = *MyoDataMap[myo];
 	MyoData.Acceleration = convertVectorToUE(FVector(accel.x(), accel.y(), accel.z()));
 	MyoData.ArmAcceleration = MyoData.Acceleration;
 	MyoData.BodySpaceNullAcceleration = convertAccelerationToBodySpace( MyoData.ArmAcceleration,
 																		MyoData.ArmOrientation, 
 																		MyoData.ArmSpaceCorrection, 
 																		MyoData.ArmDirection);
-
-	//Sync Data
-	ControllerMap[myo]->MyoData = MyoData;
 
 	RunFunctionOnComponents([&, MyoData](UMyoControllerComponent* Component)
 	{
@@ -392,14 +389,14 @@ void FMyoInputDevice::onAccelerometerData(Myo* myo, uint64_t timestamp, const Ve
 
 void FMyoInputDevice::onGyroscopeData(Myo* myo, uint64_t timestamp, const Vector3<float>& gyro)
 {
-	FMyoControllerData& MyoData = MyoDataMap[myo];
+	FMyoControllerData& MyoData = *MyoDataMap[myo];
 	MyoData.Gyro = FVector(gyro.x(), gyro.y(), gyro.z());
 	MyoData.ArmGyro = convertVectorToUE(MyoData.Gyro);
 }
 
 void FMyoInputDevice::onRssi(Myo* myo, uint64_t timestamp, int8_t rssi)
 {
-	FMyoControllerData& MyoData = MyoDataMap[myo];
+	FMyoControllerData& MyoData = *MyoDataMap[myo];
 	MyoData.RSSI = rssi;
 
 	RunFunctionOnComponents([&, MyoData](UMyoControllerComponent* Component)
@@ -411,7 +408,7 @@ void FMyoInputDevice::onRssi(Myo* myo, uint64_t timestamp, int8_t rssi)
 void FMyoInputDevice::onBatteryLevelReceived(myo::Myo* myo, uint64_t timestamp, uint8_t level)
 {
 	UE_LOG(MyoPluginLog, Log, TEXT("onBatteryLevelReceived: %d"), level);
-	FMyoControllerData& MyoData = MyoDataMap[myo];
+	FMyoControllerData& MyoData = *MyoDataMap[myo];
 	MyoData.BatteryLevel = level;
 
 	RunFunctionOnComponents([&, MyoData](UMyoControllerComponent* Component)
@@ -422,7 +419,7 @@ void FMyoInputDevice::onBatteryLevelReceived(myo::Myo* myo, uint64_t timestamp, 
 
 void FMyoInputDevice::onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* emg)
 {
-	FMyoControllerData& MyoData = MyoDataMap[myo];
+	FMyoControllerData& MyoData = *MyoDataMap[myo];
 	FMyoEmgData EmgData;
 	EmgData.setFromArray(emg);
 
@@ -436,7 +433,7 @@ void FMyoInputDevice::onWarmupCompleted(myo::Myo* myo, uint64_t timestamp, Warmu
 {
 	UE_LOG(MyoPluginLog, Log, TEXT("onWarmupCompleted."));
 
-	FMyoControllerData& MyoData = MyoDataMap[myo];
+	FMyoControllerData& MyoData = *MyoDataMap[myo];
 
 	RunFunctionOnComponents([&, MyoData](UMyoControllerComponent* Component)
 	{
@@ -455,7 +452,7 @@ void FMyoInputDevice::SetLockingPolicy(EMyoLockingPolicy Policy)
 void FMyoInputDevice::CalibrateOrientation(int32 MyoId, FRotator Direction)
 {
 	//todo: implement old style calibration function
-	FMyoControllerData& MyoData = MyoDataMap[MyoForId(MyoId)];
+	FMyoControllerData& MyoData = *MyoDataMap[MyoForId(MyoId)];
 
 	MyoData.ArmSpaceCorrection = combineRotators(MyoData.Orientation*-1.f, Direction);
 }
@@ -523,7 +520,7 @@ void FMyoInputDevice::DataForMyo(FMyoControllerData& Data, Myo* myo)
 {
 	if (MyoDataMap.Contains(myo))
 	{
-		Data = MyoDataMap[myo];
+		Data = *MyoDataMap[myo];
 	}
 }
 

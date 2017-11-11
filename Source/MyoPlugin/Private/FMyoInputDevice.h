@@ -92,7 +92,7 @@ private:
 	int32 MyoIdCounter;		//always increments never decreases during app life cycle
 	TArray<Myo*> PairedMyos;
 	TArray<Myo*> ConnectedMyos;
-	TMap<Myo*, FMyoControllerData> MyoDataMap;
+	TMap<Myo*, FMyoControllerData*> MyoDataMap;
 
 	TMap<Myo*, int32> MyoToIdMap;
 	TMap<int32, Myo*> IdToMyoMap;
