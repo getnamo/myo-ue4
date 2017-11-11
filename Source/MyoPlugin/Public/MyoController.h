@@ -67,9 +67,10 @@ struct MYOPLUGIN_API FMyoControllerData
 
 	FMyoControllerData()
 	{
-		ArmAcceleration = FVector();
-		ArmOrientation = FRotator();
-		ArmSpaceCorrection = FRotator();
+		ArmAcceleration = FVector(0.f);
+		ArmGyro = FVector(0.f);
+		ArmOrientation = FRotator(0.f);
+		ArmSpaceCorrection = FRotator(0.f);
 	}
 
 	//Conversion

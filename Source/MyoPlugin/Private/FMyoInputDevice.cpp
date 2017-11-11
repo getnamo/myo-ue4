@@ -233,7 +233,7 @@ void FMyoInputDevice::onPair(Myo* myo, uint64_t timestamp, FirmwareVersion firmw
 	//UMyoController* Controller = NewObject<UMyoController>(this);
 
 	//Add the map data container
-	FMyoControllerData DefaultData;
+	FMyoControllerData DefaultData = FMyoControllerData();
 	DefaultData.MyoId = MyoId;
 	DefaultData.Pose = EMyoPose::MYO_POSE_UNKNOWN;
 	MyoDataMap.Add(myo, DefaultData);
