@@ -67,7 +67,6 @@ FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHan
 		UE_LOG(MyoPluginLog, Log, TEXT("Myo Initialized, thread loop started."));
 
 		bRunning = true;
-		//MyoEnabled = true;
 
 		//MyoHub->waitForMyo()	//optimization, wait stall thread?
 
@@ -103,7 +102,6 @@ FMyoInputDevice::~FMyoInputDevice()
 
 void FMyoInputDevice::Tick(float DeltaTime)
 {
-
 	//SendControllerEvents();
 }
 
@@ -196,6 +194,12 @@ void FMyoInputDevice::AddComponentDelegate(UMyoControllerComponent* Component)
 void FMyoInputDevice::RemoveComponentDelegate(UMyoControllerComponent* Component)
 {
 	ComponentDelegates.Remove(Component);
+
+	//If we removed our last delegate, clean up our data.
+	if (ComponentDelegates.Num() == 0)
+	{
+
+	}
 }
 
 void FMyoInputDevice::RunFunctionOnComponents(TFunction<void(UMyoControllerComponent*)> InFunction)
@@ -366,32 +370,41 @@ void FMyoInputDevice::onPose(Myo* myo, uint64_t timestamp, Pose pose)
 
 void FMyoInputDevice::onOrientationData(Myo* myo, uint64_t timestamp, const Quaternion<float>& rotation)
 {
-	FMyoControllerData& MyoData = *MyoDataMap[myo];
-	MyoData.Orientation = convertOrientationToUE(FQuat(rotation.x(), rotation.y(), rotation.z(), rotation.w()).Rotator());
-	MyoData.ArmOrientation = convertOrientationToArmSpace(MyoData.Orientation, MyoData.ArmSpaceCorrection, MyoData.ArmDirection);
+	if (ComponentDelegates.Num() > 0)	//conversion is dangerous here, ensure it only runs when we have components
+	{
+		FMyoControllerData& MyoData = *MyoDataMap[myo];
+		MyoData.Orientation = convertOrientationToUE(FQuat(rotation.x(), rotation.y(), rotation.z(), rotation.w()).Rotator());
+		MyoData.ArmOrientation = convertOrientationToArmSpace(MyoData.Orientation, MyoData.ArmSpaceCorrection, MyoData.ArmDirection);
+	}
 }
 
 void FMyoInputDevice::onAccelerometerData(Myo* myo, uint64_t timestamp, const Vector3<float>& accel)
 {
-	FMyoControllerData& MyoData = *MyoDataMap[myo];
-	MyoData.Acceleration = convertVectorToUE(FVector(accel.x(), accel.y(), accel.z()));
-	MyoData.ArmAcceleration = MyoData.Acceleration;
-	MyoData.BodySpaceNullAcceleration = convertAccelerationToBodySpace( MyoData.ArmAcceleration,
-																		MyoData.ArmOrientation, 
-																		MyoData.ArmSpaceCorrection, 
-																		MyoData.ArmDirection);
-
-	RunFunctionOnComponents([&, MyoData](UMyoControllerComponent* Component)
+	if (ComponentDelegates.Num() > 0)	//conversion is dangerous here, ensure it only runs when we have components
 	{
-		Component->OnArmMoved.Broadcast(MyoData, MyoData.ArmAcceleration, MyoData.ArmOrientation, MyoData.ArmGyro);
-	});
+		FMyoControllerData& MyoData = *MyoDataMap[myo];
+		MyoData.Acceleration = convertVectorToUE(FVector(accel.x(), accel.y(), accel.z()));
+		MyoData.ArmAcceleration = MyoData.Acceleration;
+		MyoData.BodySpaceNullAcceleration = convertAccelerationToBodySpace(MyoData.ArmAcceleration,
+			MyoData.ArmOrientation,
+			MyoData.ArmSpaceCorrection,
+			MyoData.ArmDirection);
+
+		RunFunctionOnComponents([&, MyoData](UMyoControllerComponent* Component)
+		{
+			Component->OnArmMoved.Broadcast(MyoData, MyoData.ArmAcceleration, MyoData.ArmOrientation, MyoData.ArmGyro);
+		});
+	}
 }
 
 void FMyoInputDevice::onGyroscopeData(Myo* myo, uint64_t timestamp, const Vector3<float>& gyro)
 {
-	FMyoControllerData& MyoData = *MyoDataMap[myo];
-	MyoData.Gyro = FVector(gyro.x(), gyro.y(), gyro.z());
-	MyoData.ArmGyro = convertVectorToUE(MyoData.Gyro);
+	if (ComponentDelegates.Num() > 0)
+	{
+		FMyoControllerData& MyoData = *MyoDataMap[myo];
+		MyoData.Gyro = FVector(gyro.x(), gyro.y(), gyro.z());
+		MyoData.ArmGyro = convertVectorToUE(MyoData.Gyro);
+	}
 }
 
 void FMyoInputDevice::onRssi(Myo* myo, uint64_t timestamp, int8_t rssi)

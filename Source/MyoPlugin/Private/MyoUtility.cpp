@@ -102,6 +102,10 @@ namespace MyoUtility
 		}
 
 		//Compensate Roll (pre)
+		if (armCorrection.ContainsNaN())
+		{
+			return convertedOrientation;
+		}
 		FRotator tempRot = combineRotators(FRotator(0, 0, armCorrection.Roll*directionModifier), convertedOrientation);
 
 		//Compensate for Yaw (post) and return the result

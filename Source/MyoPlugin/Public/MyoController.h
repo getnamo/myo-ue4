@@ -83,6 +83,7 @@ UCLASS(BlueprintType)
 class MYOPLUGIN_API UMyoController : public UObject
 {
 	GENERATED_UCLASS_BODY()
+
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Myo Frame")
