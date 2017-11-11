@@ -37,18 +37,25 @@ FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHan
 		void* DLLHandle = FPlatformProcess::GetDllHandle(*DllFilepath);
 
 		UE_LOG(MyoPluginLog, Log, TEXT("Handle: %d"), DLLHandle);*/
+		bool bHubFailureLogged = false;
+
 
 		while (!MyoHub.IsValid())
 		{
 			FPlatformProcess::Sleep(1.f);
-			myo::Hub* RawHub = new Hub("com.epicgames.unrealengine");
 
-			MyoHub = MakeShareable(RawHub);
+			MyoHub = MakeShareable(new Hub("com.epicgames.unrealengine"));
 			if (MyoHub.IsValid())
 			{
 				if (MyoHub->lastInitCausedError)
 				{
-					UE_LOG(MyoPluginLog, Log, TEXT("Hub initialization failed. Do you have Myo Connect installed and running?"));
+					//Log this only once
+					if (!bHubFailureLogged)
+					{
+						UE_LOG(MyoPluginLog, Warning, TEXT("Hub initialization failed. Do you have Myo Connect installed and running?"));
+						bHubFailureLogged = true;
+					}
+
 					MyoHub = nullptr;
 				}
 			}
@@ -73,7 +80,7 @@ FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHan
 
 		UE_LOG(MyoPluginLog, Log, TEXT("Myo Initialized, thread loop started."));
 
-		//MyoHub->waitForMyo()	//optimization, wait stall thread?
+		MyoHub->waitForMyo();	//optimization, wait stall thread?
 
 		//Start thread loop
 		while (bRunning)
@@ -133,22 +140,25 @@ void FMyoInputDevice::SendControllerEvents()
 
 	//for the primary myo also emit IM events
 	Myo* PrimaryMyo = ConnectedMyos[0];
-	FMyoControllerData& MyoData = *MyoDataMap[PrimaryMyo];
-	
-	//Orientation - Scale input mapping to -1.0-> 1.0 range
-	EmitAnalogInputEventForKey(EKeysMyo::MyoOrientationPitch, MyoData.ArmOrientation.Pitch * ORIENTATION_SCALE_PITCH, 0);
-	EmitAnalogInputEventForKey(EKeysMyo::MyoOrientationYaw, MyoData.ArmOrientation.Yaw * ORIENTATION_SCALE_YAWROLL, 0);
-	EmitAnalogInputEventForKey(EKeysMyo::MyoOrientationRoll, MyoData.ArmOrientation.Roll * ORIENTATION_SCALE_YAWROLL, 0);
+	if (MyoDataMap.Contains(PrimaryMyo))
+	{
+		FMyoControllerData& MyoData = *MyoDataMap[PrimaryMyo];
 
-	//Acceleration - No scaling needed, 1.0 = 1g.
-	EmitAnalogInputEventForKey(EKeysMyo::MyoAccelerationX, MyoData.ArmAcceleration.X, 0);
-	EmitAnalogInputEventForKey(EKeysMyo::MyoAccelerationY, MyoData.ArmAcceleration.Y, 0);
-	EmitAnalogInputEventForKey(EKeysMyo::MyoAccelerationZ, MyoData.ArmAcceleration.Z, 0);
+		//Orientation - Scale input mapping to -1.0-> 1.0 range
+		EmitAnalogInputEventForKey(EKeysMyo::MyoOrientationPitch, MyoData.ArmOrientation.Pitch * ORIENTATION_SCALE_PITCH, 0);
+		EmitAnalogInputEventForKey(EKeysMyo::MyoOrientationYaw, MyoData.ArmOrientation.Yaw * ORIENTATION_SCALE_YAWROLL, 0);
+		EmitAnalogInputEventForKey(EKeysMyo::MyoOrientationRoll, MyoData.ArmOrientation.Roll * ORIENTATION_SCALE_YAWROLL, 0);
 
-	//Gyro - scaled down by 1/45. Fast flicks should be close to 1.0, slower gyro motions may need scaling up if used in input mapping
-	EmitAnalogInputEventForKey(EKeysMyo::MyoGyroX, MyoData.ArmGyro.X * GYRO_SCALE, 0);
-	EmitAnalogInputEventForKey(EKeysMyo::MyoGyroY, MyoData.ArmGyro.Y * GYRO_SCALE, 0);
-	EmitAnalogInputEventForKey(EKeysMyo::MyoGyroZ, MyoData.ArmGyro.Z * GYRO_SCALE, 0);
+		//Acceleration - No scaling needed, 1.0 = 1g.
+		EmitAnalogInputEventForKey(EKeysMyo::MyoAccelerationX, MyoData.ArmAcceleration.X, 0);
+		EmitAnalogInputEventForKey(EKeysMyo::MyoAccelerationY, MyoData.ArmAcceleration.Y, 0);
+		EmitAnalogInputEventForKey(EKeysMyo::MyoAccelerationZ, MyoData.ArmAcceleration.Z, 0);
+
+		//Gyro - scaled down by 1/45. Fast flicks should be close to 1.0, slower gyro motions may need scaling up if used in input mapping
+		EmitAnalogInputEventForKey(EKeysMyo::MyoGyroX, MyoData.ArmGyro.X * GYRO_SCALE, 0);
+		EmitAnalogInputEventForKey(EKeysMyo::MyoGyroY, MyoData.ArmGyro.Y * GYRO_SCALE, 0);
+		EmitAnalogInputEventForKey(EKeysMyo::MyoGyroZ, MyoData.ArmGyro.Z * GYRO_SCALE, 0);
+	}
 }
 
 void FMyoInputDevice::ParseEvents()
@@ -231,35 +241,13 @@ void FMyoInputDevice::onPair(Myo* myo, uint64_t timestamp, FirmwareVersion firmw
 {
 	//Track paired myos
 	PairedMyos.Add(myo);
-
-	//Add id links
-	MyoIdCounter++;				//always bump the counter
-	int32 MyoId = MyoIdCounter;
-	MyoToIdMap.Add(myo, MyoId);
-	IdToMyoMap.Add(MyoId, myo);
-
-	//Create the UObject wrapper (on game thread)
-	//UMyoController* Controller = NewObject<UMyoController>(this);
-
-	//Add the map data container
-	FMyoControllerData DefaultData = FMyoControllerData();
-	DefaultData.MyoId = MyoId;
-	DefaultData.Pose = EMyoPose::MYO_POSE_UNKNOWN;
-
-	//spawn our controller wrappers
-	UMyoController* Controller = NewObject<UMyoController>();
-	Controller->AddToRoot();
-	Controller->MyoData = DefaultData;
-	MyoDataMap.Add(myo, &Controller->MyoData);
-	Controllers.Add(Controller);
-	ControllerMap.Add(myo, Controller);
 	
 	UE_LOG(MyoPluginLog, Log, TEXT("Paired."));
 
-	RunFunctionOnComponents([&, DefaultData](UMyoControllerComponent* Component)
+	RunFunctionOnComponents([&](UMyoControllerComponent* Component)
 	{
 		//todo: emit locally stored MyoComponents
-		Component->OnPair.Broadcast(DefaultData);
+		Component->OnPair.Broadcast(*MyoDataMap[myo]);
 	});
 }
 void FMyoInputDevice::onUnpair(Myo* myo, uint64_t timestamp)
@@ -291,14 +279,39 @@ void FMyoInputDevice::onConnect(Myo* myo, uint64_t timestamp, FirmwareVersion fi
 {
 	ConnectedMyos.Add(myo);
 
+	//Add id links
+	MyoIdCounter++;				//always bump the counter
+	int32 MyoId = MyoIdCounter;
+	MyoToIdMap.Add(myo, MyoId);
+	IdToMyoMap.Add(MyoId, myo);
+
+	//Create the UObject wrapper (on game thread)
+	//UMyoController* Controller = NewObject<UMyoController>(this);
+
+	//Add the map data container
+	FMyoControllerData DefaultData = FMyoControllerData();
+	DefaultData.MyoId = MyoId;
+	DefaultData.Pose = EMyoPose::MYO_POSE_UNKNOWN;
+
+	//spawn our controller wrappers
+	UMyoController* Controller = NewObject<UMyoController>();
+	Controller->AddToRoot();
+	Controller->MyoData = DefaultData;
+	MyoDataMap.Add(myo, &Controller->MyoData);
+	Controllers.Add(Controller);
+	ControllerMap.Add(myo, Controller);
+
 	UE_LOG(MyoPluginLog, Log, TEXT("onConnect."));
 
-	const FMyoControllerData& MyoData = *MyoDataMap[myo];
-
-	RunFunctionOnComponents([&, MyoData](UMyoControllerComponent* Component)
+	if (MyoDataMap.Contains(myo))
 	{
-		Component->OnConnect.Broadcast(MyoData);
-	});
+		const FMyoControllerData& MyoData = *MyoDataMap[myo];
+
+		RunFunctionOnComponents([&, MyoData](UMyoControllerComponent* Component)
+		{
+			Component->OnConnect.Broadcast(MyoData);
+		});
+	}
 }
 
 void FMyoInputDevice::onDisconnect(Myo* myo, uint64_t timestamp)
@@ -317,14 +330,21 @@ void FMyoInputDevice::onDisconnect(Myo* myo, uint64_t timestamp)
 
 void FMyoInputDevice::onArmSync(Myo* myo, uint64_t timestamp, Arm arm, XDirection xDirection, float rotation, WarmupState warmupState)
 {
-	UE_LOG(MyoPluginLog, Log, TEXT("onArmSync."));
-
 	//Update the data for the myo
 	FMyoControllerData Data; 
 	DataForMyo(Data, myo);
 	Data.Arm = (EMyoArm)arm;
 	Data.ArmDirection = (EMyoArmDirection)xDirection;
 	Data.bIsArmSynced = true;
+
+	if (Data.Arm == EMyoArm::MYO_ARM_LEFT)
+	{
+		UE_LOG(MyoPluginLog, Log, TEXT("onArmSync Left."));
+	}
+	else
+	{
+		UE_LOG(MyoPluginLog, Log, TEXT("onArmSync Right."));
+	}
 
 	RunFunctionOnComponents([&, Data](UMyoControllerComponent* Component)
 	{
