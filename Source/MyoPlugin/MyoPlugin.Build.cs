@@ -36,8 +36,8 @@ namespace UnrealBuildTool.Rules
             get { return Path.GetFullPath(Path.Combine(ModulePath, "../../Binaries")); }
         }
 
-        public MyoPlugin(TargetInfo Target)
-		{
+        public MyoPlugin(ReadOnlyTargetRules Target) : base(Target)
+        {
 			PublicIncludePaths.AddRange(
 				new string[] {
                     "MyoPlugin/Public",
@@ -89,7 +89,7 @@ namespace UnrealBuildTool.Rules
             return Path.Combine(ModuleDirectory, "../../../..");
         }
 
-        private void CopyToProjectBinaries(string Filepath, TargetInfo Target)
+        private void CopyToProjectBinaries(string Filepath, ReadOnlyTargetRules Target)
         {
             System.Console.WriteLine("uprojectpath is: " + Path.GetFullPath(GetUProjectPath()));
 
@@ -109,7 +109,7 @@ namespace UnrealBuildTool.Rules
             }
         }
 
-        public bool LoadMyoLib(TargetInfo Target)
+        public bool LoadMyoLib(ReadOnlyTargetRules Target)
         {
             bool isLibrarySupported = false;
 
