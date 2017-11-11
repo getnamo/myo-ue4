@@ -30,6 +30,7 @@ FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHan
 	FMyoLambdaRunnable::RunLambdaOnBackGroundThread([&] 
 	{
 		MyoIdCounter = 0;	//reset the id counter
+		bRunning = true;
 
 		/*FString BinariesRoot = FPaths::Combine(*FPaths::GameDir(), TEXT("Binaries"));
 		FString DllFilepath = FPaths::ConvertRelativePathToFull(FPaths::Combine(*BinariesRoot, "Win64", "myo64.dll"));
@@ -39,7 +40,7 @@ FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHan
 
 		while (!MyoHub.IsValid())
 		{
-			FPlatformProcess::Sleep(1.f);
+			FPlatformProcess::Sleep(5.f);
 			myo::Hub* RawHub = new Hub("com.epicgames.unrealengine");
 
 			MyoHub = MakeShareable(RawHub);
@@ -47,7 +48,7 @@ FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHan
 			{
 				if (MyoHub->lastInitCausedError)
 				{
-					UE_LOG(MyoPluginLog, Log, TEXT("Hub initialization failed. Do you have Myo Connect installed and updated?"));
+					UE_LOG(MyoPluginLog, Log, TEXT("Hub initialization failed. Do you have Myo Connect installed and running?"));
 					MyoHub = nullptr;
 				}
 			}
@@ -55,7 +56,13 @@ FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHan
 			{
 				MyoHub = nullptr;
 			}
-			
+
+			//Quit early
+			if (!bRunning)
+			{
+				bHubRunHasFinished = true;
+				return;
+			}
 		}
 
 		UE_LOG(MyoPluginLog, Log, TEXT("MyoHub found."));
@@ -66,7 +73,6 @@ FMyoInputDevice::FMyoInputDevice(const TSharedRef< FGenericApplicationMessageHan
 
 		UE_LOG(MyoPluginLog, Log, TEXT("Myo Initialized, thread loop started."));
 
-		bRunning = true;
 
 		//MyoHub->waitForMyo()	//optimization, wait stall thread?
 
