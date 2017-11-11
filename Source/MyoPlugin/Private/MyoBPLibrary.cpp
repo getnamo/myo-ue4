@@ -19,4 +19,3 @@ FString UMyoBPLibrary::Conv_MyoEmgDataToString(const FMyoEmgData& InData)
 	ResultString.Append(TEXT("]"));
 	return ResultString;
 }
-
