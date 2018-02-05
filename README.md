@@ -267,13 +267,9 @@ find <i>WindowsNoEditor/MyoPluginTest</i>, this is your packaged project root. A
 
 ## Credits and License
 * Plugin by Getnamo, Myo SDK provided by Thalmic Labs
-* Point any questions and queries to the [plugin unreal engine thread](https://forums.unrealengine.com/showthread.php?37876-Plugin-Myo)
+* Point any questions and queries to the [plugin unreal engine thread](https://forums.unrealengine.com/showthread.php?37876-Plugin-Myo) or this repository's issues page
 
+Anything not covered by [Myo SDK](https://developer.thalmic.com/docs/api_reference/platform/legal-notices.html) and [Unreal Engine EULA](https://www.unrealengine.com/eula) in <span property="dct:title">Myo UE4 Plugin</span> is covered by MIT license.
 
-<a rel="license" href="http://creativecommons.org/publicdomain/mark/1.0/">
-<img src="http://i.creativecommons.org/p/mark/1.0/88x31.png"
-     style="border-style: none;" alt="Public Domain Mark" />
-</a>
-<br />
+[![license](https://img.shields.io/github/license/getnamo/myo-ue4.svg)](https://github.com/getnamo/myo-ue4/blob/master/LICENSE)
 
-Anything not covered by [Myo SDK](https://developer.thalmic.com/docs/api_reference/platform/legal-notices.html) and [Unreal Engine EULA](https://www.unrealengine.com/eula) in <span property="dct:title">Myo UE4 Plugin</span> is free of known copyright restrictions.
