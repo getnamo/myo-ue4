@@ -105,11 +105,11 @@ FKey MyoGyroZ;
 
 ### Calibration
 
-If you're using only delta values, you may wish to use the raw values instead. If you would like to use absolute orientations (e.g. copying an arm orientation, or getting acceleration in component space) however you may wish to use the calibrated arm space values.
+If you would like to use absolute orientations (e.g. copying an arm orientation, or getting acceleration in component space) you may wish to use the calibrated arm space values.
 
 Myo reports values in myo space, which may be rotated around your wrist and has no fixed reference to which direction your screen is. In order to use arm space data emitted from On Arm Moved correctly, your myo should be calibrated. This is done by pointing your myo forward toward your screen or another known reference direction (adjustable in the function) and calling Calibrate Arm Orientation on the myo you wish to calibrate. After this is done all your arm space orientation, gyro, and acceleration data will be automatically rotated to compensate for any wrist roll offset (myo can be arbitrarily rotated around your wrist), yaw offset (difference between screen and magnetic north) and you can safely use these outputs to drive your 3d data in component space.
 
-example of how to calibrate (old plugin graph, should be similar in modern >v0.9):
+example of how to calibrate (note: old plugin bp graph, should be similar in modern >v0.9):
 
 <img src="http://i.imgur.com/yQcd5NH.png">
 
@@ -125,15 +125,9 @@ Since 0.7.7 the plugin includes optional Content such as the Myo Utility BP Libr
 
 To see this content simply select View->Show Plugin Content from your Content browser. Below are a few examples of using this function library.
 
-Debug your orientation
+e.g. Debug your orientation (note: old plugin bp graph, should be similar in modern >v0.9)
 
 ![](http://i.imgur.com/9fVTYB8.png)
-
-Draw debug arrows representing each of the 8 raw streams
-
-![](http://i.imgur.com/DsAzDlz.png)
-
-or print them out instead using the respective function.
 
 ## C++ usage
 
