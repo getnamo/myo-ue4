@@ -12,6 +12,16 @@ A [Thalmic Myo](https://www.thalmic.com/en/myo/) Plugin for Unreal Engine 4.
 
 Documentation for v0.9 is still pending. Basics: add a ```UMyoControllerComponent``` to your actor of choice and subscribe to events you're interested in. From there you will get ```FMyoControllerData``` filled with all kinds of information. Cast ```FMyoControllerData``` to ```UMyoController``` to call functions on it such as vibrate device and enable raw emg stream.
 
+## Setup
+
+1. Ensure you have the latest [Myo Connect](https://www.myo.com/start) and [firmware](https://developer.thalmic.com/downloads) installed.
+2. Download [latest plugin release](https://github.com/getnamo/myo-ue4/releases)
+3. Browse to your project (typically found at *Documents/Unreal Project/{Your Project Root}*)
+4. Copy *Plugins* folder from the .7z download into your Project root.
+5. Launch your project
+6. Plugin is now ready to use.
+
+
 # Old documentation
 
 Latest plugin is bound to beta 9, requires Myos to have [firmware 1.5](https://developer.thalmic.com/downloads) or later.
