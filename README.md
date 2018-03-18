@@ -8,9 +8,6 @@ A [Thalmic Myo](https://www.thalmic.com/en/myo/) Plugin for Unreal Engine 4.
 
 [Main discussion thread](https://forums.unrealengine.com/showthread.php?37876-Plugin-Myo)
 
-# Modern rewrite (v0.9)
-
-Documentation for v0.9 is still pending. Basics: add a ```UMyoControllerComponent``` to your actor of choice and subscribe to events you're interested in. From there you will get ```FMyoControllerData``` filled with all kinds of information. Cast ```FMyoControllerData``` to ```UMyoController``` to call functions on it such as vibrate device and enable raw emg stream.
 
 ## Setup
 
@@ -21,35 +18,60 @@ Documentation for v0.9 is still pending. Basics: add a ```UMyoControllerComponen
 5. Launch your project
 6. Plugin is now ready to use.
 
+## How to use
+
+### Basics
+
+add a ```UMyoControllerComponent``` to your actor of choice 
+
+![add component](https://i.imgur.com/c24OGSo.png)
+
+and subscribe to events you're interested in. 
+
+![subscribe to events](https://i.imgur.com/Qyph7Du.png)
+
+Typically you're most likely interested in the ```OnPoseChanged``` and ```OnArmMoved``` events.
+
+![example onevents](https://i.imgur.com/Bpsu6va.png)
+
+All events emit the a [```FMyoControllerData```](https://github.com/getnamo/myo-ue4/blob/master/Source/MyoPlugin/Public/MyoController.h#L7) UStruct along with context relative data such as e.g. pose. You can convert the struct to a [```UMyoController```](https://github.com/getnamo/myo-ue4/blob/master/Source/MyoPlugin/Public/MyoController.h#L80) object where you can call functions such as ```CalibrateArmOrientation(FRotator Direction)``` or ```VibrateDevice(EMyoVibrationType Type)```.
+
+![vibrate](https://i.imgur.com/Mem9GMh.png)
+
+In the above graph we will tell the myo device to vibrate a short duration after detecting a ```Double Tap``` pose.
+
+### Getting a myo reference without events
+
+You can take your myo controller component and call ```PrimaryMyo()```, ```LeftMyo()```, or ```RightMyo()``` on it to get desired myos. From there you can call e.g. vibrate from a keyboard event
+
+![vibrate on f key](https://i.imgur.com/eHAKkd0.png)
 
 
+### Raw Data
 
+The plugin supports getting raw emg data from the myo, because this functionality uses additional bluetooth bandwidth it is disabled by default. To enable call ```SetStreamEmg(EMyoStreamEmgType StreamType)``` with enable state.
 
+![enable raw emg](https://i.imgur.com/N8UVJiz.png)
 
-# Old documentation
+The myo controller component will then receive ```OnEmgData``` events which you can easily debug using the global ```DrawMyoEmgArrows``` blueprint function
 
-Latest plugin is bound to beta 9, requires Myos to have [firmware 1.5](https://developer.thalmic.com/downloads) or later.
+![draw emg](https://i.imgur.com/Stkucu8.png)
 
-## Quick Setup
-1. Create new or open a project. 
-2. Browse to your project (typically found at *Documents/Unreal Project/{Your Project Root}*)
-3. Copy *Plugins* folder into your Project root.
-4. Copy *Binaries* folder into your Project root.
-6. Restart the Editor and open your project again.
-7. Select Window->Plugins. Click on Installed and you should see a category called Input and a plugin called Myo Plugin now available. Select Enabled. The Editor will warn you to restart, click restart.
-8. When your project has reloaded, the plugin should be enabled and ready to use. 
+this will output the 8 channels of raw emg data as arrows which behave a bit like vibrating strings.
 
-## How to Use
-The plugin is designed with an event driven architecture through a delegate interface. You can access device events through the UE4 Input Mapping system, adding myo support to any blueprint through the Myo Component and Myo Interface, the convenience Blueprint classes provided, or through C++. C++ supports both subclassing of provided example class or by inheriting the MyoDelegate, you can extend your own class to support Myo events. Additionally callable functions support polling for latest data.
+![raw emg strings](https://i.imgur.com/v3Jlter.png)
+
+![raw strings 2](http://i.imgur.com/moXdgn8.gif)
+
+See [MyoEnum.h](https://github.com/getnamo/myo-ue4/blob/master/Source/MyoPlugin/Public/MyoEnum.h#L64) for struct layout for raw emg types. 
 
 ## Input Mapping
 
- 1.	For a good example start with a template project.
- 2.	Select Edit->Project Settings.
- 3.	Select Engine->Input
- 4.	Under Action Mappings and Axis Mappings expand the category you wish to add controller movement to. For example if you want to add Forward motion in the standard 3rd person template, click the + sign in MoveForward.
- 5.	Change None to the binding you want and adjust the scale to fit. If for example you wanted this to happen when you pitch your arm you would select Myo Orientation Pitch with a scale of say 3.0 to have snappier controls.
- 6.	Play and test your scaling adjust as needed.
+ 1.	Select Edit->Project Settings.
+ 2.	Select Engine->Input
+ 3.	Under Action Mappings and Axis Mappings expand the category you wish to add controller movement to. For example if you want to add Forward motion in the standard 3rd person template, click the + sign in MoveForward.
+ 4.	Change None to the binding you want and adjust the scale to fit. If for example you wanted this to happen when you pitch your arm you would select Myo Orientation Pitch with a scale of say 3.0 to have snappier controls.
+ 5.	Play and test your scaling adjust as needed.
 
 (Optional) Use key and axis events in any input derived class blueprint (such as controller). Note note that any events you override will cause Engine->Input mapping to stop working for that bind.
 
@@ -110,102 +132,27 @@ Two, if you want a reference to specific arms outside an event, you can get them
 Remember that all the available functions/properties relevant to the myo are easily searched by dragging off of the Myo Controller or Myo Component and typing 'myo'. 
 
 ### Locking Policy
-Since myo beta 7, the SDK implements a locking policy. This means you can perform a double-tap pose on your myo to unlock and make a gesture, which then locks itself automatically again. By default this plugin has no locking policy, if you wish to use one however simply set it at an appropriate time e.g. in your begin play.
-
-<img src="http://i.imgur.com/2x0lZpG.png">
-
-
-### Raw Data Streams
-Since 0.7.7 the plugin supports raw streams. You have to first enable the raw streams for your myo
-
-e.g. using the double tap pose
-
-<img src="http://i.imgur.com/OacMVYW.png">
-
-or using a key event (note that this targets your primary myo since we don't have a myo pointer emitted with a key event)
-
-<img src="http://i.imgur.com/XMC9Ftz.png">
-
-Then subscribing to the OnEmgData event with the optional content library function
-
-<img src="http://i.imgur.com/DsAzDlz.png">
-
-Yields the following results in the rolling template (with Debug Orientation shown and Debug Poses printed to log)
-
-<img src ="http://i.imgur.com/moXdgn8.gif">
-
-To do something useful with the stream, break the struct which encapsulates an int array, one for each of the 8 data streams. The value range for each int is -127 to 128 (int8)
-
-<img src="http://i.imgur.com/GfH30ke.png">
-
-#### *Blueprint Events Available*
-
-<img src="http://i.imgur.com/h49rgju.png">
-
-#### *Blueprint Callable Functions Available*
-
-##### *Myo Component/Convenience Class*
-
-<img src="http://i.imgur.com/1kncm52.png">
-
-##### *Myo Controller*
-
-<img src="http://i.imgur.com/WU3Dumv.png">
-
-#### Example
-For example you can show a debug myo orientation like this
-
-<img src="http://i.imgur.com/zrd95U2.png">
-
-with a Draw Orientation function like this (note that this function is included in the optional Content Myo Utility BP Library)
-
-<img src="http://i.imgur.com/aNBewsH.png">
-
-which gives the following result in the Rolling template
-
-<img src="http://i.imgur.com/lVdgzWA.png">
-
-Note in this example two myos were paired and the orientation was obtained from calibrated values thus needed a calibration call to each myo when the user was pointing them toward the screen (e.g. point to screen and bind calibration to make fist).
+Since myo beta 7, the SDK implements a locking policy. This means you can perform a double-tap pose on your myo to unlock and make a gesture, which then locks itself automatically again. By default this plugin has no locking policy, if you wish to use one however simply set it at an appropriate time e.g. in your begin play. This function is available on the myo controller component as it affects all myos used in ue4.
 
 ### Convenience Myo Blueprint Library
 Since 0.7.7 the plugin includes optional Content such as the Myo Utility BP Library
 
-<img src="http://i.imgur.com/uV37oa4.png">
+![]("http://i.imgur.com/uV37oa4.png")
 
 To see this content simply select View->Show Plugin Content from your Content browser. Below are a few examples of using this function library.
 
 Debug your orientation
 
-<img src="http://i.imgur.com/9fVTYB8.png">
+![](img src="http://i.imgur.com/9fVTYB8.png")
 
 Draw debug arrows representing each of the 8 raw streams
 
-<img src="http://i.imgur.com/DsAzDlz.png">
+![](img src="http://i.imgur.com/DsAzDlz.png")
 
 or print them out instead using the respective function.
 
-## Events through Blueprint - Convenience Classes
-1. Select Window->Class Viewer.
-2. Search for "MyoPluginActor"
-3. Right click the actor and Create a new Blueprint e.g. "MyoPluginActorBP"
-4. Select Graph in the upper right hand corner and right click in the graph to bring up the function search
-5. Typing in "myo" will narrow the events down to plugin related.
-6. Add your desired events and linkup to your desired functions 
-7. Add the created blueprint to the scene (it's an actor subclass) and hit Play.
+## C++ usage
 
-e.g. If you want to get the acceleration data from your Myo/s add the Event "On Accelerometer Data". Right click again in an empty space in the BP graph and add a function call to "Print String", connect acceleration to string (a conversion node will automatically be made) and drag exec (the white triangle on node) from the event to the function to connect the calls. 
-
-Compile and Play to see the accelerometer data stream as printed output after the myo/s automatically connect and pair.
-
-## Events through C++
-
-#### *Simple Version*
-1. Extend or Subclass MyoPluginActor and Override functions you wish to subscribe to e.g. 
-
-```virtual void onPose(int32 myoId, uint64 timestamp, int32 pose) override;```
-
-
-#### *Extend your own Class to Receive Events*
 1. Ensure your project has "MyoPlugin" added to your PublicDependencyModuleNames in your *{Project}.build.cs*
 2. Add a ```UMyoControllerComponent``` to your actor of choice
 3. [Bind your listening functions to the multicast delegates](https://docs.unrealengine.com/en-us/Programming/UnrealArchitecture/Delegates/Multicast) available in the component. You most likely are interested in ```OnPoseChanged``` and ```OnArmMoved```.
