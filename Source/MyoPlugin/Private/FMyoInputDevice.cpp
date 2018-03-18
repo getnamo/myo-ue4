@@ -377,7 +377,7 @@ void FMyoInputDevice::onLock(Myo* myo, uint64_t timestamp)
 
 void FMyoInputDevice::onPose(Myo* myo, uint64_t timestamp, Pose pose)
 {
-	UE_LOG(MyoPluginLog, Log, TEXT("onPose."));
+	//UE_LOG(MyoPluginLog, Log, TEXT("onPose."));
 
 	FMyoControllerData& MyoData = *MyoDataMap[myo];
 	
