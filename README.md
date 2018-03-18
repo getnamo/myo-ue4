@@ -22,6 +22,10 @@ Documentation for v0.9 is still pending. Basics: add a ```UMyoControllerComponen
 6. Plugin is now ready to use.
 
 
+
+
+
+
 # Old documentation
 
 Latest plugin is bound to beta 9, requires Myos to have [firmware 1.5](https://developer.thalmic.com/downloads) or later.
@@ -41,12 +45,11 @@ The plugin is designed with an event driven architecture through a delegate inte
 ## Input Mapping
 
  1.	For a good example start with a template project.
- 2.	Use the MyoPluginActor (NB the convenience actor needs to be placed), or attach the Myo Component to any desired blueprint.
- 3.	Select Edit->Project Settings.
- 4.	Select Engine->Input
- 5.	Under Action Mappings and Axis Mappings expand the category you wish to add controller movement to. For example if you want to add Forward motion in the standard 3rd person template, click the + sign in MoveForward.
- 6.	Change None to the binding you want and adjust the scale to fit. If for example you wanted this to happen when you pitch your arm you would select Myo Orientation Pitch with a scale of say 3.0 to have snappier controls.
- 7.	Play and test your scaling adjust as needed.
+ 2.	Select Edit->Project Settings.
+ 3.	Select Engine->Input
+ 4.	Under Action Mappings and Axis Mappings expand the category you wish to add controller movement to. For example if you want to add Forward motion in the standard 3rd person template, click the + sign in MoveForward.
+ 5.	Change None to the binding you want and adjust the scale to fit. If for example you wanted this to happen when you pitch your arm you would select Myo Orientation Pitch with a scale of say 3.0 to have snappier controls.
+ 6.	Play and test your scaling adjust as needed.
 
 (Optional) Use key and axis events in any input derived class blueprint (such as controller). Note note that any events you override will cause Engine->Input mapping to stop working for that bind.
 
@@ -77,27 +80,6 @@ FKey MyoGyroX;
 FKey MyoGyroY;
 FKey MyoGyroZ;
 ```
-
-## Events through Blueprint - Component Based Support for Any Blueprint
-
-Available since v0.7, this method works by adding a Myo Component and then subscribing to the events through a MyoInterface.
-
-<ol>
-<li> Open the blueprint you wish to receive myo events.</li>
-<li> Add the Myo Component to your blueprint through method 3 or 4.</li>
-<li> (Option 1) Add component directly</li>
-
-<img src="http://i.imgur.com/H3INs0v.png">
-
-<li> (Option 2) Add component through event graph</li>
-
-<img src="http://i.imgur.com/vSXFb7O.png">
-
-<li> To receive events we now have to add an interface. Click on Blueprint Props and under Details find 'Add' under interfaces. Add the MyoInterface.</li>
-
-<img src="http://i.imgur.com/tdPViq8.png">
-
-</ol>
 
 ### Calibration
 
@@ -223,61 +205,33 @@ Compile and Play to see the accelerometer data stream as printed output after th
 ```virtual void onPose(int32 myoId, uint64 timestamp, int32 pose) override;```
 
 
-####*Extend your own Class to Receive Events*####
-1. include "MyoDelegate.h" and "IMyoPlugin.h" in your implementation
-2. Ensure your project has "MyoPlugin" added to your PublicDependencyModuleNames in your *{Project}.build.cs*
-3. Make your class inherit from MyoDelegate (multiple inheritence)
-4. add ```IMyoPlugin::Get().SetDelegate((MyoDelegate*)this);``` in your BeginPlay() or other form of initialization that comes before the first tick.
-5. Make your class tickable (```PrimaryActorTick.bCanEverTick = true;``` in your constructor)
-6. add ```IMyoPlugin::Get().MyoTick(DeltaTime);``` inside Tick(float DeltaTime)
-7. override any of the delegate methods to receive the events.
+#### *Extend your own Class to Receive Events*
+1. Ensure your project has "MyoPlugin" added to your PublicDependencyModuleNames in your *{Project}.build.cs*
+2. Add a ```UMyoControllerComponent``` to your actor of choice
+3. [Bind your listening functions to the multicast delegates](https://docs.unrealengine.com/en-us/Programming/UnrealArchitecture/Delegates/Multicast) available in the component. You most likely are interested in ```OnPoseChanged``` and ```OnArmMoved```.
 
-To poll for the latest data call MyoGetLatestData(*Myo Device Index*, *Data Pointer*); where *Data Pointer* is a structure in the form of
+To poll for the latest data, get your desired Myo Controller either via listening to the pairing event or getting your primary myo e.g.
 
 ```c++
-struct MyoDeviceData{
-	int pose;			//0 = rest, 1 = fist, 2 = waveIn, 3 = waveOut, 4 = fingersSpread, 5 = reserved1, 6 = thumbToPinky, 7 = unknown (as of beta1)
-	FVector acceleration;	//units of g
-	FQuat quaternion;	//orientation in quaternion format
-	FRotator orientation;	//orientation
-	FVector gyro;			//angular speed in deg/s
-	int arm;			//which arm it is bound to, 0=right, 1=left, 2=unknown
-	int xDirection;			//0 = toward wrist, 1= toward elbow, 2=unknown
+UMyoControllerComponent* Component;	//instantiated somewhere
+UMyoController* PrimaryController = Component->PrimaryMyo();
+```
 
-	//Values in arm space after calibration, otherwise same as raw
-	FVector armAcceleration;	//units of g
-	FRotator armOrientation;	//orientation
-	FVector armGyro;			//angular speed in deg/s
-	FRotator armSpaceCorrection;	//used to calibrate the orientation, not exposed to blueprints
+then you can access the data directly via
 
-	//Body space, useful for easy component space integration
-	FVector bodySpaceNullAcceleration;	//units of g, in calibrated space, without gravity component
-};
-``` 
+```c++
+PrimaryController.MyoData;
+```
 
-defined in MyoDelegate.h
+with the available data defined in [MyoController.h](https://github.com/getnamo/myo-ue4/blob/master/Source/MyoPlugin/Public/MyoController.h#L7)
+
+All functionality follows how you use it in blueprint, check source files for specific method names.
 
 ## Shipping/Packaged Builds
-<ol>
-<li> Projects require code, if you are using a blueprint only project, add an empty class and compile your project module. You simply do File->Add Code to Project and it can be anything so I usually just pick None->Create Class and then it will ask you to open visual studio where you just hit compile (Build solution). If you haven't added code before follow the unreal engine <a href="https://docs.unrealengine.com/latest/INT/Programming/QuickStart/1/index.html">programming Quick Start guide</a>. Essentially it boils down to downloading the free Visual Studio Community and changing a few small configs.</li>
-<li> Add the following line to your DefaultEngine.ini </li>
+Projects require code, if you are using a blueprint only project, add an empty class and compile your project module. You simply do File->Add Code to Project and it can be anything so I usually just pick None->Create Class and then it will ask you to open visual studio where you just hit compile (Build solution). If you haven't added code before follow the unreal engine <a href="https://docs.unrealengine.com/latest/INT/Programming/QuickStart/1/index.html">programming Quick Start guide</a>. Essentially it boils down to downloading the free Visual Studio Community and changing a few small configs.
 
-<i>EnabledPlugins=MyoPlugin</i>
-
-under <i>[Plugins]</i>, create this category if missing.
-
-<li> Package your content</li>
-<li> In your packaged directory drag the <i>Binaries</i> folder from this plugin into your packaged project folder. E.g. if I have a packaged folder called <i>MyoPluginTest</i>
-find <i>WindowsNoEditor/MyoPluginTest</i>, this is your packaged project root. Add the binaries folder there.</li>
-</ol>
-
-## Bugs and Todo
-* Hub runs on the main thread, adds 1ms to render loop. Should be separated into its own thread or reduced to near 0ms.
-* Platforms apart from Windows are untested
-
-## Credits and License
-* Plugin by Getnamo, Myo SDK provided by Thalmic Labs
-* Point any questions and queries to the [plugin unreal engine thread](https://forums.unrealengine.com/showthread.php?37876-Plugin-Myo) or this repository's issues page
+## Community
+* Point any questions and queries to the [plugin unreal engine thread](https://forums.unrealengine.com/showthread.php?37876-Plugin-Myo) or this repository's [issues page](https://github.com/getnamo/myo-ue4/issues)
 
 Anything not covered by [Myo SDK](https://developer.thalmic.com/docs/api_reference/platform/legal-notices.html) and [Unreal Engine EULA](https://www.unrealengine.com/eula) in <span property="dct:title">Myo UE4 Plugin</span> is covered by MIT license.
 
