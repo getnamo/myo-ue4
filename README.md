@@ -57,9 +57,11 @@ The myo controller component will then receive ```OnEmgData``` events which you 
 
 ![draw emg](https://i.imgur.com/Stkucu8.png)
 
-this will output the 8 channels of raw emg data as arrows which behave a bit like vibrating strings.
+this will output the 8 channels of raw emg data as arrows
 
 ![raw emg strings](https://i.imgur.com/v3Jlter.png)
+
+these behave a bit like vibrating strings, with different sensors reacting based on myo rotation, pose, and hand state.
 
 ![raw strings 2](http://i.imgur.com/moXdgn8.gif)
 
