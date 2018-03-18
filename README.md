@@ -109,27 +109,11 @@ If you're using only delta values, you may wish to use the raw values instead. I
 
 Myo reports values in myo space, which may be rotated around your wrist and has no fixed reference to which direction your screen is. In order to use arm space data emitted from On Arm Moved correctly, your myo should be calibrated. This is done by pointing your myo forward toward your screen or another known reference direction (adjustable in the function) and calling Calibrate Arm Orientation on the myo you wish to calibrate. After this is done all your arm space orientation, gyro, and acceleration data will be automatically rotated to compensate for any wrist roll offset (myo can be arbitrarily rotated around your wrist), yaw offset (difference between screen and magnetic north) and you can safely use these outputs to drive your 3d data in component space.
 
-example of how to calibrate:
+example of how to calibrate (old plugin graph, should be similar in modern >v0.9):
 
 <img src="http://i.imgur.com/yQcd5NH.png">
 
 Note that you should perform a 'Sync Gesture' first in order to establish which arm the myo is on and which direction it is facing (toward wrist/arm), calibration picks this up and automatically adjusts for it as well, but if your arm isn't detected (synced), your movements may be inverse if you have the device on the opposite direction compared to default.
-
-### Specific Arm
-
-The myo can distinguish your arms after you've done the [sync gesture](https://support.getmyo.com/hc/en-us/articles/200755509-How-to-perform-the-sync-gesture). There are two methods used in the plugin to get your arm possession.
-
-One, you can get the arm possession by dragging off the myo controller pointer you get from an event such as OnPair or OnPose.
-
-For Example if you had a pose and you wanted it to only affect a particular arm you could do something like this
-
-<img src="http://i.imgur.com/cWjHCPd.png">
-
-Two, if you want a reference to specific arms outside an event, you can get them by dragging off of the myo component and using any of the convenience functions
-
-<img src="http://i.imgur.com/W8vqfa8.png">
-
-Remember that all the available functions/properties relevant to the myo are easily searched by dragging off of the Myo Controller or Myo Component and typing 'myo'. 
 
 ### Locking Policy
 Since myo beta 7, the SDK implements a locking policy. This means you can perform a double-tap pose on your myo to unlock and make a gesture, which then locks itself automatically again. By default this plugin has no locking policy, if you wish to use one however simply set it at an appropriate time e.g. in your begin play. This function is available on the myo controller component as it affects all myos used in ue4.
@@ -137,17 +121,17 @@ Since myo beta 7, the SDK implements a locking policy. This means you can perfor
 ### Convenience Myo Blueprint Library
 Since 0.7.7 the plugin includes optional Content such as the Myo Utility BP Library
 
-![]("http://i.imgur.com/uV37oa4.png")
+![](http://i.imgur.com/uV37oa4.png)
 
 To see this content simply select View->Show Plugin Content from your Content browser. Below are a few examples of using this function library.
 
 Debug your orientation
 
-![](img src="http://i.imgur.com/9fVTYB8.png")
+![](http://i.imgur.com/9fVTYB8.png)
 
 Draw debug arrows representing each of the 8 raw streams
 
-![](img src="http://i.imgur.com/DsAzDlz.png")
+![](http://i.imgur.com/DsAzDlz.png)
 
 or print them out instead using the respective function.
 
