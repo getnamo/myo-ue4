@@ -2,7 +2,7 @@
 	"FileVersion" : 3,
 	"FriendlyName" : "Myo Plugin",
 	"Version" : 1,
-	"VersionName" : "0.9.1",
+	"VersionName" : "0.9.2",
 	"CreatedBy" : "Getnamo",
 	"CreatedByURL" : "https://github.com/getnamo/myo-ue4",
 	"Description" : "Unofficial Plugin for Thalmic Myo.",
