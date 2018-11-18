@@ -2,53 +2,53 @@
 
 namespace UnrealBuildTool.Rules
 {
-    using System.IO;
+	using System.IO;
 
 	public class MyoPlugin : ModuleRules
 	{
-        private string ModulePath
-        {
-            get { return ModuleDirectory; }
-        }
+		private string ModulePath
+		{
+			get { return ModuleDirectory; }
+		}
 
-        private string ThirdPartyPath
-        {
-            get { return Path.GetFullPath(Path.Combine(ModulePath, "../../ThirdParty/")); }
-        }
+		private string ThirdPartyPath
+		{
+			get { return Path.GetFullPath(Path.Combine(ModulePath, "../../ThirdParty/")); }
+		}
 
-        private string ThalmicPath
-        {
-            get { return Path.GetFullPath(Path.Combine(ThirdPartyPath, "Thalmic")); }
-        }
+		private string ThalmicPath
+		{
+			get { return Path.GetFullPath(Path.Combine(ThirdPartyPath, "Thalmic")); }
+		}
 
-        private string LibrariesPath
-        {
-            get { return Path.Combine(ThalmicPath, "Lib"); }
-        }
+		private string LibrariesPath
+		{
+			get { return Path.Combine(ThalmicPath, "Lib"); }
+		}
 
-        private string IncludePath
-        {
-            get { return Path.Combine(ThalmicPath, "Include"); }
-        }
+		private string IncludePath
+		{
+			get { return Path.Combine(ThalmicPath, "Include"); }
+		}
 
-        private string BinariesPath
-        {
-            get { return Path.GetFullPath(Path.Combine(ModulePath, "../../Binaries")); }
-        }
+		private string BinariesPath
+		{
+			get { return Path.GetFullPath(Path.Combine(ModulePath, "../../Binaries")); }
+		}
 
-        public MyoPlugin(ReadOnlyTargetRules Target) : base(Target)
-        {
+		public MyoPlugin(ReadOnlyTargetRules Target) : base(Target)
+		{
 			PublicIncludePaths.AddRange(
 				new string[] {
-                    "MyoPlugin/Public",
+					Path.Combine(ModuleDirectory, "Public"),
 					// ... add public include paths required here ...
 				}
 				);
 
 			PrivateIncludePaths.AddRange(
 				new string[] {
-					"MyoPlugin/Private",
-                    IncludePath,
+					Path.Combine(ModuleDirectory, "Private"),
+					IncludePath,
 					// ... add other private include paths required here ...
 				}
 				);
@@ -58,11 +58,11 @@ namespace UnrealBuildTool.Rules
 				{
 					"Core",
 					"CoreUObject",
-                    "Engine",
-                    "InputCore",
-                    "InputDevice",
-                    "Slate",
-                    "SlateCore"
+					"Engine",
+					"InputCore",
+					"InputDevice",
+					"Slate",
+					"SlateCore"
 					// ... add other public dependencies that you statically link with here ...
 				}
 				);
@@ -81,64 +81,64 @@ namespace UnrealBuildTool.Rules
 				}
 				);
 
-            LoadMyoLib(Target);
+			LoadMyoLib(Target);
 		}
 
-        public string GetUProjectPath()
-        {
-            return Path.Combine(ModuleDirectory, "../../../..");
-        }
+		public string GetUProjectPath()
+		{
+			return Path.Combine(ModuleDirectory, "../../../..");
+		}
 
-        private void CopyToProjectBinaries(string Filepath, ReadOnlyTargetRules Target)
-        {
-            System.Console.WriteLine("uprojectpath is: " + Path.GetFullPath(GetUProjectPath()));
+		private void CopyToProjectBinaries(string Filepath, ReadOnlyTargetRules Target)
+		{
+			System.Console.WriteLine("uprojectpath is: " + Path.GetFullPath(GetUProjectPath()));
 
-            string binariesDir = Path.Combine(GetUProjectPath(), "Binaries", Target.Platform.ToString());
-            string filename = Path.GetFileName(Filepath);
+			string binariesDir = Path.Combine(GetUProjectPath(), "Binaries", Target.Platform.ToString());
+			string filename = Path.GetFileName(Filepath);
 
-            //convert relative path
-            string fullBinariesDir = Path.GetFullPath(binariesDir);
+			//convert relative path
+			string fullBinariesDir = Path.GetFullPath(binariesDir);
 
-            if (!Directory.Exists(fullBinariesDir))
-                Directory.CreateDirectory(fullBinariesDir);
+			if (!Directory.Exists(fullBinariesDir))
+				Directory.CreateDirectory(fullBinariesDir);
 
-            if (!File.Exists(Path.Combine(fullBinariesDir, filename)))
-            {
-                System.Console.WriteLine("Myo Plugin: Copied from " + Filepath + ", to " + Path.Combine(fullBinariesDir, filename));
-                File.Copy(Filepath, Path.Combine(fullBinariesDir, filename), true);
-            }
-        }
+			if (!File.Exists(Path.Combine(fullBinariesDir, filename)))
+			{
+				System.Console.WriteLine("Myo Plugin: Copied from " + Filepath + ", to " + Path.Combine(fullBinariesDir, filename));
+				File.Copy(Filepath, Path.Combine(fullBinariesDir, filename), true);
+			}
+		}
 
-        public bool LoadMyoLib(ReadOnlyTargetRules Target)
-        {
-            bool isLibrarySupported = false;
+		public bool LoadMyoLib(ReadOnlyTargetRules Target)
+		{
+			bool isLibrarySupported = false;
 
-            if ((Target.Platform == UnrealTargetPlatform.Win64) || (Target.Platform == UnrealTargetPlatform.Win32))
-            {
-                isLibrarySupported = true;
+			if ((Target.Platform == UnrealTargetPlatform.Win64) || (Target.Platform == UnrealTargetPlatform.Win32))
+			{
+				isLibrarySupported = true;
 
-                string PlatformString = (Target.Platform == UnrealTargetPlatform.Win64) ? "64" : "32";
-                string dllFile = "myo" + PlatformString + ".dll";
+				string PlatformString = (Target.Platform == UnrealTargetPlatform.Win64) ? "64" : "32";
+				string dllFile = "myo" + PlatformString + ".dll";
 
-                //lib
-                PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "myo" + PlatformString + ".lib"));
+				//lib
+				PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "myo" + PlatformString + ".lib"));
 
-                //dll
-                string PluginDLLPath = Path.Combine(BinariesPath, "Win" + PlatformString, dllFile);
-                string ProjectDLLPath = Path.GetFullPath(Path.Combine(GetUProjectPath(), "Binaries", "Win" + PlatformString, dllFile));
+				//dll
+				string PluginDLLPath = Path.Combine(BinariesPath, "Win" + PlatformString, dllFile);
+				string ProjectDLLPath = Path.GetFullPath(Path.Combine(GetUProjectPath(), "Binaries", "Win" + PlatformString, dllFile));
 
-                CopyToProjectBinaries(PluginDLLPath, Target);
-                //PublicDelayLoadDLLs.Add(dllFile);
-                RuntimeDependencies.Add(new RuntimeDependency(ProjectDLLPath));
+				CopyToProjectBinaries(PluginDLLPath, Target);
+				//PublicDelayLoadDLLs.Add(dllFile);
+				RuntimeDependencies.Add(new RuntimeDependency(ProjectDLLPath));
 
-                //Include Path
-                PublicIncludePaths.Add(Path.Combine(ThirdPartyPath, "Myo", "Include"));
-            }
+				//Include Path
+				PublicIncludePaths.Add(Path.Combine(ThirdPartyPath, "Myo", "Include"));
+			}
 
-            Definitions.Add(string.Format("WITH_MYO_BINDING={0}", isLibrarySupported ? 1 : 0));
+			Definitions.Add(string.Format("WITH_MYO_BINDING={0}", isLibrarySupported ? 1 : 0));
 
-            return isLibrarySupported;
-        }
+			return isLibrarySupported;
+		}
 	}
 
 }
