@@ -38,6 +38,8 @@ namespace UnrealBuildTool.Rules
 
 		public MyoPlugin(ReadOnlyTargetRules Target) : base(Target)
 		{
+			PrivatePCHHeaderFile = "Private/MyoPluginPrivatePCH.h";
+
 			PublicIncludePaths.AddRange(
 				new string[] {
 					Path.Combine(ModuleDirectory, "Public"),
@@ -129,13 +131,13 @@ namespace UnrealBuildTool.Rules
 
 				CopyToProjectBinaries(PluginDLLPath, Target);
 				//PublicDelayLoadDLLs.Add(dllFile);
-				RuntimeDependencies.Add(new RuntimeDependency(ProjectDLLPath));
+				RuntimeDependencies.Add(ProjectDLLPath);
 
 				//Include Path
 				PublicIncludePaths.Add(Path.Combine(ThirdPartyPath, "Myo", "Include"));
 			}
 
-			Definitions.Add(string.Format("WITH_MYO_BINDING={0}", isLibrarySupported ? 1 : 0));
+			PublicDefinitions.Add(string.Format("WITH_MYO_BINDING={0}", isLibrarySupported ? 1 : 0));
 
 			return isLibrarySupported;
 		}
