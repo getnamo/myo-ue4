@@ -2,7 +2,7 @@
 	"FileVersion" : 3,
 	"FriendlyName" : "Myo Plugin",
 	"Version" : 1,
-	"VersionName" : "1.5.0",
+	"VersionName" : "1.6.0",
 	"CreatedBy" : "Getnamo",
 	"CreatedByURL" : "https://github.com/getnamo/myo-ue4",
 	"Description" : "Unofficial Plugin for Thalmic Myo.",
@@ -15,7 +15,7 @@
 			"Name" : "MyoPlugin",
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
-			"WhitelistPlatforms" : [ "Win64", "Win32" ]
+			"WhitelistPlatforms" : [ "Win64" ]
 		}
 	]
 }
